@@ -57,15 +57,6 @@ tr.org td.num{color:var(--red)}
 tr.sp td:first-child{color:transparent}
 tr.total td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;font-size:16px}
 footer{margin-top:48px;color:var(--grey);font-size:13px}
-.sk{border:1.5px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:14px}
-.sk h2{margin:0 0 4px;font-size:18px}
-.sk p{margin:0 0 16px;color:var(--grey);font-size:14px}
-.sk-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-.sk label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--grey);font-weight:700}
-.sk input{font:inherit;font-size:16px;color:var(--ink);padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;min-width:170px}
-.sk input:focus{outline:3px solid var(--orange);outline-offset:1px;border-color:var(--orange)}
-.btn:disabled{opacity:.6;cursor:wait}
-.or{color:var(--grey);font-size:14px;text-align:center;margin:6px 0 14px}
 @media (max-width:560px){header img{height:48px} header .tag{display:none} .stats{gap:18px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -78,26 +69,14 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   </header>
 
   <h1>Meeting room hours by client</h1>
-  <p class="lead">Load a month from Skedda or upload the bookings export. The page adds up the booked duration for every holder organization and room, converts minutes to hours, and gives you an Excel file to download.</p>
+  <p class="lead">Upload the monthly bookings export. The page adds up the booked duration for every holder organization and room, converts minutes to hours, and gives you an Excel file to download.</p>
 
-  <div id="inputs">
-  <div class="sk">
-    <h2>Load from Skedda</h2>
-    <p>Pulls the chosen month's bookings straight from Skedda.</p>
-    <div class="sk-row">
-      <label>Month<input type="month" id="month"></label>
-      <label>Password<input type="password" id="pw" autocomplete="current-password"></label>
-      <button class="btn" id="load">Load from Skedda</button>
-    </div>
-  </div>
-  <div class="or">or upload an export file</div>
   <label class="drop" id="drop">
     <input type="file" id="file" accept=".xlsx,.xls,.csv">
     <strong>Drop the bookings file here</strong>
     <span>or click to choose a file (.xlsx, .xls, .csv)</span>
     <span>The file stays on your computer; nothing is uploaded to a server.</span>
   </label>
-  </div>
   <div class="msg" id="msg" role="alert"></div>
 
   <section id="result" aria-live="polite">
@@ -137,31 +116,8 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
   drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
-  $('reset').addEventListener('click', () => { $('result').classList.remove('show'); $('inputs').style.display=''; input.value=''; current=null; clearError(); window.scrollTo({top:0}); });
+  $('reset').addEventListener('click', () => { $('result').classList.remove('show'); drop.style.display=''; input.value=''; current=null; clearError(); window.scrollTo({top:0}); });
   $('dl').addEventListener('click', download);
-  $('load').addEventListener('click', loadSkedda);
-  { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); $('month').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
-  try { $('pw').value = localStorage.getItem('vpo_pw') || ''; } catch(e){}
-
-  async function loadSkedda(){
-    clearError();
-    const m = $('month').value;
-    if (!/^\d{4}-\d{2}$/.test(m)) return showError('Choose a month first.');
-    if (!$('pw').value) return showError('Enter the password.');
-    const btn = $('load'), label = btn.textContent;
-    btn.disabled = true; btn.textContent = 'Loading…';
-    try {
-      const r = await fetch('/.netlify/functions/bookings?month=' + encodeURIComponent(m), {headers:{'x-app-password': $('pw').value}});
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || ('Loading from Skedda failed (' + r.status + ').'));
-      try { localStorage.setItem('vpo_pw', $('pw').value); } catch(e){}
-      if (!j.bookings || !j.bookings.length) throw new Error('Skedda returned no bookings for ' + m + '.');
-      const res = aggregate(j.bookings.map(b => ({min:b.minutes, org:b.organization, sp:b.spaces, fn:b.firstName, ln:b.lastName, start:b.start})), 0);
-      res.fileName = 'skedda_' + m; res.period = m;
-      current = res; render(res);
-    } catch(err){ showError(err.message || 'Loading from Skedda failed.'); }
-    finally { btn.disabled = false; btn.textContent = label; }
-  }
 
   function handle(file){
     clearError();
@@ -199,34 +155,25 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     }
     if (!rows) throw new Error('Could not find the columns "Duration (minutes)", "Holder organization" and "Spaces". Is this the bookings export?');
 
-    const recs = []; let skipped = 0;
+    const map = new Map(); let bookings = 0, skipped = 0; const noOrg = new Set(); const dates = [];
     for (let i = hdr + 1; i < rows.length; i++){
       const r = rows[i];
       if (r.every(v => v === '' || v == null)) continue;
       const min = Number(String(r[cols.dur]).replace(',', '.'));
       if (!isFinite(min) || String(r[cols.dur]).trim() === ''){ skipped++; continue; }
-      recs.push({min, org:r[cols.org], sp:r[cols.sp], fn: cols.fn>=0 ? r[cols.fn] : '', ln: cols.ln>=0 ? r[cols.ln] : '', start: cols.start>=0 ? r[cols.start] : null});
-    }
-    return aggregate(recs, skipped);
-  }
-
-  function aggregate(recs, skipped){
-    const map = new Map(); let bookings = 0; const noOrg = new Set(); const dates = [];
-    for (const x of recs){
-      let org = norm(x.org);
+      let org = norm(r[cols.org]);
       if (!org){
-        const who = [norm(x.fn), norm(x.ln)].filter(Boolean).join(' ');
+        const who = [cols.fn>=0 ? norm(r[cols.fn]) : '', cols.ln>=0 ? norm(r[cols.ln]) : ''].filter(Boolean).join(' ');
         org = '(no organization) ' + (who || 'unknown');
         noOrg.add(org);
       }
-      const sp = norm(x.sp) || '(no space)';
+      const sp = norm(r[cols.sp]) || '(no space)';
       const k = org + '\u0000' + sp;
-      map.set(k, (map.get(k) || 0) + x.min);
+      map.set(k, (map.get(k) || 0) + min);
       bookings++;
-      const d = x.start instanceof Date ? x.start : (typeof x.start === 'string' && /^\d{4}-\d{2}-\d{2}/.test(x.start) ? new Date(x.start.slice(0,10) + 'T12:00:00') : null);
-      if (d && !isNaN(d)) dates.push(d);
+      if (cols.start >= 0 && r[cols.start] instanceof Date) dates.push(r[cols.start]);
     }
-    if (!bookings) throw new Error('No bookings with a duration were found.');
+    if (!bookings) throw new Error('No bookings with a duration were found in the file.');
 
     const lines = [...map].map(([k, m]) => { const [org, sp] = k.split('\u0000'); return {org, sp, min:m, h:m/60}; })
       .sort((a,b) => coll.compare(a.org,b.org) || coll.compare(a.sp,b.sp));
@@ -267,7 +214,7 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     }
     html += `<tr class="total"><td>Total</td><td></td><td class="num">${fmtH(total)}</td></tr></tbody>`;
     $('tbl').innerHTML = html;
-    $('inputs').style.display = 'none';
+    drop.style.display = 'none';
     $('result').classList.add('show');
   }
 
