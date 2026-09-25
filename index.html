@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Meeting room hours · Vista Plus Offices</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#EF4130; --red-dark:#D1372A; --orange:#F5975A; --peach:#FDEEE4;
+  --ink:#2B2B2B; --grey:#7D7D7D; --line:#E6E3E0; --bg:#FFFFFF; --soft:#FAF8F6;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;font-size:16px}
+.wrap{max-width:980px;margin:0 auto;padding:28px 24px 64px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:22px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--orange),var(--red)) 1}
+header img{height:84px;width:auto;display:block}
+header .tag{color:var(--grey);font-size:14px;text-align:right}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:36px 0 8px;font-weight:700;letter-spacing:-.01em}
+.lead{color:var(--grey);margin:0 0 28px;max-width:60ch}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;
+  border:2px dashed #E9C7B5;background:var(--soft);border-radius:14px;padding:44px 20px;cursor:pointer;transition:background .15s,border-color .15s}
+.drop:hover,.drop.over{background:var(--peach);border-color:var(--orange)}
+.drop:focus-within{outline:3px solid var(--orange);outline-offset:3px}
+.drop strong{font-size:18px}
+.drop span{color:var(--grey);font-size:14px}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:12px 22px;cursor:pointer;background:var(--red);color:#fff}
+.btn:hover{background:var(--red-dark)}
+.btn:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink);background:transparent}
+.msg{margin:18px 0 0;padding:12px 16px;border-radius:10px;background:#FFF1EF;color:#9B2418;display:none}
+.msg.show{display:block}
+.note{margin:14px 0 0;padding:10px 14px;border-left:3px solid var(--orange);background:var(--soft);color:#5a5a5a;font-size:14px;display:none}
+.note.show{display:block}
+#result{display:none;margin-top:36px}
+#result.show{display:block}
+.bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+.bar h2{margin:0;font-size:22px}
+.bar p{margin:2px 0 0;color:var(--grey);font-size:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:flex;flex-wrap:wrap;gap:28px;margin:0 0 22px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats div{font-size:14px;color:var(--grey)}
+.stats b{display:block;font-size:24px;color:var(--ink)}
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--grey);font-weight:700;border-bottom:2px solid var(--ink)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.org td{font-weight:700;background:var(--soft)}
+tr.org td.num{color:var(--red)}
+tr.sp td:first-child{color:transparent}
+tr.total td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;font-size:16px}
+footer{margin-top:48px;color:var(--grey);font-size:13px}
+@media (max-width:560px){header img{height:48px} header .tag{display:none} .stats{gap:18px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wgARCACqAVQDASIAAhEBAxEB/8QAGwABAAIDAQEAAAAAAAAAAAAAAAQFAQMGAgf/xAAaAQEAAgMBAAAAAAAAAAAAAAAAAQIDBAUG/9oADAMBAAIQAxAAAAH6oAAAAAAAAAABDxQ4tjptpl1wAAAAAAAAAAAAAACPopeegypjYLVAYzT1vzHS8dI5/c+hvl0fY1vrL5f02TW6pjObSAAAAAAAAAAAAApKPt6vT3ubyxo9C16Dhdm1rdyi8TuafRUXOX+h2IcOZCxbejXcXOfFxTvod8Nd9D+V9FbD2o3OIAAAAAAAAAAAABS8/wB1x2h0quJsi6vYxpYvnzfUN9XBD8+oh9U9cj13V82K62Pi6rzjmes+te66x6flAmgAAAAAAAAAAACDORb5ZHu6Ll+qxsfQsmPXXdbWbPD4eJLic70Gi9osZbdZzWhNBNrm+iTTqeQCagAAAAAAAAAAAAUPA/WOf1erJuzY5oWpyHMfVuX0uvxWJMbW7QlSjd/56Dc4YbPKAAAAAAAAAAAAAAAAAAxCnItAnZATUAAAAAAA56+Pao0l6jwy0VO0sVPLJqqnG80m5Rby2UF4e2qnL1rri1VnssCETUKEXTTUl4r4Req/BYqv2WKJqLBR2BMRI5ZoQ14suXLytvueL7l7/cYVFoQ7amnkCPc0R0rGCi36L8ob7nb890NnSHTQt2op7PbVHQ8z01CX1bJrz3X3lOWMC/54mTd8Uj1thAOlx4jlZIiXw5m0sDy5Edt59Bo3jxpkhq2jTn14iffjYmGPPuJ1b/KY0t2mJ3efWkxJxpG30mCPuidWzPqY8atmuJkR9gzjzsNe4mI272NGJA86JIAAAAArI9vrx7UVO1qwtknYQY1wmK2Pc6Iyb+e6KMjEO4iKzK2yxfDVbN8imejv9ey2PFbZ+JrXJymWulSdlqBbEAAAB//EACsQAAICAQQBAgQHAQAAAAAAAAIDAQQABRESExAUQCAhIzQVIjAxMjNQYP/aAAgBAQABBQL29h4pxcTt/kW7EV1aXEusf5EztF10vbpA7VPfk5Y56tORaTOCYn8Wps4pLPXOSo7TyzuZi9Qsrynq4MmJ3j3P75Yp+Y+WJuEOAUGPi5qS041pugsZ4nzp94q8gUGPurdbs8lOVrU12Metaruom/wWFh4nT7DsDRc/BU43RMchlc9Fs8T93eRk4U4U4RTMeCwsQzpeMwUedWPneApA1lzD3d9XSwpyZ8xG+FExhYWaRciPN6zFZMzvOadO9L3dxPcgsnwAkZafQGvGpBxeWF4ram5UHrBbOabj8Uh4VPeasrqtYAEw9PpDWDNQT2pLC+Kmnvs+91lXOpETM6dSisHnUqvXJfFpVToX71gwYaXR6fh/fLmmcsclip8JQx00NOFE/wCNMb4VRBYNOuORG3/TXG2ENGJ4/X9VeY+vkbrWgmWF8n+nIXCqoTnordmai01pQztTjYKRpsfYTWskbbDHrsjExDIKYose/DiZioTjKGk54do2MtWBrgAuIWvbVMtzCkxz8+sL3Mcu20XQDpbFaiTWqsWesxBmyyaNi0xyXEDdlHMVkkywusTJG+rurUXdtWtG46t/Ax5gJO0+UtBwP/o0v7LJcqXaSe3nSi41kpIrlz7/AMaV/HK37vU6tYqWwseLU8tVzUR5U9LnenRZwYlxMfenjdbZKIs/bab9lS/PqObfPU/k19hwgweYAbtPlLQaGCsl3M1cogbDeCeQGvSg45aKBr6SUTUsuhKa8QKbZRX1KPnhTAjo5R0ZcMfxDkOyG92VWRVsk1YjXieuq6HLhcTquakgpKu4Xr1A+QV1whGlmMs2je6YxqExBRbKBraWUTTcBVLizFg9vKxqZjD9xkZs/T5Aa1VGs8cY5ZKVzIgIx6dW+EsCyFLiSWByICGSpcyIwMEAnkJXE50qzoVgxAwYCcAhQThpWciMDHgkrKQAQwhEs6VeOlWCIjBLA8FQDOShW4iIR0qzpVgiIx6dW/6JkICtoMyZiJ3jkxgLgSgxgomeUcomJw3KCRmCiHLlk/KFuWzyty2SRQMSUROGYhAOWcmYrgDFkG1a8EoOPY6h/QveL1mdrIzvqFiN7NKd4R93YCSu0Dhmfm9aP8I+nXu8ZrDMjZzUPt7PHlqEQVYZkbeTlCI6GbevVt65/L1tVUqH2LBghWsAxgwQpAQBwCYLGBCIjltHMYiMNSzIYgR6l904lYBOTiVgBFETExHLwERENETBQiAbRz/S/8QAKxEAAgIBAgUCBQUAAAAAAAAAAQIAAwQREhAhIjAxI0ETM0BhgRUgMlBR/9oACAEDAQE/Ae3VTqhtbwPoRWx8CFGXyONab2CiXY5sqFVc/SW92luBbXzHPv0ZWnS/C7D3jcnmY+JZeeUGIlGmnmVy3LqTkWgz6T7zOxlsT49ffw7d3pmIsA0l/tAAw0Mvpal9piKXO1ZXWEQJLF2sV7ysVO4ShhYgcTKylx1+8qyWN29z5iSypLRo4lWNVTzQRmCjcYzbiT38PMFNJDe0ssa1tzcMPOA6LYCCNRCQo1Mzs4WenX4+kV2XwYzs38j/AHOh88ND54AEzQzQ8NCOXDQ+ZodNZofPaQ+lB8vd+IflQWaNr9onU5AlPItK/lmI21gYeh1H+Sxt2hgPSRNfT3fiM/SF/d//xAApEQABBAAFAwIHAAAAAAAAAAABAAIDEQQSITAxEEFCIkATFCAjMlFg/9oACAECAQE/Adtz9co59iXtHJQe08Hq92UWopKfmcvmR+k2Zp35sP5M6Q4gjRyfKGKWUvQTYnHsvguUMhach38TFXrCHQoGkx+cWia1TnWbQNi94ixRRblNKOMvKli+3QQTXFvCdI53KAvRAVvyxZnaJrQ0UOkuH1tq4VWoYcvqPtCAUABx/Hn8l5LyVI8JyPKOqGoTRS7rugNb+r//xAA5EAABAwICCAELAwQDAAAAAAABAAIRAyESMRATIjJBUWFxBCAjM0BCYnKRkqGxUIHBFDBSgmBz0f/aAAgBAQAGPwL1cDee7daOK2zLv0nEc+AVSvUuRb9Jkou4cFPMn9Au8Le+y3lsuB8rCM3aGU6ZAEZwtqs/5r0j/qVqpPxXWGuMB58FI9bxUvp02UVNoLE0yNJazbf9k11TONA8kA3pcuSDmmWn1vEzf/Pke4cwtY5ww/lFrNin9z5MhmEc3WXnK30hekqLzVb6gsFUQVqHHZdu+uaxv7+QASYGXksqcigRkfIfHs7KDhmDKa4cRPrlt05eTAzUOEHSKFU/Cf40l3tHdCk56KPw+uFvtZjyA1glx4LE/aq/hTwdfyMLvON65rYpAHqViqOk6aTfdHrpI3X30BrBLipN6hzOiRvNv/YYzhN+3r2Liy6gXJWJ16pz6eQajBsHPp5eN/pHfb15zTkRC1lUbfDp5WLw9vdK84wt0xSYXIPq7VT7D9Hur0WfJWos+St/yZgxjA7iW5K5k81qxUGCJJwppY8EOMXCJqvxRc2Wsx4AcgAqoPpWuwghFxrXAndQqa2CfdVQVjJDs+i81vfwmP5jRsOwnsi7WAOBjdTqNYYao5cVTptqCH82q5krYdhPZPL3gBpizVsuwlVNa4Qx2GwVSnTOFrMzxKwPdiYWyDF9Em5OQ5qaj8J5NGSGu26R9qLhebfHVVMb4LDFgmAvxUzPBUqes2X+6iadW/Vq1jHQ4NmIQqVH58AE2nTGOq7ILbq390LV1Ic0iQ5Umh4wvMbq2at+rUH1swJK1mPADkAE4VYxNdCcOIuE1xNxYo1Dm+//AIqXxpzTkRCwvGOjzWKmbKp8JTP30VdZMbm6VUo/4mRpeT/mneIeMPBoXhdNb49Fb/sTq9Daa7eCtZ/LRRachGip0Eps8LLxHm3v2/ZTmljmAD2l4YwT0CEUajZIEkKr8JVNV3OzGiV4WBO1krUHN6yLJzTkRCwvbjo81iYbaKnh27lW/wC2ikJvilaxtwLmOSmWlhVZw9GTsqoXGNkpom4Tnn9kwAzbNU6k2cNpWRJsE8TfFo8NcWzUyITnDcmB1VWlW2Q4yCpL2x3RJsXku7L3xZwWKlk0bcc9DK9K7mcFiYe45LUUtqo/7BNZOXFeIuLulTxXhri2a5hVZPslMAOS/qGgmk7ejgsTCCEKbDldy8NJydJWYwp9Vt6bHR3HFTLSwpzqNqc20YovlOi9NnyWy0Dsp1bPlo2mNPcKQxoPZbTGnuFstA7KTTYT2UNAA6LaaD3VqbPlo9Gz6V6Jn0qGgAdFD2h3dSymwHtolzGk9lDQAOmmSxs84Wy0DstoA916Nny0ejZ9KhoA7Laa09wpaxoPQaJ1bfkoaAOy9Gz5L0bPpUNAAU6tny/tS8gDqth7XdigCbnJYZvyU1HBo6qWkEcwiAbhYZGLOEYOSh9RgPUqWmQsAqNx8pV15t7Xdjphj2uPQqXEAdUATc6Je4NHVQyo1x6FS9waOqljg4dFtva3uVLSCOnqQiN9ufdNx6sksO5/K8MTliP4T44UwPuqeB4bVDTGIWKqDCGkPvhNiV4n/X8Iup+kZTBHzyVdwyL/AOAq+A0xZu+hl+ypnYq0MQjg7NPFQkN5qkKmrcSCGuZbRfcxDF2leHwRjxjDHLioORc38qhRfcsJg8xGn/Z35VPWZYDhnmqmrywjFHNMwBpOrO93CdiiXOxQ3IepQ4AjqthjW9giHAEdVsNDey22h3cIBoAHRExcqYujAiVLqbSeoQAEBYsDcXONDsDGt7DS4sY1vYK4lNMCRpsIRDgCOqAaAB0Uxf8At//EACsQAQACAQMDAgYDAQEBAAAAAAEAESExQVEQYXGBkUChscHR8CBQ8TBg4f/aAAgBAQABPyH4fGdqtUvxB2BNa0PH9S0yPHMx+9Me7/8AP6kESgyzZJweCVfLfb+g0++sS3PhThPkYVfiH+WXtn06KVvbUcrNRPtlLYfqj+D4wQRb9uX+IAII6J8UgKSyYkfP4Rw069Eq0jySp8ruQ8JNzroZ9hw8sWMXoCg6Pp1Fij0vxbX6xD7AsTf4sAlQ2hKadetdMv8ApQaMyx+yZp8B8zpoOjSQssP6t5eW18flmHd8n4iBdjx9wlKmqU2JGXdHY8fGWiedv3jo6w+ANBdOujowpZcnbeIXYWP8D2gH695hXEIGiCHxbmeov8OtPREAqwBAxAlI7PUEpObqfiOLkYzpabXnoi3h8ZVWj3Y8t6xdHasoEB1Jvt2ks9h1DAdIaXw9Y6vOL4hc/wAutpalnxtctj536MMZQEwIN4ex0RRvA789R/igeq3g1gUfG3xM/t3hs1FAbyoIHL6D+D8DA3/jof4ax3Gtc4cfHaraU9NpdnPn+KApLIKWH6XpKP3pMe/XzcGx6xQja/p0BQE4Y3bX0xm7vqgCgBwf+mFF/RIBRewiu7DGLO0MxIA4ZpiFmEodX65x3uXOGAlXpT84Wpbga0iOFzAeZXS4wFDQqbKPK1oNX6Qgebolq7tiWPppRIB3c6IW50ULIRO/VU9VplHcCAGZX+8VcurIpTfeYmNK7TtHTDjKBExjz0Iguo9VM4btq9TrMbn1SnklA5OQF3KSOg2UcclpRqUxO/SyHYSWAZlQNnVxxmGuS1VZ3hU4O7F2XtED3l02JinbD7xLLXhZLTDsoSY4MVIVLv1zR3uXKEXCrOZW5fvRDwk2+IwnP6TZ7T5fD1UlNfFwNvx4hm4teR7z9hxP3u/TMLStJjfQ5+kpIrqJWP369HSBaNWhexKt9LOvlnz71+d9B776EOW1cQ6wjL+3TtFnz6BZ4HpF54jxcUpaWga1huDoDLnWVvRvkYc4pNRbP2XE+v8Aqx6+sDtmuiEUyaMSiwYjfSIWyQumrXEHXaU1InA2/HiDzq+T0ATS8d33IYMR6DZdpk60ai7ZmnzZdqi0KavuF5gYBueIFRaiesbAsMHdhkBsbu7KZih4aX9PaIAoR3I4YBasbRZ2vQ6VLUbtLiVhcrlTnj2asZ7I/SUjIU+a0dbafaDGzyAYCEzFo1Y86dAg3Q41gz6gXDHqtEh8ziUMUc928MC6kXqZm16KuWh5rS5QWkjERgz4gEFsJxmNPcoNfzB63uRIs1a9uD94lKPtBZG8VW94lytDh+jX5S3qbLeKgKLnm1Zz02Zj6HRIoXdMTBbsKnKXjDGkZtnkGGhzcJLgzyDCqL7Kj5Q1UztZoVKrF8LgRAm4ZrP8tP8AFQSAbCpXhdlzu4oPTuXhyna7QrrZe9ZAKJ7KhtG8C5/l5WK2n+WlabwKjFu+SdzHAdFai7lJWG8Cos23eMxVj8J2TQFE5S8f+Sor3VEssRrU1BIGg5m0MbyzUNJmMqhRz0SxgFHUL0nZhqZrmOgFVNbM7LjEYJIuRN5bJ9VEIqg3Yyihrk6KBbgi8c1LJ3vkqgADQL16bTktVN3y0LO/cVU79xVxwGHTFcKveirPgrbpj2adZlIINNZIBvVG3ldQrkbKtm0sVEC8LL9YNvsZlQbJ83D3II8r9UyDyadTYj3hFL2dIszZrO30jBUiY1v1MDZZSC6zrCtvgkFXk46foPej/ZxeipSOwE5KxJVS3Pp87dAJkuXCBf382x4lnn1qbO8azx61LdvyqIWTvl7AfBJ+OhZLvMa1Eo7rQWQoBOaFRoBGTJAzo0FEMIFFtazIowq95jdZbRqzvhYVhkg0AqoAxvsN3AJSWMeErqwOmRmLIrqwJUyF3mKallNZOtCIWtBOMGhc4waFRoVYVe//AD//2gAMAwEAAgADAAAAEPPPPPPPPPPPJ/fPPPPPPPPPPPPPPMtfPPJsu/PPPPPPPPPPPPLDNaPSBAxK/PPPPPPPPPPPPPGobS1deIXPPPPPPPPPPPPPLKfGQvX/ADbzzzzzzzzzzzzzxv8A8T/5E88888888888888888888888888888848www8884888w4040w0w8owcQwQoU88sAow8gU0wso+s8M8WNC5+66I6M+Si88cM88888knjh8oP9Xc53c88888//xAApEQEAAQIEBAYDAQAAAAAAAAABEQAhMUFRcWGBodEQMJHB4fAgQLFQ/9oACAEDAQE/EPL+UM5G2rSyz+hc0eVYxHLxTPVRwFzHQGiGxOzQkEOHbt57IW2vesShQY0ZPzUAMBiuB80XDOp+2rEUvCnhf+U9Fm41moxYzNdzz50t8u3gEIKRI39qc4TanXLdTWhoStYzQIrgYp6PnE8UrBASpw3WB7vCicrA8Pjw3zCnLF1xetM8EJplc2fPvyKsaz7Wl3pw8r4DCRGD37+tTpkqcMGrRMnE68Dh/f7+ncWNmKuKO7P+yMQLVDViy1Q0pAUNMGFCChY8Fki9RQxAtWUWpIkW8qBuk9QPutLlHUzPWlau3Veez60jEyHQOtIGQIGuEdqsDgX3ieY3xH1p3XKepG++ThXCFpxt5TPOfvNrD0W92lNYnvXQWZYzP3O/CliFo938v//EACYRAQACAQMCBgMBAAAAAAAAAAEAETEQIUEwUUBhgbHR8CBQkaH/2gAIAQIBAT8Q6dZzv8ht4DZgPWYkdRd8Qkl2I2V265ohv2+JiIj2e0K3zBqcdpnNzIT4n0Kde1w8wXodrjISEIgFWIj98qO7rG2Bju+J5ahKPG+ha3U2lxEDmUA67m8swBg0b2cR2MEqIy5fCZAuYRX7my60supcUMyyWY0ES9LBqWXUsuukL/iPD1hDcrzgor3+ZuqY4KJBe95uD7iJsZWPrBt+T//EACoQAQACAQMDAwQCAwEAAAAAAAEAESExQVFhcYEQkaFAscHwINEwUOFg/9oACAEBAAE/EPpxLltH/ByWB8wqK6Q46uX/AFIdGsP7BuxO4R2hqUbBhXX/AFJIBKOgG8Ryma/rbqwKTKrzT/T69QLWiKU9wXfYjFH6BtHK9nfiVgfSf5KVZbVx198E1sEHVQFUOXHxLdsthD2KjfI5P7YHTe2N75+YE/GHUdd/kdYWNrRYnI/VOTIUiWJCKE68n62gUBA0jqegkj0Sk8xexo/uzBsvZ6C1FqeI5T+mD4gMSOEXIB2Sb4rVwvk/36wrg02axu3+Z5cPbR7wbansB+rIkDIwH++sRAQNI6j6UiEItWoeOHU+YSQg28iwGqxtL8WYOo0Oh8xMV4hojQAPBNbNprf3jA9M1K5DV7Qw5IAPdfiafuPww9FsV/07RFTGJQ3E7Mt6WXPXexM9zr9YWM+S3Py59E1c+m4tCBDd0G0W2GpMw9Cb5fwCUXejypYJAgGiJY/wMFd66hb8o8Rp1ZnI3PhCgS/z9WAIljqMV6ar8c+H2qauZdcdvonNaC1XQCG2Nq1GRm+amERq07De5+3txLv0CATdzz9jV/7FnNI1S2sNYzFtXtj8fWGcKbODt508xQAgaR2Zf6UuJLasKcrOv9HLGBKCO5h+x7zfN01w9DKsAcc/IxurmsJ4A+8x7OtwDgNA6HpdZ4jFKpnClv3+txhD0jQffPmLbN4KJl/d5wJNYH2Pv6ZCBE1Gz2z4m+bpr/iWSiXjIvbHmAAFBofWleQQ9eB7I+ITsg1qdAh3CI5B+1u/b+C1lrNqb93xN01/wBQAqtAbyhGSzXXO7d8G31wAX2QSolzLXtV5Pg7sMfwciQpEsSPruVKfdt2cdo6b927aH3hnTMca4h7JqSV3lghILkhk6Xq9Xx/p0rDqFjHyhuBfEPlDRT91wOV6BQeP/TKZjIWrBGtcNwPXWUB9jEoGk7NqHC2l7XNccm1GGzaO3hQggFtBBi2tGBQWG3GhUGR4n124ZOqIo0Aklq1uoloRYBSOekQagyQShtv5uJxokgcb5EeZocgjh3PDfpXGBRBnayMEILTQOd9+Yd2VFssZB0wjGzNWqmm6c4ztG57zFvBKvR6IF7jLQU94t8uhLIdon3jKjYBgwGzrWTEGHTQo3i2AKc0yv1QgAU0Hdp6fqHNYrrCVW34gQVexLgVpenAMPirzDh4h0hMYdols6Gdbc9pURAxjWMmK/qF1ZhhVqcO20T4dOEGmKqUwsFJLdRvHoXQBQpa67QukJA8uxh9mU4VlVXBRXyxXZabUhAxeGkMmq+owc6OHiN0t3M61US4UWgKu6PEZgqYwUFhtxoURPcXsIEp1GYQn+E8lnmAWFO2Rq9ymIMMO6014AeVn63hlmOANaSo1W1+S3Hd1Y4YWRlCq4A2Z+m5T5n3fQXWBSUFu0MqoCzTREtpw5M0+jU7QuGVg7XYAuOItaMaDBpg06z9NyQ09P23EdJV1FnYkirabtmqXaJkicW2fkOVufr6cjUHS1X3D2hpB4l2TsoYcpbY8FUs5GszLBtIbvcgqtl4xWsRRr6RyaA1FOTohiK0u2PM/S858SbTgruyv2AefRIBJKMg6/YjlHVAKvEXEuQgHAgaJZZVhDWkqJnN39w7urHDHTPTeHcE2fRvBmTBfdfHukAAADAG0oGQdsgMvzMB8fFgFPDfiCedKovdd494pSH5Ng6UhfSVuAFqtUAdbiopbcmSY7MB3fYztgb5gvkVSxs+RVggATvS2Q7WgSjWJYkdGJCgIKKSb5poa8PoRdzODUoviIxwtRA8w3IlmNHwFsO3WXEGwry1nqJnkqMqRu6N9g1ehB0phajBOQLdZWy1TQ8OOFyQLzalQNGLXY9G3pKlqGiG9N30YExU1OoDaL7wMvmtVsxWesWWo7ArK91lmBqy0cjmbE+Ku6lPYStFXUXxKO0DrhpshclJarVAe8bAZTlXc+EiElai3kHcA9yaYlFv34ekRQsVYNFeVb7dUKwuvdYfZ9o5OFqCjvpUfP+RuihHNOEX5cqhe69oxUHepuByVi+nooHRYpkTadrD0TK1qS+amulIIfBMvKtu481pAAAAYAg83wLD3Jk54ODyEGG5QsDyRgpahh9opALWK9VJl8F1B7EMBugMHvEztYEnmogESxwjF1Vl1vL8TBWDj/jNHKxAeCBhnQMHvCJDoYnZ9OiB58tYMIdCA8Hq6QNaBd3WJ3RtBs9a1gs/boj2YGiEmif1ymgYVXSLqrLrf9MyI26I9iFRooSp7kKmG5PcIllOkToNYCe9azfD9EfEQIrVWX4nxkw/aaiPx8muCZeVbdBea0gAAFBof4XC4CYL0yxMv6XlVMWZKI0oLaN8Zg7FMvQJoa4sYnTKJ2eC9Yc0bAB0SUSLqs2LLNrJ7bK1Kw1q8XKZWtW0XTw0nvFJUCmA6YWH42zsHIxcAKILY1K56QQgrUoDlZk8aCQc429GSgFqtAQp42Gg5o26xcEoJAK0ZesS5KNRQW0b4z6ZeiU4t2thWlG2KNWhjskari+MwiyNVxfGIRvVAsHFzTqAidk+i1scwbLg7I0q1+0iKFVvAN4zjMDAaWoABfViSC5V2KD1rNQlGBx+gNiBDRuniDJQLMIR01LNm/TN8wCVox06DHRp2mHZdCkqUbIiPaPre2nQwSIIgLTk1mnHEKHJKSFVTQrkoWm4AhduXBY4Gr2q7lYMdiBZ0tRkaGuYaTVy2HpZ9K16XGm1si/F17206RAJ3tEFPaarwslBHhq6g7+lKIXolwQFSsC5oPRQfA4X0a3q4k9lZcllWOXpUBeaigNQoczHZOEsAyZ2tcWr9E+DpZUzwwxpula96I/jqyp4YzUlDK8tR2MAER5LgSCUQPBMDqEBoUW7w1iy6li7q+MsWay1xYZXl6xo7gYw7pCHeAwHAEM7rj7ldXfWIxApEsSP1KS1OMGnoBACOEd4vE2LU4sJjEigEsRHwzPjJhsM07X6qcShBa2vllBfXXFm9MoD+64t1aIpSlipQUUvjB/j/AP/Z" alt="Vista Plus Offices – Business on top">
+    <div class="tag">Monthly meeting room report</div>
+  </header>
+
+  <h1>Meeting room hours by client</h1>
+  <p class="lead">Upload the monthly bookings export. The page adds up the booked duration for every holder organization and room, converts minutes to hours, and gives you an Excel file to download.</p>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".xlsx,.xls,.csv">
+    <strong>Drop the bookings file here</strong>
+    <span>or click to choose a file (.xlsx, .xls, .csv)</span>
+    <span>The file stays on your computer; nothing is uploaded to a server.</span>
+  </label>
+  <div class="msg" id="msg" role="alert"></div>
+
+  <section id="result" aria-live="polite">
+    <div class="bar">
+      <div>
+        <h2 id="rtitle">Summary</h2>
+        <p id="rsub"></p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="dl">Download Excel</button>
+        <button class="btn ghost" id="reset">Load another file</button>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="note" id="note"></div>
+    <div class="tablebox"><table id="tbl"></table></div>
+  </section>
+
+  <footer>Vista Plus Offices · internal tool</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const drop = $('drop'), input = $('file'), msg = $('msg');
+  let current = null;
+  const fmtH = n => n.toLocaleString('hu-HU',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const norm = s => String(s ?? '').replace(/\s+/g,' ').trim();
+  const key = s => norm(s).toLowerCase();
+  const coll = new Intl.Collator('hu',{sensitivity:'base'});
+
+  function showError(t){ msg.textContent = t; msg.classList.add('show'); }
+  function clearError(){ msg.classList.remove('show'); }
+
+  input.addEventListener('change', e => { if (e.target.files[0]) handle(e.target.files[0]); });
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+  $('reset').addEventListener('click', () => { $('result').classList.remove('show'); drop.style.display=''; input.value=''; current=null; clearError(); window.scrollTo({top:0}); });
+  $('dl').addEventListener('click', download);
+
+  function handle(file){
+    clearError();
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true});
+        const res = process(wb);
+        res.fileName = file.name.replace(/\.[^.]+$/,'');
+        current = res; render(res);
+      } catch(err){ showError(err.message || 'The file could not be read. Check that it is the bookings export in Excel format.'); }
+    };
+    reader.onerror = () => showError('The file could not be opened.');
+    reader.readAsArrayBuffer(file);
+  }
+
+  function findCol(header, ...names){
+    for (const n of names){ const i = header.findIndex(h => key(h) === n); if (i >= 0) return i; }
+    for (const n of names){ const i = header.findIndex(h => key(h).startsWith(n)); if (i >= 0) return i; }
+    return -1;
+  }
+
+  function process(wb){
+    // Use the sheet that has the needed columns (normally "Bookings")
+    let rows = null, hdr = -1, cols = null;
+    for (const name of wb.SheetNames){
+      const r = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:'', raw:true});
+      for (let i = 0; i < Math.min(r.length, 15); i++){
+        const c = { dur: findCol(r[i],'duration (minutes)','duration'), org: findCol(r[i],'holder organization','holder organisation'),
+                    sp: findCol(r[i],'spaces','space'), fn: findCol(r[i],'holder first name'), ln: findCol(r[i],'holder last name'),
+                    start: findCol(r[i],'scheduled start','start') };
+        if (c.dur >= 0 && c.org >= 0 && c.sp >= 0){ rows = r; hdr = i; cols = c; break; }
+      }
+      if (rows) break;
+    }
+    if (!rows) throw new Error('Could not find the columns "Duration (minutes)", "Holder organization" and "Spaces". Is this the bookings export?');
+
+    const map = new Map(); let bookings = 0, skipped = 0; const noOrg = new Set(); const dates = [];
+    for (let i = hdr + 1; i < rows.length; i++){
+      const r = rows[i];
+      if (r.every(v => v === '' || v == null)) continue;
+      const min = Number(String(r[cols.dur]).replace(',', '.'));
+      if (!isFinite(min) || String(r[cols.dur]).trim() === ''){ skipped++; continue; }
+      let org = norm(r[cols.org]);
+      if (!org){
+        const who = [cols.fn>=0 ? norm(r[cols.fn]) : '', cols.ln>=0 ? norm(r[cols.ln]) : ''].filter(Boolean).join(' ');
+        org = '(no organization) ' + (who || 'unknown');
+        noOrg.add(org);
+      }
+      const sp = norm(r[cols.sp]) || '(no space)';
+      const k = org + '\u0000' + sp;
+      map.set(k, (map.get(k) || 0) + min);
+      bookings++;
+      if (cols.start >= 0 && r[cols.start] instanceof Date) dates.push(r[cols.start]);
+    }
+    if (!bookings) throw new Error('No bookings with a duration were found in the file.');
+
+    const lines = [...map].map(([k, m]) => { const [org, sp] = k.split('\u0000'); return {org, sp, min:m, h:m/60}; })
+      .sort((a,b) => coll.compare(a.org,b.org) || coll.compare(a.sp,b.sp));
+    const spaces = [...new Set(lines.map(l => l.sp))].sort(coll.compare);
+    let period = '';
+    if (dates.length){
+      const mo = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      const ms = [...new Set(dates.map(mo))].sort();
+      period = ms.length === 1 ? ms[0] : ms[0] + ' – ' + ms[ms.length-1];
+    }
+    return {lines, spaces, bookings, skipped, noOrg:[...noOrg], period};
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  function render(res){
+    const total = res.lines.reduce((s,l) => s + l.h, 0);
+    const orgs = [...new Set(res.lines.map(l => l.org))];
+    $('rtitle').textContent = res.period ? 'Summary for ' + res.period : 'Summary';
+    $('rsub').textContent = res.fileName;
+    $('stats').innerHTML =
+      `<div><b>${fmtH(total)}</b>hours in total</div><div><b>${orgs.length}</b>organizations</div><div><b>${res.spaces.length}</b>rooms</div><div><b>${res.bookings}</b>bookings</div>`;
+    const notes = [];
+    if (res.noOrg.length) notes.push('Bookings without a holder organization are listed under the holder\'s name: ' + res.noOrg.map(esc).join(', ') + '.');
+    if (res.skipped) notes.push(res.skipped + ' row(s) had no valid duration and were left out.');
+    $('note').innerHTML = notes.join('<br>'); $('note').classList.toggle('show', notes.length > 0);
+
+    let html = '<thead><tr><th>Holder organization</th><th>Space</th><th class="num">Hours</th></tr></thead><tbody>';
+    for (const org of orgs){
+      const ls = res.lines.filter(l => l.org === org);
+      const sub = ls.reduce((s,l) => s + l.h, 0);
+      if (ls.length > 1){
+        html += `<tr class="org"><td>${esc(org)}</td><td></td><td class="num">${fmtH(sub)}</td></tr>`;
+        for (const l of ls) html += `<tr class="sp"><td>${esc(org)}</td><td>${esc(l.sp)}</td><td class="num">${fmtH(l.h)}</td></tr>`;
+      } else {
+        html += `<tr class="org"><td>${esc(org)}</td><td style="font-weight:400">${esc(ls[0].sp)}</td><td class="num">${fmtH(sub)}</td></tr>`;
+      }
+    }
+    html += `<tr class="total"><td>Total</td><td></td><td class="num">${fmtH(total)}</td></tr></tbody>`;
+    $('tbl').innerHTML = html;
+    drop.style.display = 'none';
+    $('result').classList.add('show');
+  }
+
+  function download(){
+    if (!current) return;
+    const {lines, spaces} = current;
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: one row per organization + space
+    const a = [['Holder organization','Spaces','Duration (minutes)','Hours']];
+    lines.forEach(l => a.push([l.org, l.sp, l.min, l.h]));
+    const n = lines.length;
+    a.push([]);
+    a.push(['Total','', {f:`SUM(C2:C${n+1})`}, {f:`SUM(D2:D${n+1})`}]);
+    const ws1 = XLSX.utils.aoa_to_sheet(a);
+    for (let r = 2; r <= n + 3; r++){ const c = ws1['D'+r]; if (c) c.z = '0.00'; }
+    ws1['!cols'] = [{wch:32},{wch:30},{wch:18},{wch:10}];
+    ws1['!autofilter'] = {ref:`A1:D${n+1}`};
+    XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+
+    // Sheet 2: organizations × spaces (hours)
+    const orgs = [...new Set(lines.map(l => l.org))];
+    const b = [['Holder organization', ...spaces, 'Total']];
+    const colL = i => XLSX.utils.encode_col(i);
+    orgs.forEach((o, i) => {
+      const row = [o];
+      spaces.forEach(s => { const l = lines.find(x => x.org === o && x.sp === s); row.push(l ? l.h : null); });
+      row.push({f:`SUM(B${i+2}:${colL(spaces.length)}${i+2})`});
+      b.push(row);
+    });
+    const tr = ['Total'];
+    for (let c = 1; c <= spaces.length + 1; c++) tr.push({f:`SUM(${colL(c)}2:${colL(c)}${orgs.length+1})`});
+    b.push(tr);
+    const ws2 = XLSX.utils.aoa_to_sheet(b);
+    const rng = XLSX.utils.decode_range(ws2['!ref']);
+    for (let R = 1; R <= rng.e.r; R++) for (let C = 1; C <= rng.e.c; C++){ const c = ws2[XLSX.utils.encode_cell({r:R,c:C})]; if (c) c.z = '0.00'; }
+    ws2['!cols'] = [{wch:32}, ...spaces.map(s => ({wch:Math.max(12, s.length + 2)})), {wch:10}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Org x Space');
+
+    XLSX.writeFile(wb, current.fileName + '_hours.xlsx');
+  }
+})();
+</script>
+</body>
+</html>
