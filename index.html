@@ -69,7 +69,7 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   </header>
 
   <h1>Meeting room hours by client</h1>
-  <p class="lead">Upload the monthly bookings export. The page adds up the booked duration for every holder organization and room, converts minutes to hours, and gives you an Excel file to download.</p>
+  <p class="lead">Upload the monthly bookings export. The page adds up the booked duration for every holder organization and room, converts minutes to hours (every started hour counts as a full hour, per client and room), and gives you an Excel file to download.</p>
 
   <label class="drop" id="drop">
     <input type="file" id="file" accept=".xlsx,.xls,.csv">
@@ -104,7 +104,7 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   const $ = id => document.getElementById(id);
   const drop = $('drop'), input = $('file'), msg = $('msg');
   let current = null;
-  const fmtH = n => n.toLocaleString('hu-HU',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtH = n => n.toLocaleString('hu-HU',{minimumFractionDigits:0,maximumFractionDigits:2});
   const norm = s => String(s ?? '').replace(/\s+/g,' ').trim();
   const key = s => norm(s).toLowerCase();
   const coll = new Intl.Collator('hu',{sensitivity:'base'});
@@ -175,7 +175,7 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     }
     if (!bookings) throw new Error('No bookings with a duration were found in the file.');
 
-    const lines = [...map].map(([k, m]) => { const [org, sp] = k.split('\u0000'); return {org, sp, min:m, h:m/60}; })
+    const lines = [...map].map(([k, m]) => { const [org, sp] = k.split('\u0000'); return {org, sp, min:m, h:Math.ceil(Math.round(m)/60)}; })
       .sort((a,b) => coll.compare(a.org,b.org) || coll.compare(a.sp,b.sp));
     const spaces = [...new Set(lines.map(l => l.sp))].sort(coll.compare);
     let period = '';
@@ -195,24 +195,28 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     $('rtitle').textContent = res.period ? 'Summary for ' + res.period : 'Summary';
     $('rsub').textContent = res.fileName;
     $('stats').innerHTML =
-      `<div><b>${fmtH(total)}</b>hours in total</div><div><b>${orgs.length}</b>organizations</div><div><b>${res.spaces.length}</b>rooms</div><div><b>${res.bookings}</b>bookings</div>`;
+      `<div><b>${fmtH(total)}</b>billed hours in total</div><div><b>${orgs.length}</b>organizations</div><div><b>${res.spaces.length}</b>rooms</div><div><b>${res.bookings}</b>bookings</div>`;
     const notes = [];
     if (res.noOrg.length) notes.push('Bookings without a holder organization are listed under the holder\'s name: ' + res.noOrg.map(esc).join(', ') + '.');
     if (res.skipped) notes.push(res.skipped + ' row(s) had no valid duration and were left out.');
     $('note').innerHTML = notes.join('<br>'); $('note').classList.toggle('show', notes.length > 0);
 
-    let html = '<thead><tr><th>Holder organization</th><th>Space</th><th class="num">Hours</th></tr></thead><tbody>';
+    const fmtM = n => Math.round(n).toLocaleString('hu-HU');
+    let html = '<thead><tr><th>Holder organization</th><th>Space</th><th class="num">Minutes</th><th class="num">Billed hours</th></tr></thead><tbody>';
+    let totalMin = 0;
     for (const org of orgs){
       const ls = res.lines.filter(l => l.org === org);
       const sub = ls.reduce((s,l) => s + l.h, 0);
+      const subMin = ls.reduce((s,l) => s + l.min, 0);
+      totalMin += subMin;
       if (ls.length > 1){
-        html += `<tr class="org"><td>${esc(org)}</td><td></td><td class="num">${fmtH(sub)}</td></tr>`;
-        for (const l of ls) html += `<tr class="sp"><td>${esc(org)}</td><td>${esc(l.sp)}</td><td class="num">${fmtH(l.h)}</td></tr>`;
+        html += `<tr class="org"><td>${esc(org)}</td><td></td><td class="num" style="color:var(--grey)">${fmtM(subMin)}</td><td class="num">${fmtH(sub)}</td></tr>`;
+        for (const l of ls) html += `<tr class="sp"><td>${esc(org)}</td><td>${esc(l.sp)}</td><td class="num">${fmtM(l.min)}</td><td class="num">${fmtH(l.h)}</td></tr>`;
       } else {
-        html += `<tr class="org"><td>${esc(org)}</td><td style="font-weight:400">${esc(ls[0].sp)}</td><td class="num">${fmtH(sub)}</td></tr>`;
+        html += `<tr class="org"><td>${esc(org)}</td><td style="font-weight:400">${esc(ls[0].sp)}</td><td class="num" style="color:var(--grey)">${fmtM(subMin)}</td><td class="num">${fmtH(sub)}</td></tr>`;
       }
     }
-    html += `<tr class="total"><td>Total</td><td></td><td class="num">${fmtH(total)}</td></tr></tbody>`;
+    html += `<tr class="total"><td>Total</td><td></td><td class="num">${fmtM(totalMin)}</td><td class="num">${fmtH(total)}</td></tr></tbody>`;
     $('tbl').innerHTML = html;
     drop.style.display = 'none';
     $('result').classList.add('show');
@@ -224,18 +228,18 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     const wb = XLSX.utils.book_new();
 
     // Sheet 1: one row per organization + space
-    const a = [['Holder organization','Spaces','Duration (minutes)','Hours']];
+    const a = [['Holder organization','Spaces','Duration (minutes)','Billed hours (rounded up)']];
     lines.forEach(l => a.push([l.org, l.sp, l.min, l.h]));
     const n = lines.length;
     a.push([]);
     a.push(['Total','', {f:`SUM(C2:C${n+1})`}, {f:`SUM(D2:D${n+1})`}]);
     const ws1 = XLSX.utils.aoa_to_sheet(a);
-    for (let r = 2; r <= n + 3; r++){ const c = ws1['D'+r]; if (c) c.z = '0.00'; }
+    for (let r = 2; r <= n + 3; r++){ const c = ws1['D'+r]; if (c) c.z = '0'; }
     ws1['!cols'] = [{wch:32},{wch:30},{wch:18},{wch:10}];
     ws1['!autofilter'] = {ref:`A1:D${n+1}`};
     XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
 
-    // Sheet 2: organizations × spaces (hours)
+    // Sheet 2: organizations × spaces (billed hours)
     const orgs = [...new Set(lines.map(l => l.org))];
     const b = [['Holder organization', ...spaces, 'Total']];
     const colL = i => XLSX.utils.encode_col(i);
@@ -250,7 +254,7 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     b.push(tr);
     const ws2 = XLSX.utils.aoa_to_sheet(b);
     const rng = XLSX.utils.decode_range(ws2['!ref']);
-    for (let R = 1; R <= rng.e.r; R++) for (let C = 1; C <= rng.e.c; C++){ const c = ws2[XLSX.utils.encode_cell({r:R,c:C})]; if (c) c.z = '0.00'; }
+    for (let R = 1; R <= rng.e.r; R++) for (let C = 1; C <= rng.e.c; C++){ const c = ws2[XLSX.utils.encode_cell({r:R,c:C})]; if (c) c.z = '0'; }
     ws2['!cols'] = [{wch:32}, ...spaces.map(s => ({wch:Math.max(12, s.length + 2)})), {wch:10}];
     XLSX.utils.book_append_sheet(wb, ws2, 'Org x Space');
 
