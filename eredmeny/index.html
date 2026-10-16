@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>VPO eredmény · Vista Plus Offices</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#EF4130; --red-dark:#D1372A; --orange:#F5975A; --peach:#FDEEE4;
+  --ink:#2B2B2B; --grey:#7D7D7D; --line:#E6E3E0; --bg:#FFFFFF; --soft:#FAF8F6; --green:#2E7D4F;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;font-size:16px}
+.wrap{max-width:1360px;margin:0 auto;padding:28px 24px 64px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:22px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--orange),var(--red)) 1}
+header img{height:84px;width:auto;display:block}
+header nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+header nav a{color:var(--grey);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:999px}
+header nav a:hover{color:var(--ink);background:var(--soft)}
+header nav a[aria-current]{color:var(--ink);font-weight:700;background:var(--peach)}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:36px 0 8px;font-weight:700;letter-spacing:-.01em}
+.lead{color:var(--grey);margin:0 0 24px;max-width:75ch}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;position:relative;
+  border:2px dashed #E9C7B5;background:var(--soft);border-radius:14px;padding:36px 20px;cursor:pointer;transition:background .15s,border-color .15s}
+.drop:hover,.drop.over{background:var(--peach);border-color:var(--orange)}
+.drop:focus-within{outline:3px solid var(--orange);outline-offset:3px}
+.drop strong{font-size:18px}
+.drop span{color:var(--grey);font-size:14px}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:14px 0 0}
+.file{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:14px}
+.file .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;margin-top:1px}
+.file.ok .dot{background:var(--green);border-color:var(--green)}
+.file b{display:block}
+.file small{color:var(--grey);display:block;word-break:break-word}
+.file button{margin-left:auto;font:inherit;font-size:12px;background:none;border:0;color:var(--grey);cursor:pointer;text-decoration:underline;padding:0}
+.btn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--red);color:#fff}
+.btn:hover{background:var(--red-dark)}
+.btn:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.msg{margin:16px 0 0;padding:12px 16px;border-radius:10px;background:#FFF1EF;color:#9B2418;display:none}
+.msg.show{display:block}
+.note{margin:0 0 18px;padding:12px 16px;border-left:3px solid var(--orange);background:var(--soft);color:#4a4a4a;font-size:14px}
+.note p{margin:0 0 8px}
+.note ul{margin:0;padding-left:18px}
+.note li{margin:4px 0}
+.note select{font:inherit;font-size:13px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;max-width:100%}
+#result{display:none;margin-top:32px}
+#result.show{display:block}
+.bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.bar h2{margin:0;font-size:22px}
+.bar p{margin:2px 0 0;color:var(--grey);font-size:14px}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.controls label{font-size:14px;color:var(--grey);display:flex;gap:6px;align-items:center}
+.controls select,.controls input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:#fff}
+.controls input[type=number]{width:84px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:#fff;color:var(--grey);padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.stats{display:flex;flex-wrap:wrap;gap:28px;margin:0 0 18px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats div{font-size:14px;color:var(--grey)}
+.stats b{display:block;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.stats b.neg{color:var(--red)}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1;min-width:200px;white-space:normal}
+thead th{font-size:12.5px;color:var(--grey);font-weight:700;border-bottom:2px solid var(--ink);background:#fff}
+tr.sec td{font-weight:700;font-size:14px;background:var(--soft);padding-top:14px;color:var(--ink)}
+tr.sec td:first-child{background:var(--soft)}
+tr.grp{cursor:pointer}
+tr.grp:hover td{background:#FFF8F3}
+tr.grp td:first-child::before{content:"▸";display:inline-block;width:14px;color:var(--grey);transition:transform .15s}
+tr.grp.open td:first-child::before{transform:rotate(90deg)}
+tr.item td{color:#555;font-size:12.5px;background:#FCFBFA}
+tr.item td:first-child{padding-left:30px;background:#FCFBFA}
+tr.sum td{font-weight:700;border-top:1.5px solid var(--ink)}
+tr.res td{font-weight:700;font-size:14.5px;background:var(--peach)}
+tr.res td:first-child{background:var(--peach)}
+tr.cum td{font-weight:700;color:#555}
+tr.warn td:first-child{color:var(--red)}
+td.neg{color:var(--red)}
+td.tot,th.tot{border-left:1.5px solid var(--line);font-weight:700}
+td input{font:inherit;font-size:13px;width:82px;text-align:right;padding:3px 6px;border:1px solid var(--line);border-radius:6px;font-variant-numeric:tabular-nums}
+td input:focus{outline:2px solid var(--orange);border-color:transparent}
+.hint{font-size:13px;color:var(--grey);margin:10px 2px 0}
+footer{margin-top:48px;color:var(--grey);font-size:13px}
+@media (max-width:640px){header img{height:48px} .stats{gap:18px} th:first-child,td:first-child{min-width:170px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="data:image/jpeg;base64,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" alt="Vista Plus Offices – Business on top">
+    <nav>
+      <a href="/">Tárgyaló órák</a>
+      <a href="/eredmeny/" aria-current="page">VPO eredmény</a>
+    </nav>
+  </header>
+
+  <h1>VPO eredmény havonta</h1>
+  <p class="lead">Húzd be a Kulcs-Soft „Bizonylatok tételes lekérdezése” exportokat (Értékesítés és Beszerzés), valamint a „Termékek listája” fájlt. Az oldal teljesítés dátuma szerint havonta, termékcsoportonként összesíti a nettó HUF értékeket a VPO-Eredmény táblázat szerkezetében. A fájlok a gépeden maradnak, semmi nem kerül feltöltésre.</p>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".xlsx,.xls,.csv" multiple>
+    <strong>Húzd ide a fájlokat</strong>
+    <span>vagy kattints a kiválasztáshoz – egyszerre több fájl is mehet (.xls, .xlsx)</span>
+  </label>
+  <div class="files" id="files"></div>
+  <div class="msg" id="msg" role="alert"></div>
+
+  <section id="result" aria-live="polite">
+    <div class="bar">
+      <div>
+        <h2 id="rtitle">Eredmény</h2>
+        <p id="rsub"></p>
+      </div>
+      <div class="controls">
+        <label>Év <select id="year"></select></label>
+        <span class="seg" role="group" aria-label="Pénznem">
+          <button type="button" id="cHUF" aria-pressed="true">HUF</button>
+          <button type="button" id="cEUR" aria-pressed="false">EUR</button>
+        </span>
+        <label>Árfolyam <input type="number" id="rate" min="1" step="0.01" value="390"></label>
+        <button class="btn" id="dl">Excel letöltése</button>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div id="notes"></div>
+    <div class="tablebox"><table id="tbl"></table></div>
+    <p class="hint">Kattints egy termékcsoportra a termékenkénti bontáshoz. A KP sorokba kézzel írhatsz összegeket (HUF) – ezeket a böngésző megjegyzi.</p>
+  </section>
+
+  <footer>Vista Plus Offices · belső eszköz</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const MONTHS = ['Jan','Feb','Már','Ápr','Máj','Jún','Júl','Aug','Szep','Okt','Nov','Dec'];
+  const coll = new Intl.Collator('hu',{numeric:true,sensitivity:'base'});
+  const norm = s => String(s ?? '').replace(/\s+/g,' ').trim();
+  const key = s => norm(s).toLowerCase();
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const UNCL = 'Besorolatlan';
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem('vpo-er:' + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem('vpo-er:' + k, JSON.stringify(v)); } catch(e){} }
+  };
+
+  // ---- state ----
+  let products = store.get('products', null);      // {map:{key:group}, name, count, date}
+  let overrides = store.get('overrides', {});       // {productKey: group}
+  let sales = null, purchases = null;               // {name, rows:[...]}
+  let year = null, cur = 'HUF', rate = store.get('rate', 390);
+  let openGroups = new Set();
+  $('rate').value = rate;
+
+  // ---- file handling ----
+  const drop = $('drop'), input = $('file');
+  input.addEventListener('change', e => { handleFiles([...e.target.files]); input.value = ''; });
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => handleFiles([...e.dataTransfer.files]));
+
+  function showError(t){ $('msg').innerHTML = t; $('msg').classList.add('show'); }
+  function clearError(){ $('msg').classList.remove('show'); }
+
+  async function handleFiles(files){
+    clearError();
+    const errs = [];
+    for (const f of files){
+      try {
+        const buf = await f.arrayBuffer();
+        const wb = XLSX.read(new Uint8Array(buf), {type:'array', cellDates:true});
+        classify(wb, f.name);
+      } catch(err){ errs.push(esc(f.name) + ': ' + esc(err.message || 'nem olvasható')); }
+    }
+    if (errs.length) showError(errs.join('<br>'));
+    renderFiles(); update();
+  }
+
+  function sheetRows(wb, test){
+    for (const name of wb.SheetNames){
+      const r = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:'', raw:true});
+      for (let i = 0; i < Math.min(r.length, 15); i++){
+        const h = r[i].map(key);
+        if (test(h)) return {rows:r, hdr:i, h};
+      }
+    }
+    return null;
+  }
+  const col = (h, ...names) => { for (const n of names){ const i = h.indexOf(n); if (i >= 0) return i; } for (const n of names){ const i = h.findIndex(x => x.startsWith(n)); if (i >= 0) return i; } return -1; };
+
+  function classify(wb, fname){
+    // Product list?
+    const p = sheetRows(wb, h => h.includes('termék név') && h.some(x => x.replace(/'/g,'') === 'szolgáltatások'));
+    if (p){
+      const ni = p.h.indexOf('termék név'), gi = p.h.findIndex(x => x.replace(/'/g,'') === 'szolgáltatások');
+      const map = {};
+      let n = 0;
+      for (let i = p.hdr + 1; i < p.rows.length; i++){
+        const k = key(p.rows[i][ni]); const g = norm(p.rows[i][gi]);
+        if (!k) continue; n++;
+        const usable = g && key(g) !== 'üres';
+        if (!(k in map) || (usable && !map[k])) map[k] = usable ? g : '';
+      }
+      products = {map, name:fname, count:n, date:new Date().toISOString()};
+      store.set('products', products);
+      return;
+    }
+    // Document item list?
+    const d = sheetRows(wb, h => h.includes('teljesítés') && h.includes('termék név') && h.some(x => x.startsWith('nettó érték')));
+    if (!d) throw new Error('nem ismerhető fel (sem bizonylat-lekérdezés, sem terméklista)');
+    const c = { kind:col(d.h,'bizonylat fajta'), no:col(d.h,'bizonylatszám'), date:col(d.h,'teljesítés'), cust:col(d.h,'ügyfél'),
+      prod:col(d.h,'termék név'), desc:col(d.h,'megnevezés'), qty:col(d.h,'mennyiség'),
+      netHUF:col(d.h,'nettó érték (huf)'), net:d.h.indexOf('nettó érték'), fx:col(d.h,'árfolyam') };
+    const rows = []; let skipped = 0, kinds = {};
+    for (let i = d.hdr + 1; i < d.rows.length; i++){
+      const r = d.rows[i];
+      const kind = norm(r[c.kind]);
+      let dt = r[c.date];
+      if (!kind && !norm(r[c.prod])) continue;              // summary / empty rows
+      if (!(dt instanceof Date)) dt = parseDate(dt);
+      if (!dt){ skipped++; continue; }
+      let v = num(r[c.netHUF]);
+      if (v == null && c.net >= 0){ const n = num(r[c.net]), fx = num(r[c.fx]); if (n != null) v = n * (fx || 1); }
+      if (v == null){ skipped++; continue; }
+      kinds[kind] = (kinds[kind] || 0) + 1;
+      rows.push({kind, no:norm(r[c.no]), date:dt, y:dt.getFullYear(), m:dt.getMonth(), cust:norm(r[c.cust]), prod:norm(r[c.prod]) || norm(r[c.desc]) || '(nincs termék)', v});
+    }
+    if (!rows.length) throw new Error('nincs feldolgozható tétel');
+    const inbound = (kinds['Bejövő számla'] || 0) > rows.length / 2;
+    const fn = key(fname);
+    const isPurchase = fn.includes('beszerz') ? true : fn.includes('értékesít') || fn.includes('ertekesit') ? false : inbound;
+    const obj = {name:fname, rows, skipped};
+    if (isPurchase) purchases = obj; else sales = obj;
+  }
+  function num(x){ if (typeof x === 'number') return isFinite(x) ? x : null; const s = String(x ?? '').replace(/[\s €]/g,'').replace(',', '.'); if (!s || isNaN(+s)) return null; return +s; }
+  function parseDate(x){
+    if (typeof x === 'number' && x > 20000) { const d = XLSX.SSF.parse_date_code(x); return new Date(d.y, d.m - 1, d.d); }
+    const m = String(x ?? '').match(/(\d{4})[.\-\/]\s*(\d{1,2})[.\-\/]\s*(\d{1,2})/);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+
+  function renderFiles(){
+    const box = (ok, title, sub, clear) => `<div class="file ${ok?'ok':''}"><span class="dot">${ok?'✓':''}</span><div><b>${title}</b><small>${sub}</small></div>${clear?`<button type="button" data-clear="${clear}">törlés</button>`:''}</div>`;
+    const fmtD = s => new Date(s).toLocaleDateString('hu-HU');
+    $('files').innerHTML =
+      box(!!sales, 'Értékesítés', sales ? esc(sales.name) + ' · ' + sales.rows.length + ' tétel' : 'Bizonylatok tételes lekérdezése_Értékesítés', sales && 'sales') +
+      box(!!purchases, 'Beszerzés', purchases ? esc(purchases.name) + ' · ' + purchases.rows.length + ' tétel' : 'Bizonylatok tételes lekérdezése_Beszerzés', purchases && 'purchases') +
+      box(!!products, 'Termékek listája', products ? esc(products.name) + ' · ' + products.count + ' termék · megjegyezve ' + fmtD(products.date) : 'termékcsoportokhoz (egyszer kell betölteni, a böngésző megjegyzi)', products && 'products');
+    $('files').querySelectorAll('[data-clear]').forEach(b => b.onclick = () => {
+      const k = b.dataset.clear;
+      if (k === 'sales') sales = null; else if (k === 'purchases') purchases = null; else { products = null; store.set('products', null); }
+      renderFiles(); update();
+    });
+  }
+
+  // ---- grouping ----
+  function groupOf(prod){
+    const k = key(prod);
+    if (overrides[k]) return {g:overrides[k], how:'manual'};
+    if (!products) return {g:UNCL, how:'none'};
+    if (products.map[k]) return {g:products.map[k], how:'exact'};
+    const k2 = k.replace(/\s*[-–]\s*(beszerzés|értékesítés|sztornó.*)$/,'').trim();
+    if (k2 !== k && products.map[k2]) return {g:products.map[k2], how:'fuzzy', base:k2};
+    return {g:UNCL, how:'none'};
+  }
+
+  function build(){
+    const res = {years:new Set(), cost:new Map(), rev:new Map(), fuzzy:new Map(), uncl:new Map()};
+    const add = (target, rows, side) => {
+      for (const r of rows){
+        res.years.add(r.y);
+        if (r.y !== year) continue;
+        const gi = groupOf(r.prod);
+        if (gi.how === 'fuzzy') res.fuzzy.set(r.prod, gi.g);
+        if (gi.g === UNCL){ const u = res.uncl.get(r.prod) || {side, v:0, n:0}; u.v += r.v; u.n++; res.uncl.set(r.prod, u); }
+        let G = target.get(gi.g); if (!G){ G = {m:Array(12).fill(0), items:new Map()}; target.set(gi.g, G); }
+        G.m[r.m] += r.v;
+        let I = G.items.get(r.prod); if (!I){ I = Array(12).fill(0); G.items.set(r.prod, I); }
+        I[r.m] += r.v;
+      }
+    };
+    if (purchases) add(res.cost, purchases.rows, 'Beszerzés');
+    if (sales) add(res.rev, sales.rows, 'Értékesítés');
+    return res;
+  }
+
+  function allYears(){
+    const s = new Set();
+    [sales, purchases].forEach(x => x && x.rows.forEach(r => s.add(r.y)));
+    return [...s].sort();
+  }
+
+  function sortGroups(map){ return [...map.keys()].sort((a,b) => (a===UNCL) - (b===UNCL) || coll.compare(a,b)); }
+
+  function compute(){
+    const res = build();
+    const costG = sortGroups(res.cost), revG = sortGroups(res.rev);
+    const costT = Array(12).fill(0), revT = Array(12).fill(0);
+    costG.forEach(g => res.cost.get(g).m.forEach((v,i) => costT[i] += v));
+    revG.forEach(g => res.rev.get(g).m.forEach((v,i) => revT[i] += v));
+    const kp = store.get('kp-' + year, {a:Array(12).fill(null), b:Array(12).fill(null)});
+    const kpT = kp.a.map((v,i) => (v||0) + (kp.b[i]||0));
+    const result = revT.map((v,i) => v - costT[i] + kpT[i]);
+    const cum = []; result.reduce((s,v,i) => (cum[i] = s + v), 0);
+    // months that have any data
+    let last = -1; for (let i = 0; i < 12; i++) if (costT[i] || revT[i] || kpT[i]) last = i;
+    for (let i = last + 1; i < 12; i++){ result[i] = 0; cum[i] = 0; }
+    return {res, costG, revG, costT, revT, kp, kpT, result, cum, last};
+  }
+
+  // ---- render ----
+  function update(){
+    const ys = allYears();
+    if (!ys.length){ $('result').classList.remove('show'); return; }
+    if (!ys.includes(year)) year = ys.includes(new Date().getFullYear()) ? new Date().getFullYear() : ys[ys.length - 1];
+    $('year').innerHTML = ys.map(y => `<option ${y===year?'selected':''}>${y}</option>`).join('');
+    render();
+    $('result').classList.add('show');
+  }
+
+  const conv = v => cur === 'EUR' ? v / rate : v;
+  const fmt = v => { if (!v || Math.abs(v) < 0.5) return ''; const x = conv(v); return Math.round(x).toLocaleString('hu-HU'); };
+  const cell = (v, cls='') => `<td class="${cls}${v < -0.5 ? ' neg' : ''}">${fmt(v)}</td>`;
+  const sum = a => a.reduce((s,v) => s + (v||0), 0);
+
+  function render(){
+    const C = compute(); const {res} = C;
+    $('rtitle').textContent = 'VPO-Eredmény ' + year;
+    $('rsub').textContent = [sales && sales.name, purchases && purchases.name].filter(Boolean).join(' · ') + (cur === 'EUR' ? ` · EUR, ${rate} Ft/€ árfolyamon` : ' · nettó HUF');
+
+    const yRes = sum(C.result);
+    const unit = cur === 'EUR' ? ' €' : ' Ft';
+    $('stats').innerHTML =
+      `<div><b>${fmt(sum(C.revT))}${unit}</b>Könyvelt bevétel</div>` +
+      `<div><b>${fmt(sum(C.costT))}${unit}</b>Havi költségek</div>` +
+      (sum(C.kpT) ? `<div><b>${fmt(sum(C.kpT))}${unit}</b>KP kiadások</div>` : '') +
+      `<div><b class="${yRes<0?'neg':''}">${fmt(yRes)}${unit}</b>VPO-Eredmény (göngyölt)</div>` +
+      `<div><b>${C.last >= 0 ? MONTHS[C.last] : '–'}</b>utolsó hónap adattal</div>`;
+
+    // notes
+    const notes = [];
+    if (!products) notes.push('<p><b>Hiányzik a Termékek listája.</b> Termékcsoportok nélkül minden tétel „Besorolatlan”. Húzd be a Termékek listája fájlt.</p>');
+    if (!sales || !purchases) notes.push(`<p>Még hiányzik: ${[!sales&&'Értékesítés',!purchases&&'Beszerzés'].filter(Boolean).join(', ')}.</p>`);
+    if (products && res.uncl.size){
+      const groups = [...new Set(Object.values(products.map).filter(Boolean))].sort(coll.compare);
+      const opts = '<option value="">— válassz csoportot —</option>' + groups.map(g => `<option>${esc(g)}</option>`).join('');
+      notes.push(`<p><b>${res.uncl.size} termék nincs a Termékek listájában</b> – válassz nekik csoportot (a böngésző megjegyzi):</p><ul>` +
+        [...res.uncl].sort((a,b)=>coll.compare(a[0],b[0])).map(([p,u]) => `<li>${esc(p)} <small style="color:var(--grey)">(${u.side}, ${u.n} tétel, ${Math.round(u.v).toLocaleString('hu-HU')} Ft)</small> <select data-prod="${esc(key(p))}">${opts}</select></li>`).join('') + '</ul>');
+    }
+    if (res.fuzzy.size) notes.push('<p>Hasonló név alapján besorolva: ' + [...res.fuzzy].map(([p,g]) => `<b>${esc(p)}</b> → ${esc(g)}`).join('; ') + '.</p>');
+    const manual = Object.keys(overrides);
+    if (manual.length) notes.push(`<p>${manual.length} kézi besorolás van mentve. <button type="button" class="btn ghost" style="padding:3px 10px;font-size:12px" id="clrOv">Kézi besorolások törlése</button></p>`);
+    const sk = (sales?.skipped||0) + (purchases?.skipped||0);
+    if (sk) notes.push(`<p>${sk} sor teljesítés dátum vagy nettó érték nélkül kimaradt.</p>`);
+    $('notes').innerHTML = notes.length ? `<div class="note">${notes.join('')}</div>` : '';
+    $('notes').querySelectorAll('select[data-prod]').forEach(s => s.onchange = () => { if (s.value){ overrides[s.dataset.prod] = s.value; store.set('overrides', overrides); render(); } });
+    const co = $('clrOv'); if (co) co.onclick = () => { overrides = {}; store.set('overrides', overrides); render(); };
+
+    // table
+    const head = `<thead><tr><th>${year}</th>${MONTHS.map(m => `<th>${m}</th>`).join('')}<th class="tot">Összesen</th></tr></thead>`;
+    const rowsFor = (side, names, map) => names.map(g => {
+      const G = map.get(g); const id = side + ':' + g; const open = openGroups.has(id);
+      let h = `<tr class="grp ${open?'open':''} ${g===UNCL?'warn':''}" data-g="${esc(id)}"><td>${esc(g)}</td>${G.m.map(v => cell(v)).join('')}${cell(sum(G.m),'tot')}</tr>`;
+      if (open){
+        [...G.items].sort((a,b) => sum(b[1]) - sum(a[1])).forEach(([p, arr]) => {
+          h += `<tr class="item"><td>${esc(p)}</td>${arr.map(v => cell(v)).join('')}${cell(sum(arr),'tot')}</tr>`;
+        });
+      }
+      return h;
+    }).join('');
+    const line = (cls, label, arr) => `<tr class="${cls}"><td>${label}</td>${arr.map(v => cell(v)).join('')}${cell(sum(arr),'tot')}</tr>`;
+    const kpRow = (label, k) => `<tr><td>${label}</td>${C.kp[k].map((v,i) => `<td><input type="text" inputmode="numeric" data-kp="${k}" data-m="${i}" value="${v==null?'':Math.round(v).toLocaleString('hu-HU')}" aria-label="${label} ${MONTHS[i]}"></td>`).join('')}${cell(sum(C.kp[k]),'tot')}</tr>`;
+    const empty = '<tr><td colspan="14" style="color:var(--grey)">Nincs adat – húzd be a fájlt.</td></tr>';
+
+    $('tbl').innerHTML = head + '<tbody>' +
+      `<tr class="sec"><td colspan="14">Havi költségek</td></tr>` +
+      (C.costG.length ? rowsFor('c', C.costG, res.cost) : empty) +
+      line('sum', 'Összesen:', C.costT) +
+      `<tr class="sec"><td colspan="14">KP kiadások</td></tr>` +
+      kpRow('KP kiadások/bevétel', 'a') + kpRow('+ bérek +', 'b') +
+      line('sum', 'KP kiadások összesen:', C.kpT) +
+      `<tr class="sec"><td colspan="14">Bevételek</td></tr>` +
+      (C.revG.length ? rowsFor('r', C.revG, res.rev) : empty) +
+      line('sum', 'Könyvelt bevételek összesen:', C.revT) +
+      line('res', 'VPO-Eredmény', C.result) +
+      `<tr class="cum"><td>Göngyölt eredmény</td>${C.cum.map(v => cell(v)).join('')}<td class="tot"></td></tr>` +
+      '</tbody>';
+
+    $('tbl').querySelectorAll('tr.grp').forEach(tr => tr.onclick = () => { const g = tr.dataset.g; openGroups.has(g) ? openGroups.delete(g) : openGroups.add(g); render(); });
+    $('tbl').querySelectorAll('input[data-kp]').forEach(inp => inp.onchange = () => {
+      const kp = store.get('kp-' + year, {a:Array(12).fill(null), b:Array(12).fill(null)});
+      kp[inp.dataset.kp][+inp.dataset.m] = num(inp.value);
+      store.set('kp-' + year, kp); render();
+    });
+  }
+
+  $('year').onchange = e => { year = +e.target.value; render(); };
+  const setCur = c => { cur = c; $('cHUF').setAttribute('aria-pressed', c==='HUF'); $('cEUR').setAttribute('aria-pressed', c==='EUR'); render(); };
+  $('cHUF').onclick = () => setCur('HUF'); $('cEUR').onclick = () => setCur('EUR');
+  $('rate').onchange = e => { const v = num(e.target.value); if (v > 0){ rate = v; store.set('rate', rate); render(); } };
+  $('dl').onclick = download;
+
+  // ---- Excel export (VPO-Eredmény layout, with formulas) ----
+  function download(){
+    const C = compute(); const {res} = C;
+    const L = i => XLSX.utils.encode_col(i);
+    const aoa = []; const R = () => aoa.length + 1; // next 1-based row
+    aoa.push([null, ...MONTHS.map((_,i) => new Date(year, i, 1)), 'Összesen']);
+    aoa.push(['Árfolyam:', ...Array(12).fill(rate)]);
+    aoa.push(['Havi költségek']);
+    const c0 = R();
+    C.costG.forEach(g => aoa.push([g, ...res.cost.get(g).m.map(v => v ? Math.round(v*100)/100 : null)]));
+    const c1 = R() - 1; aoa.push([]);
+    const costRow = R(); aoa.push(['Összesen:', ...MONTHS.map((_,i) => ({f:`SUM(${L(i+1)}${c0}:${L(i+1)}${Math.max(c1+1,c0)})`}))]);
+    aoa.push(['KP kiadások']);
+    const ka = R(); aoa.push(['KP kiadások/bevétel', ...C.kp.a.map(v => v ?? null)]);
+    aoa.push(['+ bérek +', ...C.kp.b.map(v => v ?? null)]);
+    const kpRow = R(); aoa.push(['KP kiadások  összesen:', ...MONTHS.map((_,i) => ({f:`SUM(${L(i+1)}${ka}:${L(i+1)}${ka+1})`}))]);
+    aoa.push([]);
+    aoa.push(['Bevételek']);
+    const r0 = R();
+    C.revG.forEach(g => aoa.push([g, ...res.rev.get(g).m.map(v => v ? Math.round(v*100)/100 : null)]));
+    const r1 = R() - 1; aoa.push([]);
+    const revRow = R(); aoa.push(['Könyvelt bevételek összesen:', ...MONTHS.map((_,i) => ({f:`SUM(${L(i+1)}${r0}:${L(i+1)}${Math.max(r1+1,r0)})`}))]);
+    aoa.push([]);
+    const resRow = R(); aoa.push(['VPO-Eredmény', ...MONTHS.map((_,i) => ({f:`${L(i+1)}${revRow}-${L(i+1)}${costRow}+${L(i+1)}${kpRow}`}))]);
+    aoa.push(['Göngyölt eredmény', ...MONTHS.map((_,i) => ({f: i === 0 ? `B${resRow}` : `${L(i)}${resRow+1}+${L(i+1)}${resRow}`}))]);
+    aoa.push([]);
+    aoa.push(['VPO-Eredmény EUR', ...MONTHS.map((_,i) => ({f:`${L(i+1)}${resRow}/${L(i+1)}2`}))]);
+
+    // row totals in column N (skip header/rate/section/cumulative rows)
+    const skipTot = new Set([1, 2, resRow + 1]);
+    aoa.forEach((row, idx) => { const r = idx + 1; if (skipTot.has(r) || row.length < 2) return; row[13] = {f:`SUM(B${r}:M${r})`}; });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa, {cellDates:true});
+    const rng = XLSX.utils.decode_range(ws['!ref']);
+    for (let r = 0; r <= rng.e.r; r++) for (let c = 1; c <= 13; c++){
+      const a = ws[XLSX.utils.encode_cell({r, c})]; if (!a) continue;
+      a.z = r === 0 ? 'yyyy.mm' : '#,##0;[Red]-#,##0';
+    }
+    ws['!cols'] = [{wch:40}, ...Array(12).fill({wch:13}), {wch:15}];
+    ws['!freeze'] = {xSplit:1, ySplit:1};
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Eredmény');
+
+    // detail sheet: all lines of the year with group
+    const det = [['Oldal','Bizonylat fajta','Bizonylatszám','Teljesítés','Hónap','Ügyfél','Termék név','Termékcsoport','Nettó érték (HUF)']];
+    [['Beszerzés', purchases], ['Értékesítés', sales]].forEach(([side, src]) => src && src.rows.filter(r => r.y === year).forEach(r =>
+      det.push([side, r.kind, r.no, r.date, r.m + 1, r.cust, r.prod, groupOf(r.prod).g, r.v])));
+    const ws2 = XLSX.utils.aoa_to_sheet(det, {cellDates:true});
+    for (let r = 1; r < det.length; r++){ const d = ws2['D'+(r+1)]; if (d) d.z = 'yyyy.mm.dd'; const v = ws2['I'+(r+1)]; if (v) v.z = '#,##0'; }
+    ws2['!cols'] = [{wch:12},{wch:14},{wch:18},{wch:12},{wch:7},{wch:36},{wch:36},{wch:36},{wch:16}];
+    ws2['!autofilter'] = {ref:`A1:I${det.length}`};
+    XLSX.utils.book_append_sheet(wb, ws2, 'Tételek');
+
+    XLSX.writeFile(wb, `VPO-Eredmény_${year}.xlsx`);
+  }
+
+  renderFiles(); update();
+})();
+</script>
+</body>
+</html>
