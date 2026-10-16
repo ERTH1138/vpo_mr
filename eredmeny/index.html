@@ -60,9 +60,6 @@ h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:36px 0 8px;font-weight
 .controls label{font-size:14px;color:var(--grey);display:flex;gap:6px;align-items:center}
 .controls select,.controls input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:#fff}
 .controls input[type=number]{width:84px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
-.seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:#fff;color:var(--grey);padding:6px 14px;cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
 .stats{display:flex;flex-wrap:wrap;gap:28px;margin:0 0 18px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .stats div{font-size:14px;color:var(--grey)}
 .stats b{display:block;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -124,11 +121,6 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
       </div>
       <div class="controls">
         <label>Év <select id="year"></select></label>
-        <span class="seg" role="group" aria-label="Pénznem">
-          <button type="button" id="cHUF" aria-pressed="true">HUF</button>
-          <button type="button" id="cEUR" aria-pressed="false">EUR</button>
-        </span>
-        <label>Árfolyam <input type="number" id="rate" min="1" step="0.01" value="390"></label>
         <button class="btn" id="dl">Excel letöltése</button>
       </div>
     </div>
@@ -160,9 +152,8 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   let products = store.get('products', null);      // {map:{key:group}, name, count, date}
   let overrides = store.get('overrides', {});       // {productKey: group}
   let sales = null, purchases = null;               // {name, rows:[...]}
-  let year = null, cur = 'HUF', rate = store.get('rate', 390);
+  let year = null;
   let openGroups = new Set();
-  $('rate').value = rate;
 
   // ---- file handling ----
   const drop = $('drop'), input = $('file');
@@ -330,18 +321,17 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     $('result').classList.add('show');
   }
 
-  const conv = v => cur === 'EUR' ? v / rate : v;
-  const fmt = v => { if (!v || Math.abs(v) < 0.5) return ''; const x = conv(v); return Math.round(x).toLocaleString('hu-HU'); };
+  const fmt = v => { if (!v || Math.abs(v) < 0.5) return ''; const x = v; return Math.round(x).toLocaleString('hu-HU'); };
   const cell = (v, cls='') => `<td class="${cls}${v < -0.5 ? ' neg' : ''}">${fmt(v)}</td>`;
   const sum = a => a.reduce((s,v) => s + (v||0), 0);
 
   function render(){
     const C = compute(); const {res} = C;
     $('rtitle').textContent = 'VPO-Eredmény ' + year;
-    $('rsub').textContent = [sales && sales.name, purchases && purchases.name].filter(Boolean).join(' · ') + (cur === 'EUR' ? ` · EUR, ${rate} Ft/€ árfolyamon` : ' · nettó HUF');
+    $('rsub').textContent = [sales && sales.name, purchases && purchases.name].filter(Boolean).join(' · ') + ' · nettó HUF';
 
     const yRes = sum(C.result);
-    const unit = cur === 'EUR' ? ' €' : ' Ft';
+    const unit = ' Ft';
     $('stats').innerHTML =
       `<div><b>${fmt(sum(C.revT))}${unit}</b>Könyvelt bevétel</div>` +
       `<div><b>${fmt(sum(C.costT))}${unit}</b>Havi költségek</div>` +
@@ -407,9 +397,6 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
   }
 
   $('year').onchange = e => { year = +e.target.value; render(); };
-  const setCur = c => { cur = c; $('cHUF').setAttribute('aria-pressed', c==='HUF'); $('cEUR').setAttribute('aria-pressed', c==='EUR'); render(); };
-  $('cHUF').onclick = () => setCur('HUF'); $('cEUR').onclick = () => setCur('EUR');
-  $('rate').onchange = e => { const v = num(e.target.value); if (v > 0){ rate = v; store.set('rate', rate); render(); } };
   $('dl').onclick = download;
 
   // ---- Excel export (VPO-Eredmény layout, with formulas) ----
@@ -418,7 +405,6 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     const L = i => XLSX.utils.encode_col(i);
     const aoa = []; const R = () => aoa.length + 1; // next 1-based row
     aoa.push([null, ...MONTHS.map((_,i) => new Date(year, i, 1)), 'Összesen']);
-    aoa.push(['Árfolyam:', ...Array(12).fill(rate)]);
     aoa.push(['Havi költségek']);
     const c0 = R();
     C.costG.forEach(g => aoa.push([g, ...res.cost.get(g).m.map(v => v ? Math.round(v*100)/100 : null)]));
@@ -437,11 +423,9 @@ footer{margin-top:48px;color:var(--grey);font-size:13px}
     aoa.push([]);
     const resRow = R(); aoa.push(['VPO-Eredmény', ...MONTHS.map((_,i) => ({f:`${L(i+1)}${revRow}-${L(i+1)}${costRow}+${L(i+1)}${kpRow}`}))]);
     aoa.push(['Göngyölt eredmény', ...MONTHS.map((_,i) => ({f: i === 0 ? `B${resRow}` : `${L(i)}${resRow+1}+${L(i+1)}${resRow}`}))]);
-    aoa.push([]);
-    aoa.push(['VPO-Eredmény EUR', ...MONTHS.map((_,i) => ({f:`${L(i+1)}${resRow}/${L(i+1)}2`}))]);
 
-    // row totals in column N (skip header/rate/section/cumulative rows)
-    const skipTot = new Set([1, 2, resRow + 1]);
+    // row totals in column N (skip header/section/cumulative rows)
+    const skipTot = new Set([1, resRow + 1]);
     aoa.forEach((row, idx) => { const r = idx + 1; if (skipTot.has(r) || row.length < 2) return; row[13] = {f:`SUM(B${r}:M${r})`}; });
 
     const ws = XLSX.utils.aoa_to_sheet(aoa, {cellDates:true});
