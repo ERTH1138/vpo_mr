@@ -38,17 +38,27 @@ export default async (req) => {
       }));
       return json(items.filter(Boolean));
     }
-    if (m === "POST") {
+    if (m === "POST" || (m === "PUT" && parts[1] && ID.test(parts[1]))) {
       const r = await req.json();
       const month = String(r.date || "").slice(0, 7);
       if (!MONTH.test(month) || !r.company) return json({ error: "Hiányzó adat." }, 400);
-      const id = `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+      let id, moveFrom = null;
+      if (m === "PUT") {
+        const oldKey = `e/${parts[1].slice(0, 7)}/${parts[1]}`;
+        const prev = await store.get(oldKey, { type: "json" });
+        if (!prev) return json({ error: "A tétel már nem létezik (lehet, hogy valaki törölte)." }, 404);
+        id = parts[1].slice(0, 7) === month ? parts[1] : null;
+        if (!id) moveFrom = oldKey;
+        r.ts = prev.ts;
+      }
+      id = id || `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
       const entry = {
         date: String(r.date).slice(0, 10), company: String(r.company).slice(0, 200), person: String(r.person || "").slice(0, 200),
         cat: String(r.cat || "Egyéb"), item: String(r.item || "").slice(0, 300), qty: +r.qty || 0, unit: +r.unit || 0,
         total: +r.total || 0, note: String(r.note || "").slice(0, 500), ts: +r.ts || Date.now(),
       };
       await store.setJSON(`e/${month}/${id}`, entry);
+      if (moveFrom) await store.delete(moveFrom);
       return json({ ...entry, id });
     }
     if (m === "DELETE" && parts[1] && ID.test(parts[1])) {
