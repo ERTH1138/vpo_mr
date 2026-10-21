@@ -15,6 +15,39 @@ export default async (req) => {
   // GET /api/ping
   if (parts[0] === "ping") return json({ ok: true });
 
+  // GET /api/mnb?date=YYYY-MM-DD – MNB hivatalos EUR árfolyam az adott napra (vagy a legutóbbi jegyzés)
+  if (parts[0] === "mnb" && m === "GET") {
+    const d = url.searchParams.get("date") || "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return json({ error: "Hibás dátum." }, 400);
+    const from = new Date(d + "T00:00:00Z");
+    from.setUTCDate(from.getUTCDate() - 10);
+    const body = `<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><GetExchangeRates xmlns="http://www.mnb.hu/webservices/"><startDate>${from.toISOString().slice(0, 10)}</startDate><endDate>${d}</endDate><currencyNames>EUR</currencyNames></GetExchangeRates></soap:Body></soap:Envelope>`;
+    let text = null, lastErr = "";
+    for (const endpoint of ["https://www.mnb.hu/arfolyamok.asmx", "http://www.mnb.hu/arfolyamok.asmx"]) {
+      try {
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "text/xml; charset=utf-8", SOAPAction: '"http://www.mnb.hu/webservices/MNBArfolyamServiceSoap/GetExchangeRates"' },
+          body,
+          signal: AbortSignal.timeout(8000),
+        });
+        if (r.ok) { text = await r.text(); break; }
+        lastErr = "HTTP " + r.status;
+      } catch (e) { lastErr = e.message; }
+    }
+    if (!text) return json({ error: "Az MNB nem érhető el (" + lastErr + ")." }, 502);
+    const x = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    const days = [...x.matchAll(/<Day date="(\d{4}-\d{2}-\d{2})">([\s\S]*?)<\/Day>/g)]
+      .map((mm) => {
+        const v = mm[2].match(/<Rate[^>]*curr="EUR"[^>]*>([\d.,]+)<\/Rate>/);
+        return v ? { date: mm[1], rate: +v[1].replace(",", ".") } : null;
+      })
+      .filter((o) => o && o.date <= d && o.rate > 0)
+      .sort((a, b) => (a.date < b.date ? 1 : -1));
+    if (!days.length) return json({ error: "Erre a napra nincs MNB árfolyam." }, 404);
+    return json(days[0]);
+  }
+
   // Beállítások (ügyfelek, tételek, árak, ingyenes keretek, gyorsgombok)
   if (parts[0] === "config") {
     if (m === "GET") return json((await store.get("config", { type: "json" })) || {});
@@ -55,7 +88,7 @@ export default async (req) => {
       const entry = {
         date: String(r.date).slice(0, 10), company: String(r.company).slice(0, 200), person: String(r.person || "").slice(0, 200),
         cat: String(r.cat || "Egyéb"), item: String(r.item || "").slice(0, 300), qty: +r.qty || 0, unit: +r.unit || 0,
-        total: +r.total || 0, note: String(r.note || "").slice(0, 500), ts: +r.ts || Date.now(),
+        total: +r.total || 0, cur: r.cur === "EUR" ? "EUR" : "HUF", note: String(r.note || "").slice(0, 500), ts: +r.ts || Date.now(),
       };
       await store.setJSON(`e/${month}/${id}`, entry);
       if (moveFrom) await store.delete(moveFrom);
