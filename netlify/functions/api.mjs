@@ -3,25 +3,16 @@ import { getStore } from "@netlify/blobs";
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 
-function authorized(req) {
-  const pass = process.env.APP_PASSWORD;
-  if (!pass) return false;
-  return req.headers.get("x-pass") === pass;
-}
-
 const MONTH = /^\d{4}-\d{2}$/;
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
 
 export default async (req) => {
-  if (!process.env.APP_PASSWORD) return json({ error: "A jelszó nincs beállítva a szerveren (APP_PASSWORD)." }, 500);
-  if (!authorized(req)) return json({ error: "Hibás jelszó." }, 401);
-
   const store = getStore({ name: "rogzito", consistency: "strong" });
   const url = new URL(req.url);
   const parts = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
   const m = req.method;
 
-  // GET /api/ping – jelszó ellenőrzése
+  // GET /api/ping
   if (parts[0] === "ping") return json({ ok: true });
 
   // Beállítások (ügyfelek, tételek, árak, ingyenes keretek, gyorsgombok)
