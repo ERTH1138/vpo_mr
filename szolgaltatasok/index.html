@@ -45,8 +45,8 @@ h2{margin:0;font-size:19px;font-weight:700}
 .grid .wide{grid-column:span 2}
 @media (max-width:560px){.grid .wide{grid-column:auto}}
 label,.lbl{display:block;font-size:12.5px;font-weight:600;color:var(--grey);margin-bottom:4px}
-input,select{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:15px;min-width:0}
-input:focus,select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--peach)}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:15px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--peach)}
 input[type=checkbox]{width:auto;accent-color:var(--red)}
 .btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;background:var(--red);color:#fff;white-space:nowrap}
 .btn:hover{background:var(--red-dark)}
@@ -107,6 +107,9 @@ td.act{text-align:right}
 .search{width:220px;max-width:100%}
 .phead>div:first-child{flex:1 1 280px;min-width:0}
 footer{margin-top:40px;color:var(--grey);font-size:12.5px}
+textarea{resize:vertical;min-height:84px;line-height:1.45}
+.cnote{margin:6px 0 4px;padding:8px 12px;border-left:3px solid var(--orange);background:var(--soft);border-radius:0 8px 8px 0;font-size:13.5px;color:#4a4a4a;white-space:pre-line;max-width:80ch}
+td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;font-size:13px}
 [hidden]{display:none!important}
 @media (max-width:560px){header img{height:48px} header .tag{display:none} .panel{padding:16px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -206,6 +209,7 @@ footer{margin-top:40px;color:var(--grey);font-size:12.5px}
         <div><label for="cfree">Ingyenes tárgyalóórák / hó</label><input type="number" id="cfree" min="0" step="any" inputmode="decimal" placeholder="0"></div>
         <div><label class="chk" style="padding-top:26px"><input type="checkbox" id="cquick"> Gyakori ügyfél (gyorsgomb)</label></div>
       </div>
+      <div style="margin-top:14px"><label for="cnote">Megjegyzés</label><textarea id="cnote" rows="3" placeholder="pl. kapcsolattartó, számlázási tudnivalók, szerződés részletei…"></textarea></div>
 
       <div style="margin-top:20px">
         <div class="phead" style="margin-bottom:8px"><div><h2 style="font-size:16px">Egyedi (kedvezményes) árak</h2><p class="sub">Rögzítéskor ennél az ügyfélnél ezek az árak töltődnek be az árlista helyett. Az ár forintban vagy euróban is megadható.</p></div><button class="btn ghost sm" id="cpadd">+ Egyedi ár</button></div>
@@ -326,7 +330,7 @@ function clientInfo(){const c=$("co").value.trim(),box=$("cinfo");if(!c){box.inn
  if(cl.eur)b.push('<span class="badge eur">Euróban számlázva</span>');
  if(cl.free)b.push(`<span class="badge free">${fmtN(cl.free)} ingyenes tárgyalóóra / hó</span>`);
  if(p)b.push(`<span class="badge price">Egyedi ár: ${money(p.u,p.cur)}</span>`);else if(cl.prices.length)b.push(`<span class="badge price">${cl.prices.length} egyedi ár</span>`);
- b.push(`<button type="button" class="x" id="cgo">Ügyfél beállításai →</button>`);box.innerHTML=b.join("");
+ b.push(`<button type="button" class="x" id="cgo">Ügyfél beállításai →</button>`);box.innerHTML=b.join("")+(cl.note?`<div class="cnote" style="flex-basis:100%">${esc(cl.note)}</div>`:"");
  $("cgo").onclick=()=>{showTab("ugyfelek");openClient(cl.n)}}
 
 // ---------- rögzítés ----------
@@ -424,14 +428,14 @@ $("xl").onclick=()=>{
 // ---------- ügyfelek ----------
 function renderClients(){const q=norm($("cq").value);$("ccount").textContent=CLIENTS.length;
  const L=CLIENTS.filter(c=>!q||norm(c.n).includes(q)).sort((a,b)=>a.n.localeCompare(b.n,"hu"));
- $("ctab").innerHTML=L.length?"<tr><th>Ügyfél</th><th>Számlázás</th><th class=num>Ingyenes óra / hó</th><th>Egyedi árak</th><th>Gyakori</th><th></th></tr>"+L.map(c=>`<tr class="click${edOrig&&c.n===edOrig?" sel":""}" data-n="${esc(c.n)}"><td><b>${esc(c.n)}</b></td><td>${c.eur?'<span class="badge eur">EUR</span>':'<span class=mute>Ft</span>'}</td><td class=num>${c.free?fmtN(c.free):'<span class=mute>–</span>'}</td><td class=wrap>${c.prices.length?c.prices.map(p=>esc(shortName(p.i))+": <b>"+money(p.u,p.cur)+"</b>").join("<br>"):'<span class=mute>–</span>'}</td><td>${inQL(c.n)?"★":""}</td><td class=act><button type="button" class="x">Szerkesztés</button></td></tr>`).join("")
+ $("ctab").innerHTML=L.length?"<tr><th>Ügyfél</th><th>Számlázás</th><th class=num>Ingyenes óra / hó</th><th>Egyedi árak</th><th>Megjegyzés</th><th>Gyakori</th><th></th></tr>"+L.map(c=>`<tr class="click${edOrig&&c.n===edOrig?" sel":""}" data-n="${esc(c.n)}"><td><b>${esc(c.n)}</b></td><td>${c.eur?'<span class="badge eur">EUR</span>':'<span class=mute>Ft</span>'}</td><td class=num>${c.free?fmtN(c.free):'<span class=mute>–</span>'}</td><td class=wrap>${c.prices.length?c.prices.map(p=>esc(shortName(p.i))+": <b>"+money(p.u,p.cur)+"</b>").join("<br>"):'<span class=mute>–</span>'}</td><td class=notecell>${c.note?esc(c.note.length>140?c.note.slice(0,140)+"…":c.note):'<span class=mute>–</span>'}</td><td>${inQL(c.n)?"★":""}</td><td class=act><button type="button" class="x">Szerkesztés</button></td></tr>`).join("")
   :`<tr><td class=empty>${q?"Nincs ilyen nevű ügyfél.":"Még nincs ügyfél. Az „+ Új ügyfél” gombbal vehetsz fel egyet."}</td></tr>`}
 $("ctab").onclick=e=>{const tr=e.target.closest("tr[data-n]");if(tr)openClient(tr.dataset.n)};
 $("cq").oninput=renderClients;
 $("cnew").onclick=()=>openClient(null,"");
 function openClient(name,prefill){const c=name?findClient(name):null;edOrig=c?c.n:null;
- ED=c?{n:c.n,eur:!!c.eur,free:c.free||0,prices:c.prices.map(p=>({...p}))}:{n:prefill||"",eur:false,free:0,prices:[]};
- $("ced").hidden=false;$("ceh").textContent=c?c.n:"Új ügyfél";$("cname").value=ED.n;setEdCur(ED.eur);$("cfree").value=ED.free||"";$("cquick").checked=c?inQL(c.n):true;
+ ED=c?{n:c.n,eur:!!c.eur,free:c.free||0,note:c.note||"",prices:c.prices.map(p=>({...p}))}:{n:prefill||"",eur:false,free:0,note:"",prices:[]};
+ $("ced").hidden=false;$("ceh").textContent=c?c.n:"Új ügyfél";$("cname").value=ED.n;setEdCur(ED.eur);$("cfree").value=ED.free||"";$("cquick").checked=c?inQL(c.n):true;$("cnote").value=ED.note;
  $("cdel").hidden=!c;$("cdel").dataset.arm="";$("cdel").textContent="Ügyfél törlése";say("cm","");renderCP();renderClients();
  $("ced").scrollIntoView({behavior:"smooth",block:"start"});if(!c)setTimeout(()=>$("cname").focus(),50)}
 function closeClient(){ED=null;edOrig=null;$("ced").hidden=true;renderClients()}
@@ -452,7 +456,7 @@ $("csave").onclick=async()=>{if(!ED)return;const n=$("cname").value.trim();if(!n
  const fv=$("cfree").value.trim(),fr=fv===""?0:+fv.replace(",",".");if(!(fr>=0)){say("cm","Az ingyenes órák száma nem lehet negatív.",1);return}
  const prices=[];for(const p of ED.prices){if(p.u===""||!(+p.u>0)){say("cm","Adj meg árat minden egyedi tételhez, vagy töröld a sort.",1);return}
   if(prices.some(q=>q.i===p.i)){say("cm","Egy tételhez csak egy egyedi ár tartozhat: "+shortName(p.i),1);return}prices.push({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"})}
- const rec={n:n,eur:!!ED.eur,free:fr,prices:prices},bC=CLIENTS.slice(),bQ=QL.slice();
+ const rec={n:n,eur:!!ED.eur,free:fr,note:$("cnote").value.trim().slice(0,2000),prices:prices},bC=CLIENTS.slice(),bQ=QL.slice();
  if(edOrig){const ix=CLIENTS.findIndex(c=>c.n===edOrig);CLIENTS[ix]=rec;QL=QL.map(q=>norm(q)===norm(edOrig)?n:q)}else CLIENTS.push(rec);
  const q=inQL(n);if($("cquick").checked&&!q)QL=QL.concat(n);if(!$("cquick").checked&&q)QL=QL.filter(x=>norm(x)!==norm(n));
  try{await saveCfg()}catch(e){CLIENTS=bC;QL=bQ;say("cm","Nem sikerült menteni: "+e.message,1);return}
@@ -487,7 +491,7 @@ function migrate(v){const out=[],add=n=>{n=String(n||"").trim();if(n&&!out.some(
  (v.free||[]).forEach(o=>{const c=f(o.c);if(c)c.free=+o.h||0});(v.eur||[]).forEach(n=>{const c=f(n);if(c)c.eur=true});
  (v.prices||[]).forEach(o=>{const c=f(o.c);if(c)c.prices.push({i:o.i,u:+o.u,cur:o.cur==="EUR"?"EUR":"HUF"})});return out}
 function applyCfg(v){v=v||{};CI=(v.items||[]).map(o=>[o.n,o.c,+o.u||0,o.q?1:0]);BPL=v.base||[];rebuildBP();RATES=v.rates||{};QL=v.quick||QC.slice();QI=v.qitems||null;
- CLIENTS=Array.isArray(v.clients)?v.clients.map(c=>({n:String(c.n),eur:!!c.eur,free:+c.free||0,prices:(c.prices||[]).map(p=>({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"}))})):migrate(v)}
+ CLIENTS=Array.isArray(v.clients)?v.clients.map(c=>({n:String(c.n),eur:!!c.eur,free:+c.free||0,note:String(c.note||""),prices:(c.prices||[]).map(p=>({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"}))})):migrate(v)}
 function refreshAll(first){buildItems();buildIChips();buildCChips();if(first)pick();else{markI();clientInfo()}fillRate();render();renderClients();renderB()}
 let busy=false;
 async function loadE(){const mo=$("mon").value;if(!mo)return;try{const L=await api("entries?month="+mo);if(mo===$("mon").value){E=L;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}}
