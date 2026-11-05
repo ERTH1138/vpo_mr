@@ -108,6 +108,32 @@ export default async (req) => {
     }
   }
 
+  // Leadandó infók / napi teendők: n/<YYYY-MM>/<YYYY-MM-DD> = {items:[{id,t,done,by,ts}]}
+  if (parts[0] === "notes") {
+    const DAY = /^\d{4}-\d{2}-\d{2}$/;
+    if (m === "GET") {
+      const from = url.searchParams.get("from") || "", to = url.searchParams.get("to") || from;
+      if (!DAY.test(from) || !DAY.test(to) || to < from) return json({ error: "Hibás időszak." }, 400);
+      const months = []; let [y, mo] = from.slice(0, 7).split("-").map(Number); const [y2, m2] = to.slice(0, 7).split("-").map(Number);
+      while ((y < y2 || (y === y2 && mo <= m2)) && months.length < 24) { months.push(`${y}-${String(mo).padStart(2, "0")}`); mo++; if (mo > 12) { mo = 1; y++; } }
+      const out = {};
+      for (const month of months) {
+        const { blobs } = await store.list({ prefix: `n/${month}/` });
+        await Promise.all(blobs.map(async (b) => { const d = b.key.split("/").pop(); if (d >= from && d <= to) { const v = await store.get(b.key, { type: "json" }); if (v && v.items && v.items.length) out[d] = v.items; } }));
+      }
+      return json(out);
+    }
+    if (m === "PUT" && DAY.test(parts[1] || "")) {
+      const body = await req.json().catch(() => ({}));
+      const items = (Array.isArray(body.items) ? body.items : []).slice(0, 200).map((x) => ({
+        id: String(x.id || "").slice(0, 40) || Math.random().toString(36).slice(2, 10), t: String(x.t || "").slice(0, 400), done: !!x.done,
+        by: String(x.by || user).slice(0, 120), ts: +x.ts || Date.now(), dby: x.done ? String(x.dby || user).slice(0, 120) : "" })).filter((x) => x.t.trim());
+      const key = `n/${parts[1].slice(0, 7)}/${parts[1]}`;
+      if (items.length) await store.setJSON(key, { items }); else await store.delete(key);
+      return json({ date: parts[1], items });
+    }
+  }
+
   // Tárgyalófoglalások havonta: b/<YYYY-MM>/<id>
   if (parts[0] === "bookings") {
     const DAY = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$|^24:00$/;
