@@ -221,6 +221,19 @@ footer{margin-top:18px}
 .cater li .c{white-space:pre-line;color:#4a4a4a}
 .cater .none{color:var(--grey);font-size:13px}
 .tday li.cat .tx{color:#8A3A16}
+.crow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px}
+.crow label{margin:0}
+.crow select{width:auto;padding:6px 9px;font-size:13.5px}
+.crow .mute{font-size:12.5px}
+.cater .sub{font-size:12px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.04em;margin:2px 0 6px}
+.cater .sub+ul{margin-bottom:12px}
+.cater li.ord{display:flex;gap:8px;align-items:flex-start}
+.cater li.ord input{margin-top:3px;flex:none}
+.cater li.ord .tx{flex:1;min-width:0}
+.cater li.ord.done .tx{text-decoration:line-through;color:var(--grey)}
+.cater li.ord .x{font:inherit;background:none;border:0;color:#9a9390;cursor:pointer;padding:0 6px;border-radius:6px}
+.cater li.ord .x:hover{background:var(--warnbg);color:var(--warn)}
+.cater li.ord .x[data-arm="1"]{color:var(--warn);font-size:12.5px;font-weight:700}
 </style>
 </head>
 <body>
@@ -287,7 +300,8 @@ footer{margin-top:18px}
       <div><label for="fda">Dátum</label><input type="date" id="fda"></div>
       <div><label for="fst">Kezdés</label><select id="fst"></select></div>
       <div><label for="fen">Befejezés</label><select id="fen"></select></div>
-      <div class="wide"><label for="fca">Catering</label><textarea id="fca" rows="2" placeholder="pl. 10 fő kávé, víz, pogácsa 9:00-ra – ha nem kér, hagyd üresen"></textarea><div class="mute" style="font-size:12px;margin-top:3px">Ha kitöltöd, a tárgyalás előtti munkanapra emlékeztető kerül a Leadandó infók közé.</div></div>
+      <div class="wide"><label for="fca">Catering</label><textarea id="fca" rows="2" placeholder="pl. 10 fő kávé, víz, pogácsa 9:00-ra – ha nem kér, hagyd üresen"></textarea>
+        <div class="crow"><label for="fcd">Megrendelni</label><select id="fcd"><option value="1">az előző munkanapon</option><option value="2">2 munkanappal előtte</option><option value="3">3 munkanappal előtte</option><option value="5">egy héttel előtte (5 munkanap)</option><option value="0">a tárgyalás napján</option></select><span class="mute" id="fcdh"></span></div></div>
       <div class="wide"><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div>
       <div class="wide" id="repw"><span class="lbl">Ismétlés</span><div class="repeat"><select id="frep" aria-label="Ismétlés"><option value="0">Nem ismétlődik</option><option value="7">Hetente</option><option value="14">Kéthetente</option></select><input type="number" id="fcnt" min="2" max="52" value="4" aria-label="Alkalmak száma" hidden><span class="mute" id="fcntl" hidden>alkalom</span></div></div>
       <div class="wide"><label for="fno">Megjegyzés</label><textarea id="fno" rows="2"></textarea></div>
@@ -353,7 +367,7 @@ function clientInfo(){const c=$("fco").value.trim(),r=roomById($("fro").value),b
 
 // ---------- betöltés ----------
 function range(){if(view==="nap")return[cur,cur];if(view==="het"){const m=mondayOf(cur);return[m,addDays(m,6)]}return[cur,addDays(cur,30)]}
-async function loadBK(force){loadNotes();const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
+async function loadBK(force){loadNotes();loadCater();const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
  try{const L=await api(`bookings?from=${a}&to=${b}`);const [a2,b2]=range();if(a2!==a||b2!==b)return;BK=L;loadedRange=key;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}
  catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
 let PEOPLE={};
@@ -406,13 +420,26 @@ $("todo").addEventListener("submit",ev=>{ev.preventDefault();const t=$("ttext").
  noteOp(d,L=>L.concat({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false,by:ME,ts:Date.now()})).then(()=>{if(!noteDays().includes(d))say("msg","✓ Felírva ide: "+parseD(d).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})+" – "+t);const ni=$("ttext");if(ni)ni.focus()})});
 $("todo").addEventListener("change",ev=>{const c=ev.target;if(c.type!=="checkbox")return;noteOp(c.dataset.d,L=>L.map(x=>x.id===c.dataset.id?{...x,done:c.checked,dby:c.checked?ME:""}:x))});
 $("todo").addEventListener("click",ev=>{if(ev.target.id==="tclear"){arm(ev.target,"Biztosan törlöd a kész tételeket?",async()=>{for(const d of noteDays())if((NOTES[d]||[]).some(x=>x.done))await noteOp(d,L=>L.filter(x=>!x.done))});return}const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>noteOp(b.dataset.d,L=>L.filter(x=>x.id!==b.dataset.del)))});
-function remindMsg(list){const ds=[...new Set(list.map(x=>x.remind).filter(Boolean))].sort();return ds.length?" · catering-emlékeztető: "+ds.map(d=>parseD(d).toLocaleDateString("hu-HU",{month:"short",day:"numeric",weekday:"short"})).join(", "):""}
-function renderCater(){const box=$("cater"),L=BK.filter(b=>b.date===cur&&b.catering).sort((a,b)=>a.start.localeCompare(b.start));
+function easterD(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+function isHoliday(s){const y=+s.slice(0,4),e=easterD(y),D=n=>{const x=new Date(e);x.setDate(x.getDate()+n);return iso(x)};return [y+"-01-01",y+"-03-15",y+"-05-01",y+"-08-20",y+"-10-23",y+"-11-01",y+"-12-24",y+"-12-25",y+"-12-26",D(-2),D(1),D(50)].includes(s)}
+function workdaysBefore(s,n){let d=s;for(let i=0;i<n;i++){for(let j=0;j<14;j++){d=addDays(d,-1);const w=parseD(d).getDay();if(w&&w!==6&&!isHoliday(d))break}}return d}
+function cdHint(){const d=$("fda").value,n=+$("fcd").value;$("fcdh").textContent=d&&$("fca").value.trim()?"→ emlékeztető: "+parseD(workdaysBefore(d,n)).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"}):""}
+function remindMsg(list){const ds=[...new Set(list.map(x=>x.remind).filter(Boolean))].sort();return ds.length?" · catering-rendelés emlékeztető: "+ds.map(d=>parseD(d).toLocaleDateString("hu-HU",{month:"short",day:"numeric",weekday:"short"})).join(", "):""}
+let CATER={};
+async function loadCater(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`catering?from=${a}&to=${b}`);Object.keys(CATER).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete CATER[d]});Object.assign(CATER,N);renderCater()}catch(e){}}
+async function caterOp(d,fn){try{const N=await api(`catering?from=${d}&to=${d}`);const items=fn((N[d]||[]).slice());const r=await api("catering/"+d,{method:"PUT",body:JSON.stringify({items})});if(r.items.length)CATER[d]=r.items;else delete CATER[d]}catch(e){say("msg","Nem sikerült menteni: "+e.message,1)}renderCater()}
+function renderCater(){const box=$("cater"),L=BK.filter(b=>b.date===cur&&b.catering).sort((a,b)=>a.start.localeCompare(b.start)),O=CATER[cur]||[];
  const day=cur===todayS()?"ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric"});
- box.innerHTML=`<div class="th"><h3>Catering<small>${esc(day)}${L.length?" · "+L.length+" rendelés":""}</small></h3>${L.length?'<button type="button" class="lk" id="ccopy">Másolás</button>':""}</div>`+
-  (L.length?"<ul>"+L.map(b=>{const r=roomById(b.room);return `<li><div class="h"><b>${esc(b.company||b.title||"")}</b><span class="tm">${b.start} · ${esc(r?r.name:"")}</span></div><div class="c">${esc(b.catering)}</div></li>`}).join("")+"</ul>":'<div class="none">Erre a napra nincs catering-rendelés.</div>');
- const c=$("ccopy");if(c)c.onclick=async()=>{const txt=cur+" – catering\n"+L.map(b=>{const r=roomById(b.room);return (b.company||b.title||"")+" – "+b.start+(r?", "+r.name:"")+": "+b.catering}).join("\n");
-  try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
+ const openN=O.filter(x=>!x.done).length;
+ let h=`<div class="th"><h3>Catering<small>${esc(day)}${openN?" · "+openN+" megrendelendő":""}</small></h3>${(L.length||O.length)?'<button type="button" class="lk" id="ccopy">Másolás</button>':""}</div>`;
+ if(O.length)h+=`<div class="sub">Megrendelendő</div><ul>`+O.map(x=>`<li class="ord${x.done?" done":""}"><input type="checkbox" data-id="${esc(x.id)}" ${x.done?"checked":""} aria-label="Megrendelve"><span class="tx">${esc(x.t)}${x.done&&x.dby?` <span class="mute" style="font-size:12px">· megrendelve: ${esc(x.dby.split("@")[0])}</span>`:""}</span><button type="button" class="x" data-del="${esc(x.id)}" aria-label="Törlés">✕</button></li>`).join("")+"</ul>";
+ if(L.length)h+=`<div class="sub">Tárgyalásokhoz</div><ul>`+L.map(b=>{const r=roomById(b.room);return `<li><div class="h"><b>${esc(b.company||b.title||"")}</b><span class="tm">${b.start} · ${esc(r?r.name:"")}</span></div><div class="c">${esc(b.catering)}</div></li>`}).join("")+"</ul>";
+ if(!O.length&&!L.length)h+='<div class="none">Erre a napra nincs megrendelendő vagy esedékes catering.</div>';
+ box.innerHTML=h;
+ const c=$("ccopy");if(c)c.onclick=async()=>{const lines=[];if(O.length){lines.push("Megrendelendő:");O.filter(x=>!x.done).forEach(x=>lines.push("- "+x.t))}if(L.length){lines.push("Mai tárgyalásokhoz:");L.forEach(b=>{const r=roomById(b.room);lines.push("- "+(b.company||b.title||"")+" – "+b.start+(r?", "+r.name:"")+": "+b.catering)})}
+  try{await navigator.clipboard.writeText(cur+" – catering\n"+lines.join("\n"));c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
+$("cater").addEventListener("change",ev=>{const c=ev.target;if(c.type!=="checkbox")return;caterOp(cur,L=>L.map(x=>x.id===c.dataset.id?{...x,done:c.checked,dby:c.checked?ME:""}:x))});
+$("cater").addEventListener("click",ev=>{const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>caterOp(cur,L=>L.filter(x=>x.id!==b.dataset.del)))});
 function render(){renderPlates();renderCater();renderTodo();rememberPeople();
  writeHash();$("date").value=cur;$("roomsel").value=room;
  if(view==="nap")$("dlabel").textContent=longDate(cur);
@@ -469,7 +496,7 @@ $("cal").addEventListener("pointerup",async ev=>{const a=act;act=null;if(!a)retu
  if(!a.moved){openEdit(a.b.id);return}
  const c=GEO.cols[+a.nc.dataset.i],upd={...a.b,date:c.date,room:c.room,start:a.ns,end:a.ne};
  if(upd.date===a.b.date&&upd.room===a.b.room&&upd.start===a.b.start&&upd.end===a.b.end){render();return}
- try{const sv=await api("bookings/"+encodeURIComponent(a.b.id),{method:"PUT",body:JSON.stringify(upd)});BK=BK.filter(x=>x.id!==a.b.id).concat(sv);loadNotes();say("msg","✓ Áthelyezve: "+(sv.company||sv.title||"foglalás")+" · "+roomById(sv.room).name+" · "+sv.date+" "+sv.start+"–"+sv.end)}
+ try{const sv=await api("bookings/"+encodeURIComponent(a.b.id),{method:"PUT",body:JSON.stringify(upd)});BK=BK.filter(x=>x.id!==a.b.id).concat(sv);loadNotes();loadCater();say("msg","✓ Áthelyezve: "+(sv.company||sv.title||"foglalás")+" · "+roomById(sv.room).name+" · "+sv.date+" "+sv.start+"–"+sv.end)}
  catch(e){say("msg",e.message,1)}render()});
 $("cal").addEventListener("pointercancel",()=>{if(act&&act.sel)act.sel.remove();act=null;render()});
 $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.closest(".bk");if(bk)openEdit(bk.dataset.id)}});
@@ -478,21 +505,21 @@ $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.cl
 const timeOpts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
 $("fst").innerHTML=timeOpts(0,24*60-STEP);$("fen").innerHTML=timeOpts(STEP,24*60);
 function ensureOpt(sel,v){if(v&&![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v))}
-function fill(b){$("ncw").hidden=true;$("fca").value=b.catering||"";setTimeout(fillPeople,0);$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
+function fill(b){$("ncw").hidden=true;$("fca").value=b.catering||"";$("fcd").value=String(b.cdays??1);setTimeout(cdHint,0);setTimeout(fillPeople,0);$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
 function openNew(date,roomId,a,b){editing=null;$("dh").textContent="Új foglalás";$("fdel").hidden=true;$("repw").hidden=false;fill({date:date||cur,room:roomId||ROOMS[0].id,start:toHM(a??9*60),end:toHM(b??10*60)});$("dlg").showModal();setTimeout(()=>$("fco").focus(),30)}
 function openEdit(id){tip.hidden=true;const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
 function syncRep(){const on=$("frep").value!=="0";$("fcnt").hidden=!on;$("fcntl").hidden=!on}
 $("frep").onchange=syncRep;
-$("fco").addEventListener("input",fillPeople);
+$("fco").addEventListener("input",fillPeople);["fca","fcd","fda"].forEach(id=>$(id).addEventListener(id==="fca"?"input":"change",cdHint));
 ["fco","fro","fst","fen"].forEach(id=>$(id).addEventListener(id==="fco"?"input":"change",clientInfo));
 $("fst").addEventListener("change",()=>{if(toMin($("fen").value)<=toMin($("fst").value)){const m=Math.min(toMin($("fst").value)+60,24*60);$("fen").value=toHM(m);clientInfo()}});
 $("fcancel").onclick=()=>$("dlg").close();
 $("fab").onclick=()=>{const n=new Date();let m=Math.ceil((n.getHours()*60+n.getMinutes())/STEP)*STEP;if(cur!==todayS()||m<8*60||m>19*60)m=9*60;openNew(view==="het"?cur:cur,view==="het"?room:ROOMS[0].id,m,m+60)};
-$("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api("bookings/"+encodeURIComponent(editing.id),{method:"DELETE"});BK=BK.filter(x=>x.id!==editing.id);loadNotes();say("msg","✓ Törölve: "+(editing.company||editing.title||"foglalás")+" · "+editing.date+" "+editing.start+"–"+editing.end);$("dlg").close();render()}catch(e){say("fmsg",e.message,1)}});
+$("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api("bookings/"+encodeURIComponent(editing.id),{method:"DELETE"});BK=BK.filter(x=>x.id!==editing.id);loadNotes();loadCater();say("msg","✓ Törölve: "+(editing.company||editing.title||"foglalás")+" · "+editing.date+" "+editing.start+"–"+editing.end);$("dlg").close();render()}catch(e){say("fmsg",e.message,1)}});
 $("bform").onsubmit=async ev=>{ev.preventDefault();
  if($("fco").value.trim()&&!findClient($("fco").value.trim())){try{await addClient({n:$("fco").value.trim(),eur:false,free:0,note:"",prices:[]})}catch(e){say("fmsg","Az új ügyfelet nem sikerült felvenni: "+e.message,1);return}}
  const fc=findClient($("fco").value.trim());
- const b={catering:$("fca").value.trim(),plate:$("fpl").value.toUpperCase().replace(/\s+/g," ").trim(),company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
+ const b={catering:$("fca").value.trim(),cdays:+$("fcd").value,plate:$("fpl").value.toUpperCase().replace(/\s+/g," ").trim(),company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
  if(!b.company&&!b.title){say("fmsg","Add meg az ügyfelet vagy a megnevezést.",1);return}
  if(!b.date){say("fmsg","Add meg a dátumot.",1);return}
  if(toMin(b.end)<=toMin(b.start)){say("fmsg","A befejezésnek a kezdés után kell lennie.",1);return}
@@ -503,7 +530,7 @@ $("bform").onsubmit=async ev=>{ev.preventDefault();
    BK=BK.concat(ok.filter(x=>{const [a,z]=range();return x.date>=a&&x.date<=z}));
    if(bad.length){say("fmsg",ok.length+" foglalás elkészült. Nem sikerült:\n"+bad.join("\n"),1);$("repw").hidden=true;editing=null}
    else{say("msg","✓ Lefoglalva: "+(b.company||b.title)+" · "+roomById(b.room).name+" · "+b.date+" "+b.start+"–"+b.end+(n>1?" · "+n+" alkalom":"")+remindMsg(ok));$("dlg").close()}}
-  loadNotes();
+  loadNotes();loadCater();
   {const [ra,rz]=range();if(!$("dlg").open&&(b.date<ra||b.date>rz)){cur=b.date;if(view==="het")room=b.room;render();loadBK();return}}
   render()}
  catch(e){say("fmsg",e.message,1)}finally{$("fsave").disabled=false}};
