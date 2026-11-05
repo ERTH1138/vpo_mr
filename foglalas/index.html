@@ -171,6 +171,44 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
 [hidden]{display:none!important}
 @media (max-width:640px){header img{height:48px} header .tag{display:none} .cal{max-height:calc(100vh - 260px)} .datelabel{font-size:16px;flex-basis:100%;order:-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* --- egységes fejléc és alsó napi infók --- */
+body{font-size:14px}
+.titlebar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 20px;margin:22px 0 14px}
+.titlebar h1{font-size:28px;margin:0}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12.5px;color:var(--grey)}
+.meta .status{font-size:12.5px}
+.who{display:inline-flex;gap:8px;align-items:center;margin:0;font-size:12.5px}
+.who button,.metalink{font:inherit;font-size:12.5px;background:none;border:0;padding:0;cursor:pointer;font-weight:700}
+.who button{color:var(--red)}
+.metalink{color:var(--ink);border-bottom:1px dotted var(--grey)}
+.metalink:hover{color:var(--red);border-color:var(--red)}
+.toolbar{gap:8px;margin-bottom:10px}
+.datelabel{font-size:17px}
+.btn.sm{font-size:13px}
+.seg button{font-size:13px}
+#msg{min-height:0;margin:0 0 8px;font-size:13px}#msg:empty{display:none}
+.legend{margin:8px 0 0;font-size:12.5px}
+.daily{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px;margin-top:16px}
+@media (max-width:820px){.daily{grid-template-columns:minmax(0,1fr)}}
+.panel{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px 16px;margin:0;min-width:0}
+.panel .th{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.panel h3{margin:0;font-size:15px;font-weight:700}
+.panel h3 small{font-weight:400;color:var(--grey);font-size:12.5px;margin-left:6px}
+.panel .lk{font:inherit;font-size:12.5px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.panel .lk:hover{text-decoration:underline}
+.todo{margin:0}
+.tday li{font-size:13.5px}
+.tday li .x{opacity:1;color:#9a9390;font-size:14px;padding:0 6px;border-radius:6px}
+.tday li .x:hover{background:var(--warnbg);color:var(--warn)}
+.tday li .x[data-arm="1"]{color:var(--warn);font-size:12.5px;font-weight:700}
+.tadd input[type=text],.tadd input[type=date],.tadd button{font-size:13.5px}
+.plates{font-size:13.5px;color:var(--ink);line-height:1.5}
+.plates ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.plates li{display:flex;gap:8px;align-items:baseline}
+.plates .pl{font-size:12.5px;padding:0 5px;margin:0}
+.plates .tm{color:var(--grey);font-size:12.5px;margin-left:auto;font-variant-numeric:tabular-nums}
+.plates .none{color:var(--grey);font-size:13px}
+footer{margin-top:18px}
 </style>
 </head>
 <body>
@@ -182,8 +220,8 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
   </header>
 
   <div class="titlebar">
-    <div><h1>Tárgyalófoglalás</h1><div class="status" id="st">Betöltés…</div><div class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></div></div>
-    <div class="toolbar" style="margin:0"><button class="btn ghost sm" id="impbtn">Skedda import</button><button class="btn" id="newbtn">+ Új foglalás</button></div>
+    <h1>Tárgyalófoglalás</h1>
+    <div class="meta"><span class="status" id="st">Betöltés…</span><span class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></span><button type="button" class="metalink" id="impbtn">Skedda import</button></div>
   </div>
 
   <div class="imp" id="imp" hidden>
@@ -204,12 +242,14 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
     <select id="roomsel" aria-label="Terem" hidden></select>
     <div class="seg" role="group" aria-label="Nézet"><button data-v="nap" aria-pressed="true">Nap</button><button data-v="het" aria-pressed="false">Hét</button><button data-v="lista" aria-pressed="false">Lista</button></div>
   </div>
-  <div class="todo" id="todo"></div>
-  <div class="plates" id="plates" hidden></div>
-  <div class="legend" id="legend"></div>
   <div class="msg" id="msg" role="status"></div>
   <div class="cal" id="cal"></div>
   <div class="list" id="list" hidden></div>
+  <div class="legend" id="legend"></div>
+  <section class="daily" aria-label="Napi infók">
+    <div class="panel todo" id="todo"></div>
+    <div class="panel plates" id="plates"></div>
+  </section>
   <footer>Új foglaláshoz húzd végig az egeret a naptárban, vagy koppints egy időpontra. A foglalást áthúzhatod másik időpontra vagy terembe, az alsó szélénél pedig megnyújthatod. A foglalt tárgyalóórák automatikusan megjelennek a Kiegészítő szolgáltatások havi összesítőjében.</footer>
 </div>
 
@@ -327,17 +367,19 @@ let GEO=null;
 function rememberPeople(){BK.forEach(b=>addPerson(b.company,b.person))}
 function renderPlates(){const box=$("plates"),L=BK.filter(b=>b.date===cur&&b.plate).sort((a,b)=>a.start.localeCompare(b.start));
  const rows=[];L.forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,b})));
- box.hidden=false;
- box.innerHTML=`<b>Parkolás${rows.length?" ("+rows.length+")":""}:</b>`+(rows.length?rows.map(({p,b})=>`<span class="it"><span class="pl">${esc(p)}</span>${esc((b.company||b.person||b.title||""))} ${b.start}</span>`).join("")+'<button type="button" class="lk" id="pcopy">másolás</button>':'<span class="mute">erre a napra nincs megadott rendszám</span>');
- const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+(b.company||b.person||b.title||"")+" ("+b.start+"–"+b.end+")").join("\n");
-  try{await navigator.clipboard.writeText(txt);c.textContent="✓ másolva"}catch(e){c.textContent="nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="másolás"},2000)}}
+ const co=b=>b.company||b.person||b.title||"";
+ const day=cur===todayS()?"ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric"});
+ box.innerHTML=`<div class="th"><h3>Parkolás<small>${esc(day)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="lk" id="pcopy">Másolás</button>':""}</div>`+
+  (rows.length?"<ul>"+rows.map(({p,b})=>`<li><span class="pl">${esc(p)}</span><span>${esc(co(b))}</span><span class="tm">${b.start}–${b.end}</span></li>`).join("")+"</ul>":'<div class="none">Erre a napra nincs megadott rendszám.</div>');
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+co(b)+" ("+b.start+"–"+b.end+")").join("\n");
+  try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
 let NOTES={};
 async function loadNotes(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`notes?from=${a}&to=${b}`);NOTES={...NOTES,...Object.fromEntries(Object.keys(NOTES).filter(d=>d<a||d>b).map(d=>[d,NOTES[d]]))};Object.keys(NOTES).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete NOTES[d]});Object.assign(NOTES,N);renderTodo()}catch(e){}}
 function noteDays(){if(view==="het"){const m=mondayOf(cur);return Array.from({length:7},(_,i)=>addDays(m,i))}return[cur]}
 function renderTodo(){const box=$("todo"),days=noteDays(),t=todayS();
  {const ae=document.activeElement;if(ae&&box.contains(ae)&&(ae.id==="tdate"||(ae.id==="ttext"&&ae.value)))return}
- const open=days.reduce((n,d)=>n+(NOTES[d]||[]).filter(x=>!x.done).length,0);
- let h=`<div class="th"><h3>Leadandó infók <small>${view==="het"?"a hétre":(cur===t?"ma":esc(parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})))}${open?" · "+open+" teendő":""}</small></h3></div><div class="tdays" style="grid-template-columns:repeat(${days.length},minmax(${days.length>1?130:0}px,1fr))">`;
+ const open=days.reduce((n,d)=>n+(NOTES[d]||[]).filter(x=>!x.done).length,0),doneN=days.reduce((n,d)=>n+(NOTES[d]||[]).filter(x=>x.done).length,0);
+ let h=`<div class="th"><h3>Leadandó infók<small>${view==="het"?"a hétre":(cur===t?"ma":esc(parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})))}${open?" · "+open+" teendő":""}</small></h3>${doneN?`<button type="button" class="lk" id="tclear">Kész tételek törlése (${doneN})</button>`:""}</div><div class="tdays" style="grid-template-columns:repeat(${days.length},minmax(${days.length>1?130:0}px,1fr))">`;
  days.forEach(d=>{const L=NOTES[d]||[];h+=`<div class="tday">${days.length>1?`<div class="dl${d===t?" today":""}">${esc(shortDay(d))}</div>`:""}`+
   (L.length?"<ul>"+L.map(x=>`<li class="${x.done?"done":""}"><input type="checkbox" data-d="${d}" data-id="${esc(x.id)}" ${x.done?"checked":""} aria-label="Kész"><span class="tx">${esc(x.t)} <span class="by">${esc((x.by||"").split("@")[0])}${x.done&&x.dby?" · kész: "+esc(x.dby.split("@")[0]):""}</span></span><button type="button" class="x" data-del="${esc(x.id)}" data-d="${d}" aria-label="Törlés">✕</button></li>`).join("")+"</ul>":(days.length===1?'<div class="none">Nincs teendő erre a napra.</div>':""))+
   `</div>`});
@@ -349,7 +391,7 @@ async function noteOp(d,fn){try{const N=await api(`notes?from=${d}&to=${d}`);con
 $("todo").addEventListener("submit",ev=>{ev.preventDefault();const t=$("ttext").value.trim(),d=$("tdate").value||cur;if(!t){$("ttext").focus();return}$("ttext").value="";TDATE=d;
  noteOp(d,L=>L.concat({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false,by:ME,ts:Date.now()})).then(()=>{if(!noteDays().includes(d))say("msg","✓ Felírva ide: "+parseD(d).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})+" – "+t);const ni=$("ttext");if(ni)ni.focus()})});
 $("todo").addEventListener("change",ev=>{const c=ev.target;if(c.type!=="checkbox")return;noteOp(c.dataset.d,L=>L.map(x=>x.id===c.dataset.id?{...x,done:c.checked,dby:c.checked?ME:""}:x))});
-$("todo").addEventListener("click",ev=>{const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>noteOp(b.dataset.d,L=>L.filter(x=>x.id!==b.dataset.del)))});
+$("todo").addEventListener("click",ev=>{if(ev.target.id==="tclear"){arm(ev.target,"Biztosan törlöd a kész tételeket?",async()=>{for(const d of noteDays())if((NOTES[d]||[]).some(x=>x.done))await noteOp(d,L=>L.filter(x=>!x.done))});return}const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>noteOp(b.dataset.d,L=>L.filter(x=>x.id!==b.dataset.del)))});
 function render(){renderPlates();renderTodo();rememberPeople();
  writeHash();$("date").value=cur;$("roomsel").value=room;
  if(view==="nap")$("dlabel").textContent=longDate(cur);
@@ -424,8 +466,7 @@ $("fco").addEventListener("input",fillPeople);
 ["fco","fro","fst","fen"].forEach(id=>$(id).addEventListener(id==="fco"?"input":"change",clientInfo));
 $("fst").addEventListener("change",()=>{if(toMin($("fen").value)<=toMin($("fst").value)){const m=Math.min(toMin($("fst").value)+60,24*60);$("fen").value=toHM(m);clientInfo()}});
 $("fcancel").onclick=()=>$("dlg").close();
-$("newbtn").onclick=()=>{const n=new Date();let m=Math.ceil((n.getHours()*60+n.getMinutes())/STEP)*STEP;if(cur!==todayS()||m<8*60||m>19*60)m=9*60;openNew(view==="het"?cur:cur,view==="het"?room:ROOMS[0].id,m,m+60)};
-$("fab").onclick=()=>$("newbtn").click();
+$("fab").onclick=()=>{const n=new Date();let m=Math.ceil((n.getHours()*60+n.getMinutes())/STEP)*STEP;if(cur!==todayS()||m<8*60||m>19*60)m=9*60;openNew(view==="het"?cur:cur,view==="het"?room:ROOMS[0].id,m,m+60)};
 $("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api("bookings/"+encodeURIComponent(editing.id),{method:"DELETE"});BK=BK.filter(x=>x.id!==editing.id);say("msg","✓ Törölve: "+(editing.company||editing.title||"foglalás")+" · "+editing.date+" "+editing.start+"–"+editing.end);$("dlg").close();render()}catch(e){say("fmsg",e.message,1)}});
 $("bform").onsubmit=async ev=>{ev.preventDefault();
  if($("fco").value.trim()&&!findClient($("fco").value.trim())){try{await addClient({n:$("fco").value.trim(),eur:false,free:0,note:"",prices:[]})}catch(e){say("fmsg","Az új ügyfelet nem sikerült felvenni: "+e.message,1);return}}
