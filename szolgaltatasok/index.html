@@ -110,12 +110,23 @@ footer{margin-top:40px;color:var(--grey);font-size:12.5px}
 textarea{resize:vertical;min-height:84px;line-height:1.45}
 .cnote{margin:6px 0 4px;padding:8px 12px;border-left:3px solid var(--orange);background:var(--soft);border-radius:0 8px 8px 0;font-size:13.5px;color:#4a4a4a;white-space:pre-line;max-width:80ch}
 td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;font-size:13px}
+.login{position:fixed;inset:0;z-index:100;background:var(--soft);display:flex;align-items:center;justify-content:center;padding:20px max(20px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))}
+.login .box{width:100%;max-width:380px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.login img{height:64px;width:auto;display:block;margin:0 auto 14px}
+.login h2{margin:0 0 4px;font-size:20px;text-align:center}
+.login p{margin:0 0 18px;color:var(--grey);font-size:13.5px;text-align:center}
+.login .f{display:flex;flex-direction:column;gap:12px}
+.login .err{color:var(--warn);font-weight:600;font-size:13.5px;min-height:20px}
+.who{font-size:13px;color:var(--grey);display:flex;gap:10px;align-items:center;margin-top:2px}
+.who button{font:inherit;font-size:13px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.who button:hover{text-decoration:underline}
 [hidden]{display:none!important}
 @media (max-width:560px){header img{height:48px} header .tag{display:none} .panel{padding:16px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
+<div class="login" id="login" hidden><form class="box" id="lform"><img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170"><h2>Belépés</h2><p>Kiegészítő szolgáltatások és tárgyalófoglalás</p><div class="f"><div><label for="lem">E-mail-cím</label><input id="lem" type="email" autocomplete="username" required></div><div><label for="lpw">Jelszó</label><input id="lpw" type="password" autocomplete="current-password" required></div><div class="err" id="lerr" role="alert"></div><button class="btn" type="submit" id="lbtn">Belépés</button></div></form></div>
 <div class="wrap">
   <header>
     <img src="logo.png" alt="Vista Plus Offices" width="340" height="170">
@@ -123,7 +134,7 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
   </header>
 
   <div class="titlebar">
-    <div><h1>Kiegészítő szolgáltatások</h1><div class="status" id="st">Betöltés…</div></div>
+    <div><h1>Kiegészítő szolgáltatások</h1><div class="status" id="st">Betöltés…</div><div class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></div></div>
     <div class="monthpick"><label for="mon">Hónap</label><input type="month" id="mon"></div>
   </div>
 
@@ -286,7 +297,7 @@ const allItems=()=>baseItems().map(x=>BP[x[0]]!=null?[x[0],x[1],BP[x[0]],x[3]]:x
 const shortName=n=>String(n).replace(" (kézi ár)","").replace(" (óra)","");
 function quickItems(){const A=allItems();if(QI)return QI.filter(n=>A.some(x=>x[0]===n));return A.filter(x=>x[3]).map(x=>x[0]).sort((a,b)=>a.localeCompare(b,"hu"))}
 
-async function api(p,o={}){const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json"}});const d=await r.json().catch(()=>({}));
+async function api(p,o={}){if(!TOKEN){showLogin();const e=new Error("Jelentkezz be.");e.status=401;throw e}const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json","authorization":"Bearer "+TOKEN}});const d=await r.json().catch(()=>({}));if(d&&d.auth){if(r.status===401){TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}showLogin(d.error);setWho()}else showLogin(d.error)}
  if(!r.ok)throw new Error(d.error||("HTTP "+r.status));return d}
 function saveCfg(){return api("config",{method:"PUT",body:JSON.stringify({v:2,clients:CLIENTS,quick:QL,qitems:quickItems(),base:BPL,rates:RATES,items:CI.map(x=>({n:x[0],c:x[1],u:x[2],q:x[3]}))})})}
 
@@ -508,8 +519,18 @@ async function loadE(){const mo=$("mon").value;if(!mo)return;try{const L=await a
 async function loadCfg(first){if(!first&&(dragging||$("ced").contains(document.activeElement)||$("btab").contains(document.activeElement)))return;try{applyCfg(await api("config"));refreshAll(first)}catch(e){if(first)refreshAll(true)}}
 async function start(){await loadCfg(true);await loadE();loadBK();initSort();
  if(!busy){busy=true;setInterval(()=>{if(!document.hidden){loadE();loadBK()}},20000);setInterval(()=>{if(!document.hidden)loadCfg(false)},60000)}}
+// ---------- belépés ----------
+let TOKEN="",ME="",booted=false;try{TOKEN=localStorage.getItem("vpo_token")||"";ME=localStorage.getItem("vpo_user")||""}catch(e){}
+function showLogin(msg){$("login").hidden=false;$("lerr").textContent=msg||"";if(ME&&!$("lem").value)$("lem").value=ME;setTimeout(()=>($("lem").value?$("lpw"):$("lem")).focus(),30)}
+function setWho(){$("who").hidden=!ME||!TOKEN;$("whoe").textContent=ME?"Belépve: "+ME:""}
+$("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
+ try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("lem").value,password:$("lpw").value})});const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
+  $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
+$("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
+function boot(){if(!booted){booted=true;start()}else{loadCfg(false);loadE();loadBK()}}
 CLIENTS=migrate({});refreshAll(true);
-start();
+setWho();if(TOKEN){booted=true;start()}else showLogin();
 </script>
 </body>
 </html>
