@@ -100,7 +100,32 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .fab{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:40;width:60px;height:60px;border-radius:50%;border:0;background:var(--red);color:#fff;font:inherit;font-size:34px;font-weight:400;line-height:1;cursor:pointer;box-shadow:0 8px 22px rgba(239,65,48,.38),0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
 .fab:hover{background:var(--red-dark);transform:scale(1.06)}
 .fab:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
-.plates{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:12px;background:var(--soft);padding:10px 14px;margin:0 0 12px}
+.plates{font-size:12.5px;color:#5a5a5a;margin:0 0 10px;line-height:1.7}
+.plates b{color:var(--ink);font-weight:700;margin-right:4px}
+.plates .pl{font-weight:700;letter-spacing:.04em;color:var(--ink);border:1px solid #BDB6B0;border-radius:4px;padding:0 4px;margin:0 3px 0 0;background:#fff;font-size:12px}
+.plates .it{white-space:nowrap;margin-right:12px}
+.plates .lk{font:inherit;font-size:12.5px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0 0 0 4px}
+.todo{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:#fff}
+.todo .th{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.todo h3{margin:0;font-size:15px}
+.todo h3 small{font-weight:400;color:var(--grey);font-size:13px}
+.tdays{display:grid;gap:10px;overflow-x:auto;padding-bottom:2px}
+.tday{min-width:0}
+.tday .dl{font-size:12.5px;font-weight:700;color:var(--grey);margin-bottom:4px}
+.tday .dl.today{color:var(--red)}
+.tday ul{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:3px}
+.tday li{display:flex;align-items:flex-start;gap:7px;font-size:13.5px;line-height:1.35}
+.tday li input{margin-top:2px;flex:none}
+.tday li .tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.tday li.done .tx{text-decoration:line-through;color:var(--grey)}
+.tday li .by{font-size:11.5px;color:var(--grey)}
+.tday li .x{font:inherit;background:none;border:0;color:var(--grey);cursor:pointer;padding:0 4px;font-size:13px;opacity:.6}
+.tday li .x:hover{color:var(--warn);opacity:1}
+.tday form{display:flex;gap:6px}
+.tday form input{padding:6px 9px;font-size:13.5px;border-radius:8px}
+.tday form button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:0 10px;cursor:pointer}
+.tday form button:hover{border-color:var(--ink)}
+.tday .none{font-size:12.5px;color:var(--grey);margin-bottom:6px}
 .plates .ph{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin-bottom:6px}
 .plates h3{margin:0;font-size:14.5px}
 .plates h3 small{font-weight:400;color:var(--grey);font-size:13px}
@@ -174,6 +199,7 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
     <select id="roomsel" aria-label="Terem" hidden></select>
     <div class="seg" role="group" aria-label="Nézet"><button data-v="nap" aria-pressed="true">Nap</button><button data-v="het" aria-pressed="false">Hét</button><button data-v="lista" aria-pressed="false">Lista</button></div>
   </div>
+  <div class="todo" id="todo"></div>
   <div class="plates" id="plates" hidden></div>
   <div class="legend" id="legend"></div>
   <div class="msg" id="msg" role="status"></div>
@@ -197,13 +223,13 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
           </div>
           <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap"><div class="msg" id="ncm"></div><div style="display:flex;gap:8px"><button type="button" class="btn ghost sm" id="ncx">Mégse</button><button type="button" class="btn sm" id="ncs">Ügyfél felvétele</button></div></div>
         </div></div>
+      <div class="wide"><label for="fpe">Foglaló személy</label><input id="fpe" list="ppl" autocomplete="off" placeholder="név – válassz a listából vagy írd be"></div>
       <div class="wide"><label for="fti">Megnevezés</label><input id="fti" autocomplete="off" placeholder="pl. Vezetőségi megbeszélés"></div>
       <div><label for="fro">Terem</label><select id="fro"></select></div>
       <div><label for="fda">Dátum</label><input type="date" id="fda"></div>
       <div><label for="fst">Kezdés</label><select id="fst"></select></div>
       <div><label for="fen">Befejezés</label><select id="fen"></select></div>
-      <div><label for="fpe">Foglaló személy</label><input id="fpe" autocomplete="off" placeholder="név"></div>
-      <div><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div>
+      <div class="wide"><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div>
       <div class="wide" id="repw"><span class="lbl">Ismétlés</span><div class="repeat"><select id="frep" aria-label="Ismétlés"><option value="0">Nem ismétlődik</option><option value="7">Hetente</option><option value="14">Kéthetente</option></select><input type="number" id="fcnt" min="2" max="52" value="4" aria-label="Alkalmak száma" hidden><span class="mute" id="fcntl" hidden>alkalom</span></div></div>
       <div class="wide"><label for="fno">Megjegyzés</label><textarea id="fno" rows="2"></textarea></div>
     </div>
@@ -211,7 +237,7 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
     <div class="dfoot"><div class="msg" id="fmsg" role="status"></div><div class="actions"><button type="button" class="btn danger" id="fdel" hidden>Törlés</button><button type="button" class="btn ghost" id="fcancel">Mégse</button><button type="submit" class="btn" id="fsave">Mentés</button></div></div>
   </form>
 </dialog>
-<datalist id="cl"></datalist>
+<datalist id="cl"></datalist><datalist id="ppl"></datalist>
 
 <script>
 // Termek: az azonosító a foglalásban tárolódik; az "item" köti össze az árlistával a szolgáltatásrögzítőben.
@@ -243,6 +269,7 @@ const money=(n,c)=>c==="EUR"?fmtE(n)+" EUR":fmt(n)+" Ft";
 const longDate=s=>parseD(s).toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
 const shortDay=s=>parseD(s).toLocaleDateString("hu-HU",{weekday:"short",month:"2-digit",day:"2-digit"});
 function hash(s){let h=2166136261;for(const ch of norm(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}h^=h>>>13;h=Math.imul(h,2246822507)>>>0;h^=h>>>16;return h>>>0}
+const who=b=>{const c=b.company||b.title||"",p=b.person||"";return c&&p?c+" ("+p+")":(c||p||"Foglalás")};
 function colorOf(b){const k=b.company||b.title||b.person||"?";return PALETTE[hash(k)%PALETTE.length]}
 function say(id,t,bad){const el=$(id);el.textContent=t||"";el.classList.toggle("bad",!!bad)}
 function arm(bt,label,fn){if(bt.dataset.arm!=="1"){const old=bt.textContent;bt.dataset.arm="1";bt.textContent=label;setTimeout(()=>{if(bt.isConnected){bt.dataset.arm="";bt.textContent=old}},3000);return}bt.dataset.arm="";fn()}
@@ -267,9 +294,15 @@ function clientInfo(){const c=$("fco").value.trim(),r=roomById($("fro").value),b
 
 // ---------- betöltés ----------
 function range(){if(view==="nap")return[cur,cur];if(view==="het"){const m=mondayOf(cur);return[m,addDays(m,6)]}return[cur,addDays(cur,30)]}
-async function loadBK(force){const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
+async function loadBK(force){loadNotes();const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
  try{const L=await api(`bookings?from=${a}&to=${b}`);const [a2,b2]=range();if(a2!==a||b2!==b)return;BK=L;loadedRange=key;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}
  catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
+let PEOPLE={};
+function addPerson(co,p){p=String(p||"").trim();if(!p)return;const k=norm(co);(PEOPLE[k]=PEOPLE[k]||new Set()).add(p)}
+function fillPeople(){const k=norm($("fco").value),set=new Set(PEOPLE[k]||[]);BK.filter(b=>norm(b.company)===k&&b.person).forEach(b=>set.add(b.person));
+ $("ppl").innerHTML=[...set].sort((a,b)=>a.localeCompare(b,"hu")).map(p=>`<option value="${esc(p)}">`).join("")}
+async function loadPeople(){const d=new Date(),ms=[0,1,2].map(i=>{const x=new Date(d.getFullYear(),d.getMonth()-i,1);return x.getFullYear()+"-"+pad(x.getMonth()+1)});
+ for(const mo of ms){try{(await api("entries?month="+mo)).forEach(e=>addPerson(e.company,e.person))}catch(e){}}}
 async function loadCfg(){try{const v=await api("config");CFG={clients:v.clients||[],base:v.base||[]};$("cl").innerHTML=(CFG.clients||[]).map(c=>`<option value="${esc(c.n)}">`).sort().join("")}catch(e){}}
 
 // ---------- nézet ----------
@@ -286,15 +319,30 @@ function columns(){if(view==="nap")return ROOMS.map(r=>({date:cur,room:r.id,head
  const m=mondayOf(cur),t=todayS();return Array.from({length:7},(_,i)=>{const d=addDays(m,i);return{date:d,room:room,head:`${esc(shortDay(d))}`,today:d===t}})}
 function bounds(cols){let s=DAY_START,e=DAY_END;BK.forEach(b=>{if(cols.some(c=>c.date===b.date&&c.room===b.room)){s=Math.min(s,Math.floor(toMin(b.start)/60)*60);e=Math.max(e,Math.ceil(toMin(b.end)/60)*60)}});return[s,Math.min(e,24*60)]}
 let GEO=null;
+function rememberPeople(){BK.forEach(b=>addPerson(b.company,b.person))}
 function renderPlates(){const box=$("plates"),L=BK.filter(b=>b.date===cur&&b.plate).sort((a,b)=>a.start.localeCompare(b.start));
  const rows=[];L.forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,b})));
- const t=cur===todayS()?"Ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"});
  box.hidden=false;
- box.innerHTML=`<div class="ph"><h3>Parkolás · rendszámok a recepciónak <small>${esc(t)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="btn ghost sm" id="pcopy">Lista másolása</button>':""}</div>`+
-  (rows.length?"<ul>"+rows.map(({p,b})=>{const r=roomById(b.room);return `<li><span class="plate">${esc(p)}</span>${esc(b.company||b.person||b.title||"")} <span class="mute">· ${b.start}–${b.end}${r?" · "+esc(r.name):""}</span></li>`}).join("")+"</ul>":'<div class="mute">Erre a napra még nincs rendszám megadva. A foglalásnál a „Rendszám(ok)” mezőben adhatod meg.</div>');
- const c=$("pcopy");if(c)c.onclick=async()=>{const txt=(cur)+" – parkolás\n"+rows.map(({p,b})=>p+" – "+(b.company||b.person||b.title||"")+" ("+b.start+"–"+b.end+")").join("\n");
-  try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült másolni"}setTimeout(()=>{if(c.isConnected)c.textContent="Lista másolása"},2000)}}
-function render(){renderPlates();
+ box.innerHTML=`<b>Parkolás${rows.length?" ("+rows.length+")":""}:</b>`+(rows.length?rows.map(({p,b})=>`<span class="it"><span class="pl">${esc(p)}</span>${esc(who(b))} ${b.start}</span>`).join("")+'<button type="button" class="lk" id="pcopy">másolás</button>':'<span class="mute">erre a napra nincs megadott rendszám</span>');
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+who(b)+" ("+b.start+"–"+b.end+")").join("\n");
+  try{await navigator.clipboard.writeText(txt);c.textContent="✓ másolva"}catch(e){c.textContent="nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="másolás"},2000)}}
+let NOTES={};
+async function loadNotes(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`notes?from=${a}&to=${b}`);NOTES={...NOTES,...Object.fromEntries(Object.keys(NOTES).filter(d=>d<a||d>b).map(d=>[d,NOTES[d]]))};Object.keys(NOTES).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete NOTES[d]});Object.assign(NOTES,N);renderTodo()}catch(e){}}
+function noteDays(){if(view==="het"){const m=mondayOf(cur);return Array.from({length:7},(_,i)=>addDays(m,i))}return[cur]}
+function renderTodo(){const box=$("todo"),days=noteDays(),t=todayS();
+ if(document.activeElement&&box.contains(document.activeElement)&&document.activeElement.tagName==="INPUT"&&document.activeElement.type==="text"&&document.activeElement.value)return;
+ const open=days.reduce((n,d)=>n+(NOTES[d]||[]).filter(x=>!x.done).length,0);
+ let h=`<div class="th"><h3>Leadandó infók <small>${view==="het"?"a hétre":(cur===t?"ma":esc(parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})))}${open?" · "+open+" teendő":""}</small></h3></div><div class="tdays" style="grid-template-columns:repeat(${days.length},minmax(${days.length>1?130:0}px,1fr))">`;
+ days.forEach(d=>{const L=NOTES[d]||[];h+=`<div class="tday">${days.length>1?`<div class="dl${d===t?" today":""}">${esc(shortDay(d))}</div>`:""}`+
+  (L.length?"<ul>"+L.map(x=>`<li class="${x.done?"done":""}"><input type="checkbox" data-d="${d}" data-id="${esc(x.id)}" ${x.done?"checked":""} aria-label="Kész"><span class="tx">${esc(x.t)} <span class="by">${esc((x.by||"").split("@")[0])}${x.done&&x.dby?" · kész: "+esc(x.dby.split("@")[0]):""}</span></span><button type="button" class="x" data-del="${esc(x.id)}" data-d="${d}" aria-label="Törlés">✕</button></li>`).join("")+"</ul>":(days.length===1?'<div class="none">Nincs teendő erre a napra.</div>':""))+
+  `<form data-d="${d}"><input type="text" placeholder="${days.length>1?"+ új":"Új tétel, pl. 2 belépőkártya leadása – Gordius"}" aria-label="Új tétel ${d}" maxlength="400"><button type="submit">${days.length>1?"+":"Hozzáadás"}</button></form></div>`});
+ box.innerHTML=h+"</div>"}
+async function noteOp(d,fn){try{const N=await api(`notes?from=${d}&to=${d}`);const items=fn((N[d]||[]).slice());const r=await api("notes/"+d,{method:"PUT",body:JSON.stringify({items})});if(r.items.length)NOTES[d]=r.items;else delete NOTES[d]}catch(e){say("msg","Nem sikerült menteni a teendőt: "+e.message,1)}renderTodo()}
+$("todo").addEventListener("submit",ev=>{ev.preventDefault();const f=ev.target,inp=f.querySelector("input"),t=inp.value.trim();if(!t)return;inp.value="";
+ noteOp(f.dataset.d,L=>L.concat({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false,by:ME,ts:Date.now()})).then(()=>{const ni=$("todo").querySelector(`form[data-d="${f.dataset.d}"] input`);if(ni)ni.focus()})});
+$("todo").addEventListener("change",ev=>{const c=ev.target;if(c.type!=="checkbox")return;noteOp(c.dataset.d,L=>L.map(x=>x.id===c.dataset.id?{...x,done:c.checked,dby:c.checked?ME:""}:x))});
+$("todo").addEventListener("click",ev=>{const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>noteOp(b.dataset.d,L=>L.filter(x=>x.id!==b.dataset.del)))});
+function render(){renderPlates();renderTodo();rememberPeople();
  writeHash();$("date").value=cur;$("roomsel").value=room;
  if(view==="nap")$("dlabel").textContent=longDate(cur);
  else if(view==="het"){const m=mondayOf(cur),e=addDays(m,6);$("dlabel").textContent=parseD(m).toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+" – "+parseD(e).toLocaleDateString("hu-HU",{month:"long",day:"numeric",year:"numeric"})}
@@ -309,7 +357,7 @@ function render(){renderPlates();
  const t=todayS();
  cols.forEach((c,i)=>{h+=`<div class="col${c.date<t?" past":""}" data-i="${i}" style="height:${rows*slot}px">`;
   BK.filter(b=>b.date===c.date&&b.room===c.room).forEach(b=>{const top=(toMin(b.start)-s)/STEP*slot,ht=Math.max(slot,(toMin(b.end)-toMin(b.start))/STEP*slot-2),col=colorOf(b);
-   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" aria-label="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${esc(b.company||b.title||b.person||"Foglalás")}</b><span>${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
+   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" aria-label="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${esc(who(b))}</b><span>${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
   if(c.date===t){const n=new Date(),nm=n.getHours()*60+n.getMinutes();if(nm>=s&&nm<=e)h+=`<div class="now" style="top:${(nm-s)/STEP*slot}px"></div>`}
   h+="</div>"});
  h+="</div>";
@@ -359,11 +407,12 @@ $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.cl
 const timeOpts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
 $("fst").innerHTML=timeOpts(0,24*60-STEP);$("fen").innerHTML=timeOpts(STEP,24*60);
 function ensureOpt(sel,v){if(v&&![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v))}
-function fill(b){$("ncw").hidden=true;$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
+function fill(b){$("ncw").hidden=true;setTimeout(fillPeople,0);$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
 function openNew(date,roomId,a,b){editing=null;$("dh").textContent="Új foglalás";$("fdel").hidden=true;$("repw").hidden=false;fill({date:date||cur,room:roomId||ROOMS[0].id,start:toHM(a??9*60),end:toHM(b??10*60)});$("dlg").showModal();setTimeout(()=>$("fco").focus(),30)}
 function openEdit(id){tip.hidden=true;const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
 function syncRep(){const on=$("frep").value!=="0";$("fcnt").hidden=!on;$("fcntl").hidden=!on}
 $("frep").onchange=syncRep;
+$("fco").addEventListener("input",fillPeople);
 ["fco","fro","fst","fen"].forEach(id=>$(id).addEventListener(id==="fco"?"input":"change",clientInfo));
 $("fst").addEventListener("change",()=>{if(toMin($("fen").value)<=toMin($("fst").value)){const m=Math.min(toMin($("fst").value)+60,24*60);$("fen").value=toHM(m);clientInfo()}});
 $("fcancel").onclick=()=>$("dlg").close();
@@ -406,7 +455,7 @@ $("ncs").onclick=async()=>{const n=$("ncn").value.trim();if(!n){say("ncm","Add m
 const tip=document.createElement("div");tip.className="tip";tip.hidden=true;document.body.appendChild(tip);
 function showTip(el,x,y){const b=BK.find(q=>q.id===el.dataset.id);if(!b||act){tip.hidden=true;return}const r=roomById(b.room),cl=b.company&&findClient(b.company);
  tip.style.setProperty("--c",colorOf(b));
- tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.plate?`<div class="t">Rendszám: <b style="display:inline">${esc(b.plate)}</b></div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
+ tip.innerHTML=`<b>${esc(who(b))}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.plate?`<div class="t">Rendszám: <b style="display:inline">${esc(b.plate)}</b></div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
  tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let left=x+14,top=y+14;if(left+w>innerWidth-8)left=x-w-14;if(top+h>innerHeight-8)top=y-h-14;tip.style.left=Math.max(8,left)+"px";tip.style.top=Math.max(8,top)+"px"}
 $("cal").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest(".bk");if(el)showTip(el,e.clientX,e.clientY);else tip.hidden=true});
 $("cal").addEventListener("pointerleave",()=>{tip.hidden=true});
@@ -458,11 +507,11 @@ $("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("le
   if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
   $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
 $("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
-function boot(){loadCfg();loadBK(true)}
+function boot(){loadCfg();loadPeople();loadBK(true)}
 // ---------- indulás ----------
 setWho();if(!TOKEN)showLogin();
 readHash();setView(view);
-loadCfg();
+loadCfg();loadPeople();
 setInterval(()=>{if(!document.hidden&&!act&&!$("dlg").open)loadBK(true)},20000);
 setInterval(()=>{if(!document.hidden)loadCfg()},120000);
 setInterval(()=>{if(!document.hidden&&!act&&view!=="lista")render()},60000);
