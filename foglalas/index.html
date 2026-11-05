@@ -97,6 +97,16 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .badge.eur{background:#EEF3FF;border-color:#CCD9F7;color:#24448F}
 .badge.free{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
 .badge.price{background:var(--peach);border-color:#F6CDB6;color:#8A3A16}
+.tip{position:fixed;z-index:50;max-width:320px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 12px;font-size:13px;line-height:1.4;pointer-events:none;border-top:4px solid var(--c)}
+.tip b{display:block;font-size:14px}
+.tip .t{color:#5a5a5a}
+.tip .n{margin-top:6px;white-space:pre-line}
+.tip .n i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+.newc{margin-top:8px;padding:12px;border:1.5px dashed #F2B8A5;border-radius:12px;background:#FFFBF8}
+.newc .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.newc .row>div{flex:1 1 120px}
+.linkbtn{font:inherit;font-size:12.5px;font-weight:700;color:var(--red);background:none;border:0;padding:0;cursor:pointer;float:right}
+.linkbtn:hover{text-decoration:underline}
 .cnote{flex-basis:100%;margin-top:4px;padding:7px 11px;border-left:3px solid var(--orange);background:var(--soft);border-radius:0 8px 8px 0;font-size:13px;color:#4a4a4a;white-space:pre-line}
 .dfoot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:18px}
 .dfoot .actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
@@ -153,7 +163,16 @@ footer{margin-top:24px;color:var(--grey);font-size:12.5px}
   <form class="dlg" id="bform" method="dialog">
     <h2 id="dh">Új foglalás</h2>
     <div class="grid">
-      <div class="wide"><label for="fco">Ügyfél</label><input id="fco" list="cl" autocomplete="off" placeholder="pl. Gordius"></div>
+      <div class="wide"><label for="fco">Ügyfél <button type="button" class="linkbtn" id="ncbtn">+ Új ügyfél</button></label><input id="fco" list="cl" autocomplete="off" placeholder="pl. Gordius">
+        <div class="newc" id="ncw" hidden>
+          <div class="row">
+            <div style="flex-basis:100%"><label for="ncn">Új ügyfél neve</label><input id="ncn" autocomplete="off"></div>
+            <div><label for="nccur">Számlázás</label><select id="nccur"><option value="HUF">Ft</option><option value="EUR">EUR</option></select></div>
+            <div><label for="ncfree">Ingyenes óra / hó</label><input type="number" id="ncfree" min="0" step="any" inputmode="decimal" placeholder="0"></div>
+            <div style="flex-basis:100%"><label for="ncnote">Megjegyzés az ügyfélhez</label><textarea id="ncnote" rows="2" placeholder="pl. kapcsolattartó, számlázási tudnivalók"></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap"><div class="msg" id="ncm"></div><div style="display:flex;gap:8px"><button type="button" class="btn ghost sm" id="ncx">Mégse</button><button type="button" class="btn sm" id="ncs">Ügyfél felvétele</button></div></div>
+        </div></div>
       <div class="wide"><label for="fti">Megnevezés</label><input id="fti" autocomplete="off" placeholder="pl. Vezetőségi megbeszélés"></div>
       <div><label for="fro">Terem</label><select id="fro"></select></div>
       <div><label for="fda">Dátum</label><input type="date" id="fda"></div>
@@ -218,7 +237,7 @@ function clientInfo(){const c=$("fco").value.trim(),r=roomById($("fro").value),b
  if(r){const p=cl&&(cl.prices||[]).find(p=>p.i===r.item);out.push(p?`<span class="badge price">Egyedi ár: ${money(+p.u,p.cur)} / óra</span>`:`<span class="badge">Listaár: ${fmt(listPrice(r.item))} Ft / óra</span>`)}
  if(cl&&cl.eur)out.push('<span class="badge eur">Euróban számlázva</span>');
  if(cl&&cl.free)out.push(`<span class="badge free">${cl.free} ingyenes tárgyalóóra / hó</span>`);
- if(c&&!cl)out.push('<span class="badge">Új ügyfél – a szolgáltatásrögzítőben még nincs beállítva</span>');
+ if(c&&!cl)out.push('<span class="badge">Új ügyfél – mentéskor felkerül az ügyfelek közé</span>');
  box.innerHTML=out.join("")+(cl&&cl.note?`<div class="cnote">${esc(cl.note)}</div>`:"")}
 
 // ---------- betöltés ----------
@@ -257,7 +276,7 @@ function render(){
  const t=todayS();
  cols.forEach((c,i)=>{h+=`<div class="col${c.date<t?" past":""}" data-i="${i}" style="height:${rows*slot}px">`;
   BK.filter(b=>b.date===c.date&&b.room===c.room).forEach(b=>{const top=(toMin(b.start)-s)/STEP*slot,ht=Math.max(slot,(toMin(b.end)-toMin(b.start))/STEP*slot-2),col=colorOf(b);
-   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" title="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${esc(b.company||b.title||b.person||"Foglalás")}</b><span>${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
+   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" aria-label="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${esc(b.company||b.title||b.person||"Foglalás")}</b><span>${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
   if(c.date===t){const n=new Date(),nm=n.getHours()*60+n.getMinutes();if(nm>=s&&nm<=e)h+=`<div class="now" style="top:${(nm-s)/STEP*slot}px"></div>`}
   h+="</div>"});
  h+="</div>";
@@ -307,9 +326,9 @@ $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.cl
 const timeOpts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
 $("fst").innerHTML=timeOpts(0,24*60-STEP);$("fen").innerHTML=timeOpts(STEP,24*60);
 function ensureOpt(sel,v){if(v&&![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v))}
-function fill(b){$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
+function fill(b){$("ncw").hidden=true;$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
 function openNew(date,roomId,a,b){editing=null;$("dh").textContent="Új foglalás";$("fdel").hidden=true;$("repw").hidden=false;fill({date:date||cur,room:roomId||ROOMS[0].id,start:toHM(a??9*60),end:toHM(b??10*60)});$("dlg").showModal();setTimeout(()=>$("fco").focus(),30)}
-function openEdit(id){const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
+function openEdit(id){tip.hidden=true;const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
 function syncRep(){const on=$("frep").value!=="0";$("fcnt").hidden=!on;$("fcntl").hidden=!on}
 $("frep").onchange=syncRep;
 ["fco","fro","fst","fen"].forEach(id=>$(id).addEventListener(id==="fco"?"input":"change",clientInfo));
@@ -318,6 +337,7 @@ $("fcancel").onclick=()=>$("dlg").close();
 $("newbtn").onclick=()=>{const n=new Date();let m=Math.ceil((n.getHours()*60+n.getMinutes())/STEP)*STEP;if(cur!==todayS()||m<8*60||m>19*60)m=9*60;openNew(view==="het"?cur:cur,view==="het"?room:ROOMS[0].id,m,m+60)};
 $("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api("bookings/"+encodeURIComponent(editing.id),{method:"DELETE"});BK=BK.filter(x=>x.id!==editing.id);say("msg","✓ Törölve: "+(editing.company||editing.title||"foglalás")+" · "+editing.date+" "+editing.start+"–"+editing.end);$("dlg").close();render()}catch(e){say("fmsg",e.message,1)}});
 $("bform").onsubmit=async ev=>{ev.preventDefault();
+ if($("fco").value.trim()&&!findClient($("fco").value.trim())){try{await addClient({n:$("fco").value.trim(),eur:false,free:0,note:"",prices:[]})}catch(e){say("fmsg","Az új ügyfelet nem sikerült felvenni: "+e.message,1);return}}
  const fc=findClient($("fco").value.trim());
  const b={company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
  if(!b.company&&!b.title){say("fmsg","Add meg az ügyfelet vagy a megnevezést.",1);return}
@@ -332,6 +352,33 @@ $("bform").onsubmit=async ev=>{ev.preventDefault();
    else{say("msg","✓ Lefoglalva: "+(b.company||b.title)+" · "+roomById(b.room).name+" · "+b.date+" "+b.start+"–"+b.end+(n>1?" · "+n+" alkalom":""));$("dlg").close()}}
   render()}
  catch(e){say("fmsg",e.message,1)}finally{$("fsave").disabled=false}};
+
+// ---------- új ügyfél felvétele (a szolgáltatásrögzítő ügyféllistájába) ----------
+async function addClient(c){const v=await api("config");const list=Array.isArray(v.clients)?v.clients:null;
+ if(!list)throw new Error("Előbb nyisd meg egyszer a Kiegészítő szolgáltatások oldalt, hogy az ügyféllista létrejöjjön.");
+ const ex=list.find(x=>norm(x.n)===norm(c.n));if(ex){CFG.clients=list;return ex}
+ list.push(c);v.clients=list;await api("config",{method:"PUT",body:JSON.stringify(v)});CFG.clients=list;CFG.base=v.base||[];
+ $("cl").innerHTML=list.map(x=>`<option value="${esc(x.n)}">`).sort().join("");return c}
+$("ncbtn").onclick=()=>{const w=$("ncw");w.hidden=!w.hidden;if(!w.hidden){$("ncn").value=findClient($("fco").value.trim())?"":$("fco").value.trim();$("nccur").value="HUF";$("ncfree").value="";$("ncnote").value="";say("ncm","");$("ncn").focus()}};
+$("ncx").onclick=()=>{$("ncw").hidden=true};
+$("ncs").onclick=async()=>{const n=$("ncn").value.trim();if(!n){say("ncm","Add meg a nevet.",1);return}
+ const ex=findClient(n);if(ex){$("fco").value=ex.n;$("ncw").hidden=true;clientInfo();say("fmsg","Ez az ügyfél már szerepel a listában: "+ex.n);return}
+ const fr=+String($("ncfree").value||"0").replace(",",".");if(!(fr>=0)){say("ncm","Az ingyenes órák száma nem lehet negatív.",1);return}
+ $("ncs").disabled=true;try{const c=await addClient({n,eur:$("nccur").value==="EUR",free:fr,note:$("ncnote").value.trim().slice(0,2000),prices:[]});$("fco").value=c.n;$("ncw").hidden=true;clientInfo();say("fmsg","✓ Új ügyfél felvéve: "+c.n+". A Kiegészítő szolgáltatások ügyféllistájában is megjelent.")}
+ catch(e){say("ncm",e.message,1)}finally{$("ncs").disabled=false}};
+
+// ---------- buborék a foglalás fölött ----------
+const tip=document.createElement("div");tip.className="tip";tip.hidden=true;document.body.appendChild(tip);
+function showTip(el,x,y){const b=BK.find(q=>q.id===el.dataset.id);if(!b||act){tip.hidden=true;return}const r=roomById(b.room),cl=b.company&&findClient(b.company);
+ tip.style.setProperty("--c",colorOf(b));
+ tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
+ tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let left=x+14,top=y+14;if(left+w>innerWidth-8)left=x-w-14;if(top+h>innerHeight-8)top=y-h-14;tip.style.left=Math.max(8,left)+"px";tip.style.top=Math.max(8,top)+"px"}
+$("cal").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest(".bk");if(el)showTip(el,e.clientX,e.clientY);else tip.hidden=true});
+$("cal").addEventListener("pointerleave",()=>{tip.hidden=true});
+$("cal").addEventListener("pointerdown",()=>{tip.hidden=true});
+$("cal").addEventListener("scroll",()=>{tip.hidden=true});
+$("list").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const tr=e.target.closest("tr[data-id]");if(tr)showTip(tr,e.clientX,e.clientY);else tip.hidden=true});
+$("list").addEventListener("pointerleave",()=>{tip.hidden=true});
 
 // ---------- Skedda import ----------
 let IMP=[];
