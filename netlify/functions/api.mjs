@@ -59,6 +59,71 @@ export default async (req) => {
     }
   }
 
+  // Tárgyalófoglalások havonta: b/<YYYY-MM>/<id>
+  if (parts[0] === "bookings") {
+    const DAY = /^\d{4}-\d{2}-\d{2}$/, HM = /^([01]\d|2[0-3]):[0-5]\d$|^24:00$/;
+    const toMin = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+    const monthsBetween = (a, b) => { const out = []; let [y, mo] = a.slice(0, 7).split("-").map(Number); const [y2, m2] = b.slice(0, 7).split("-").map(Number);
+      while (y < y2 || (y === y2 && mo <= m2)) { out.push(`${y}-${String(mo).padStart(2, "0")}`); mo++; if (mo > 12) { mo = 1; y++; } if (out.length > 24) break; } return out; };
+    const loadMonth = async (month) => { const { blobs } = await store.list({ prefix: `b/${month}/` });
+      const items = await Promise.all(blobs.map(async (b) => { const v = await store.get(b.key, { type: "json" }); return v ? { ...v, id: b.key.split("/").pop() } : null; }));
+      return items.filter(Boolean); };
+    const clean = (r) => {
+      const date = String(r.date || ""), start = String(r.start || ""), end = String(r.end || "");
+      if (!DAY.test(date) || !HM.test(start) || !HM.test(end)) return { error: "Hibás dátum vagy időpont." };
+      if (toMin(end) <= toMin(start)) return { error: "A befejezésnek a kezdés után kell lennie." };
+      if (!r.room) return { error: "Válassz termet." };
+      return { b: { room: String(r.room).slice(0, 80), date, start, end, company: String(r.company || "").slice(0, 200), title: String(r.title || "").slice(0, 200),
+        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
+    };
+    const clash = (list, b, selfId) => list.find((x) => x.id !== selfId && x.room === b.room && x.date === b.date && toMin(x.start) < toMin(b.end) && toMin(b.start) < toMin(x.end));
+    const newId = (month) => `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+
+    if (m === "GET") {
+      const from = url.searchParams.get("from") || "", to = url.searchParams.get("to") || from;
+      if (!DAY.test(from) || !DAY.test(to) || to < from) return json({ error: "Hibás időszak." }, 400);
+      const all = (await Promise.all(monthsBetween(from, to).map(loadMonth))).flat();
+      return json(all.filter((b) => b.date >= from && b.date <= to));
+    }
+    // Tömeges import (Skedda): a már meglévő azonos foglalásokat kihagyja
+    if (m === "POST" && parts[1] === "import") {
+      const body = await req.json();
+      const list = Array.isArray(body.items) ? body.items.slice(0, 300) : [];
+      const cache = {}; let added = 0, dup = 0, conflict = 0, bad = 0;
+      for (const r of list) {
+        const c = clean(r); if (c.error) { bad++; continue; }
+        const b = c.b, month = b.date.slice(0, 7);
+        cache[month] = cache[month] || await loadMonth(month);
+        if (cache[month].some((x) => (b.ext && x.ext === b.ext) || (x.room === b.room && x.date === b.date && x.start === b.start && x.end === b.end && x.company === b.company))) { dup++; continue; }
+        if (clash(cache[month], b)) { conflict++; continue; }
+        const id = newId(month); await store.setJSON(`b/${month}/${id}`, b); cache[month].push({ ...b, id }); added++;
+      }
+      return json({ added, dup, conflict, bad });
+    }
+    if (m === "POST" || (m === "PUT" && parts[1] && ID.test(parts[1]))) {
+      const c = clean(await req.json()); if (c.error) return json({ error: c.error }, 400);
+      const b = c.b, month = b.date.slice(0, 7);
+      let id = null, moveFrom = null;
+      if (m === "PUT") {
+        const oldKey = `b/${parts[1].slice(0, 7)}/${parts[1]}`;
+        const prev = await store.get(oldKey, { type: "json" });
+        if (!prev) return json({ error: "A foglalás már nem létezik (lehet, hogy valaki törölte)." }, 404);
+        b.ts = prev.ts; b.src = prev.src || b.src; b.ext = prev.ext || "";
+        if (parts[1].slice(0, 7) === month) id = parts[1]; else moveFrom = oldKey;
+      }
+      const x = clash(await loadMonth(month), b, parts[1]);
+      if (x) return json({ error: `Ütközik egy másik foglalással: ${x.start}–${x.end} ${x.company || x.title || ""}`.trim(), clash: x }, 409);
+      id = id || newId(month);
+      await store.setJSON(`b/${month}/${id}`, b);
+      if (moveFrom) await store.delete(moveFrom);
+      return json({ ...b, id });
+    }
+    if (m === "DELETE" && parts[1] && ID.test(parts[1])) {
+      await store.delete(`b/${parts[1].slice(0, 7)}/${parts[1]}`);
+      return json({ ok: true });
+    }
+  }
+
   // Tételek havonta: e/<YYYY-MM>/<id>
   if (parts[0] === "entries") {
     if (m === "GET") {
