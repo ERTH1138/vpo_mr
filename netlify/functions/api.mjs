@@ -36,6 +36,34 @@ const json = (data, status = 200) =>
 const MONTH = /^\d{4}-\d{2}$/;
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
 
+// ---------- Catering-emlékeztető: a tárgyalás előtti munkanapra kerül a Leadandó infók közé ----------
+const pad2 = (n) => String(n).padStart(2, "0");
+const isoD = (d) => `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
+function easter(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3),
+  h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+  mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return Date.UTC(y, mo - 1, da); }
+function holidays(y) { const e = easter(y), D = (ms) => isoD(new Date(ms));
+  return new Set([`${y}-01-01`, `${y}-03-15`, `${y}-05-01`, `${y}-08-20`, `${y}-10-23`, `${y}-11-01`, `${y}-12-24`, `${y}-12-25`, `${y}-12-26`,
+    D(e - 2 * 864e5), D(e + 864e5), D(e + 50 * 864e5)]); }
+function prevWorkday(date) { const d = new Date(date + "T12:00:00Z");
+  for (let i = 0; i < 14; i++) { d.setUTCDate(d.getUTCDate() - 1); const w = d.getUTCDay(), s = isoD(d); if (w !== 0 && w !== 6 && !holidays(d.getUTCFullYear()).has(s)) return s; }
+  return isoD(d); }
+const ROOMNAMES = { panorama: "Panoráma terem", "kis-tav": "Kisterem távolabbi", nagy: "Nagyterem", "kis-koz": "Kisterem közelebbi" };
+function cateringText(b) { const d = new Date(b.date + "T12:00:00Z");
+  const day = d.toLocaleDateString("hu-HU", { month: "long", day: "numeric", weekday: "long", timeZone: "UTC" });
+  return `Emlékeztető: catering rendelés – ${b.company || b.title || "foglalás"}${b.person ? " (" + b.person + ")" : ""}, ${day} ${b.start}, ${ROOMNAMES[b.room] || b.room}: ${b.catering}`; }
+async function noteEdit(store, date, fn) { const key = `n/${date.slice(0, 7)}/${date}`; const v = (await store.get(key, { type: "json" })) || { items: [] };
+  const items = fn((v.items || []).slice()); if (items.length) await store.setJSON(key, { items }); else await store.delete(key); }
+// Régi és új állapot alapján frissíti a foglaláshoz tartozó emlékeztetőt (azonosító: cat-<foglalás id>)
+async function syncCatering(store, user, oldB, oldId, newB, newId) {
+  const oldDay = oldB && oldB.catering ? prevWorkday(oldB.date) : null, newDay = newB && newB.catering ? prevWorkday(newB.date) : null;
+  const newItem = newDay ? { id: "cat-" + newId, t: cateringText(newB).slice(0, 400), done: false, by: user, ts: Date.now(), dby: "", bk: newId, kind: "catering" } : null;
+  if (oldDay && (oldDay !== newDay || oldId !== newId)) await noteEdit(store, oldDay, (L) => L.filter((x) => x.id !== "cat-" + oldId));
+  if (newDay) await noteEdit(store, newDay, (L) => { const i = L.findIndex((x) => x.id === newItem.id);
+    if (i >= 0) { if (L[i].t === newItem.t) return L; L[i] = { ...newItem, ts: L[i].ts }; return L; } return L.concat(newItem); });
+  return newDay;
+}
+
 export default async (req) => {
   const store = getStore({ name: "rogzito", consistency: "strong" });
   const url = new URL(req.url);
@@ -127,7 +155,8 @@ export default async (req) => {
       const body = await req.json().catch(() => ({}));
       const items = (Array.isArray(body.items) ? body.items : []).slice(0, 200).map((x) => ({
         id: String(x.id || "").slice(0, 40) || Math.random().toString(36).slice(2, 10), t: String(x.t || "").slice(0, 400), done: !!x.done,
-        by: String(x.by || user).slice(0, 120), ts: +x.ts || Date.now(), dby: x.done ? String(x.dby || user).slice(0, 120) : "" })).filter((x) => x.t.trim());
+        by: String(x.by || user).slice(0, 120), ts: +x.ts || Date.now(), dby: x.done ? String(x.dby || user).slice(0, 120) : "",
+        ...(x.bk ? { bk: String(x.bk).slice(0, 64), kind: String(x.kind || "").slice(0, 20) } : {}) })).filter((x) => x.t.trim());
       const key = `n/${parts[1].slice(0, 7)}/${parts[1]}`;
       if (items.length) await store.setJSON(key, { items }); else await store.delete(key);
       return json({ date: parts[1], items });
@@ -149,7 +178,7 @@ export default async (req) => {
       if (toMin(end) <= toMin(start)) return { error: "A befejezésnek a kezdés után kell lennie." };
       if (!r.room) return { error: "Válassz termet." };
       return { b: { room: String(r.room).slice(0, 80), date, start, end, company: String(r.company || "").slice(0, 200), title: String(r.title || "").slice(0, 200),
-        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
+        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
     };
     const clash = (list, b, selfId) => list.find((x) => x.id !== selfId && x.room === b.room && x.date === b.date && toMin(x.start) < toMin(b.end) && toMin(b.start) < toMin(x.end));
     const newId = (month) => `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -178,10 +207,10 @@ export default async (req) => {
     if (m === "POST" || (m === "PUT" && parts[1] && ID.test(parts[1]))) {
       const c = clean(await req.json()); if (c.error) return json({ error: c.error }, 400);
       const b = c.b, month = b.date.slice(0, 7);
-      let id = null, moveFrom = null;
+      let id = null, moveFrom = null, prev = null;
       if (m === "PUT") {
         const oldKey = `b/${parts[1].slice(0, 7)}/${parts[1]}`;
-        const prev = await store.get(oldKey, { type: "json" });
+        prev = await store.get(oldKey, { type: "json" });
         if (!prev) return json({ error: "A foglalás már nem létezik (lehet, hogy valaki törölte)." }, 404);
         b.ts = prev.ts; b.src = prev.src || b.src; b.ext = prev.ext || ""; b.by = prev.by || ""; b.upd = user;
         if (parts[1].slice(0, 7) === month) id = parts[1]; else moveFrom = oldKey;
@@ -192,10 +221,13 @@ export default async (req) => {
       id = id || newId(month);
       await store.setJSON(`b/${month}/${id}`, b);
       if (moveFrom) await store.delete(moveFrom);
-      return json({ ...b, id });
+      const remind = await syncCatering(store, user, prev, parts[1], b, id);
+      return json({ ...b, id, remind });
     }
     if (m === "DELETE" && parts[1] && ID.test(parts[1])) {
-      await store.delete(`b/${parts[1].slice(0, 7)}/${parts[1]}`);
+      const key = `b/${parts[1].slice(0, 7)}/${parts[1]}`, prev = await store.get(key, { type: "json" });
+      await store.delete(key);
+      if (prev) await syncCatering(store, user, prev, parts[1], null, null);
       return json({ ok: true });
     }
   }
