@@ -119,7 +119,7 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
 <div class="wrap">
   <header>
     <img src="logo.png" alt="Vista Plus Offices" width="340" height="170">
-    <nav class="tag"><a href="/">Tárgyaló órák</a> · <a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/" aria-current="page">Kiegészítő szolgáltatások</a></nav>
+    <nav class="tag"><a href="/">Tárgyaló órák</a> · <a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/" aria-current="page">Kiegészítő szolgáltatások</a> · <a href="/foglalas/">Tárgyalófoglalás</a></nav>
   </header>
 
   <div class="titlebar">
@@ -342,6 +342,15 @@ function calc(){const u=+$("up").value,q=+$("qty").value;if(u)$("tot").value=+(u
 $("it").onchange=pick;$("qty").oninput=calc;$("up").oninput=calc;$("cur").onchange=()=>setCur($("cur").value);
 $("co").oninput=()=>{onClientChange();render()};
 const inMon=e=>(e.date||"").slice(0,7)===$("mon").value;
+// Tárgyalófoglalások (a /foglalas/ oldalról): ügyfelenként és termenként havonta összesítve, minden megkezdett óra egész órának számít.
+const BK_ROOMS={"panorama":["Panoráma terem","Tárgyaló – Panoráma (óra)"],"kis-tav":["Kisterem távolabbi","Tárgyaló – Kisterem (óra)"],"nagy":["Nagyterem","Tárgyaló – Nagyterem (óra)"],"kis-koz":["Kisterem közelebbi","Tárgyaló – Kisterem (óra)"]};
+let VB=[],BKN=0;
+function buildVB(L){const g={};L.forEach(b=>{const r=BK_ROOMS[b.room];if(!r)return;const co=b.company||(b.person?"(nincs ügyfél) "+b.person:"(nincs ügyfél)");const k=norm(co)+"|"+b.room;
+  const o=g[k]||(g[k]={co,room:b.room,min:0,n:0,last:b.date});const m=(+b.end.slice(0,2)*60+ +b.end.slice(3))-(+b.start.slice(0,2)*60+ +b.start.slice(3));o.min+=m;o.n++;if(b.date>o.last)o.last=b.date});
+ const A=allItems();return Object.values(g).map(o=>{const [rn,item]=BK_ROOMS[o.room],fc=findClient(o.co),name=fc?fc.n:o.co,qty=Math.ceil(Math.round(o.min)/60),p=priceOf(name,item),it=A.find(x=>x[0]===item),unit=p?p.u:(it?it[2]:0),cu=p?p.cur:"HUF";
+  return{id:"bk:"+norm(name)+":"+o.room,virtual:true,date:o.last,company:name,person:"",cat:it?it[1]:"Egyéb",item:item.replace(" (óra)","")+" (óra)",qty,unit,total:cu==="EUR"?r2(qty*unit):qty*unit,cur:cu,note:rn+": "+o.n+" foglalás, "+Math.round(o.min)+" perc",ts:0}})}
+async function loadBK(){const mo=$("mon").value;if(!mo)return;try{const L=await api("bookings?from="+mo+"-01&to="+lastDay(mo));if(mo===$("mon").value){VB=buildVB(L);BKN=L.length;render()}}catch(e){}}
+const monthRows=()=>E.filter(inMon).concat(VB);
 function clearForm(){$("co").value="";$("pe").value="";$("it").value="";$("qty").value=1;$("nt").value="";$("cn").value="";$("dt").value=today;onClientChange()}
 $("add").onclick=async()=>{
  const co=$("co").value.trim(),pe=$("pe").value.trim(),tot=+$("tot").value;
@@ -378,7 +387,7 @@ function renderPeople(){const c=norm($("co").value);const ps=[...new Set(E.filte
 function render(){
  const cs=[...new Set([...CLIENTS.map(c=>c.n),...E.map(e=>e.company)])].sort((a,b)=>a.localeCompare(b,"hu"));
  $("cl").innerHTML=cs.map(c=>`<option value="${esc(c)}">`).join("");renderPeople();
- const M=E.filter(inMon),FR=applyFree(M),R=rateOf(),by=aggregate(M,FR,R);
+ const M=monthRows(),FR=applyFree(M),R=rateOf(),by=aggregate(M,FR,R);
  const need=Object.values(by).some(o=>o.cur==="EUR")||M.some(e=>curOf(e)==="EUR");
  const ro=RATES[$("mon").value];
  if(need&&!R)say("rm","Ebben a hónapban van euróban számlázott ügyfél vagy euró tétel. Add meg a számlázás napi MNB árfolyamot.",1);
@@ -390,15 +399,15 @@ function render(){
  $("sum").innerHTML=Object.keys(by).length?h:"<tr><td class=empty>Ebben a hónapban még nincs rögzített tétel.</td></tr>";
  const prev=$("fc").value;$("fc").innerHTML='<option value="">Minden ügyfél</option>'+Object.keys(by).sort((a,b)=>a.localeCompare(b,"hu")).map(c=>`<option>${esc(c)}</option>`).join("");$("fc").value=by[prev]?prev:"";
  const L=M.filter(e=>!$("fc").value||e.company===$("fc").value).sort((a,b)=>(b.date+b.ts).localeCompare(a.date+a.ts));
- $("logsub").textContent=M.length?M.length+" tétel ebben a hónapban":"";
+ $("logsub").textContent=M.length?(M.length-VB.length)+" rögzített tétel"+(VB.length?" · "+BKN+" tárgyalófoglalás "+VB.length+" összesített sorban":"")+" ebben a hónapban":"";
  $("log").innerHTML=L.length?"<tr><th>Dátum</th><th>Ügyfél</th><th>Ki kérte</th><th>Tétel</th><th class=num>Db</th><th class=num>Összeg</th><th>Megjegyzés</th><th></th></tr>"+
-  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act><button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button></td></tr>`).join("")
+  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
   :"<tr><td class=empty>Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra.</td></tr>";
 }
 $("log").onclick=ev=>{const bt=ev.target.closest("button");if(!bt)return;if(bt.dataset.ed){startEdit(bt.dataset.ed);return}const id=bt.dataset.id;if(!id)return;
  arm(bt,"Biztos?",async()=>{try{await api("entries/"+encodeURIComponent(id),{method:"DELETE"});E=E.filter(e=>e.id!==id);if(editId===id)endEdit();render()}catch(e){say("msg","Nem sikerült törölni.",1)}})};
 $("fc").onchange=render;
-$("mon").onchange=()=>{E=[];fillRate(true);render();loadE()};
+$("mon").onchange=()=>{E=[];VB=[];fillRate(true);render();loadE();loadBK()};
 
 // ---------- árfolyam ----------
 function lastDay(m){const [y,mo]=m.split("-").map(Number);return new Date(Date.UTC(y,mo,0)).toISOString().slice(0,10)}
@@ -413,7 +422,7 @@ $("rf").onclick=async()=>{const d=$("rd").value;if(!d){say("rm","Add meg a szám
 
 // ---------- Excel ----------
 $("xl").onclick=()=>{
- const M=E.filter(inMon).sort((a,b)=>a.date.localeCompare(b.date));if(!M.length){say("xm","Ebben a hónapban nincs tétel.",1);return}
+ const M=monthRows().sort((a,b)=>a.date.localeCompare(b.date));if(!M.length){say("xm","Ebben a hónapban nincs tétel.",1);return}
  if(!window.XLSX){say("xm","Az Excel-készítő nem töltődött be. Frissítsd az oldalt.",1);return}
  const wb=XLSX.utils.book_new(),FR=applyFree(M),R=rateOf(),RD=(RATES[$("mon").value]||{}).d||"",N=v=>isNaN(v)?"":v;
  const t=[["Dátum","Ügyfél","Ki kérte","Kategória","Tétel","Db","Pénznem","Egységár","Nettó összeg","Ebből ingyenes (db)","Ingyenes érték","Fizetendő nettó","Fizetendő nettó (Ft)","Fizetendő nettó (EUR)","Megjegyzés"],...M.map(e=>{const f=FR[e.id],c=curOf(e),p=e.total-f.a;return [e.date,e.company,e.person,e.cat,e.item,e.qty,c==="EUR"?"EUR":"Ft",e.unit,e.total,f.q||"",f.a||"",c==="EUR"?r2(p):p,N(Math.round(conv(p,c,"HUF",R))),N(r2(conv(p,c,"EUR",R))),e.note]})];
@@ -497,8 +506,8 @@ let busy=false;
 async function loadE(){const mo=$("mon").value;if(!mo)return;try{const L=await api("entries?month="+mo);if(mo===$("mon").value){E=L;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}}
  catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
 async function loadCfg(first){if(!first&&(dragging||$("ced").contains(document.activeElement)||$("btab").contains(document.activeElement)))return;try{applyCfg(await api("config"));refreshAll(first)}catch(e){if(first)refreshAll(true)}}
-async function start(){await loadCfg(true);await loadE();initSort();
- if(!busy){busy=true;setInterval(()=>{if(!document.hidden)loadE()},20000);setInterval(()=>{if(!document.hidden)loadCfg(false)},60000)}}
+async function start(){await loadCfg(true);await loadE();loadBK();initSort();
+ if(!busy){busy=true;setInterval(()=>{if(!document.hidden){loadE();loadBK()}},20000);setInterval(()=>{if(!document.hidden)loadCfg(false)},60000)}}
 CLIENTS=migrate({});refreshAll(true);
 start();
 </script>
