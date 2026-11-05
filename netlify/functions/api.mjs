@@ -123,7 +123,7 @@ export default async (req) => {
       if (toMin(end) <= toMin(start)) return { error: "A befejezésnek a kezdés után kell lennie." };
       if (!r.room) return { error: "Válassz termet." };
       return { b: { room: String(r.room).slice(0, 80), date, start, end, company: String(r.company || "").slice(0, 200), title: String(r.title || "").slice(0, 200),
-        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
+        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
     };
     const clash = (list, b, selfId) => list.find((x) => x.id !== selfId && x.room === b.room && x.date === b.date && toMin(x.start) < toMin(b.end) && toMin(b.start) < toMin(x.end));
     const newId = (month) => `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
