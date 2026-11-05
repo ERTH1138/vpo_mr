@@ -97,6 +97,9 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .badge.eur{background:#EEF3FF;border-color:#CCD9F7;color:#24448F}
 .badge.free{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
 .badge.price{background:var(--peach);border-color:#F6CDB6;color:#8A3A16}
+.fab{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:40;width:60px;height:60px;border-radius:50%;border:0;background:var(--red);color:#fff;font:inherit;font-size:34px;font-weight:400;line-height:1;cursor:pointer;box-shadow:0 8px 22px rgba(239,65,48,.38),0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
+.fab:hover{background:var(--red-dark);transform:scale(1.06)}
+.fab:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
 .tip{position:fixed;z-index:50;max-width:320px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 12px;font-size:13px;line-height:1.4;pointer-events:none;border-top:4px solid var(--c)}
 .tip b{display:block;font-size:14px}
 .tip .t{color:#5a5a5a}
@@ -116,13 +119,24 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .imp h3{margin:0 0 6px;font-size:16px}
 .imp p{margin:0 0 10px;color:#5a5a5a;font-size:13.5px;max-width:75ch}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:600;margin:0}
-footer{margin-top:24px;color:var(--grey);font-size:12.5px}
+footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
+.login{position:fixed;inset:0;z-index:100;background:var(--soft);display:flex;align-items:center;justify-content:center;padding:20px max(20px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))}
+.login .box{width:100%;max-width:380px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.login img{height:64px;width:auto;display:block;margin:0 auto 14px}
+.login h2{margin:0 0 4px;font-size:20px;text-align:center}
+.login p{margin:0 0 18px;color:var(--grey);font-size:13.5px;text-align:center}
+.login .f{display:flex;flex-direction:column;gap:12px}
+.login .err{color:var(--warn);font-weight:600;font-size:13.5px;min-height:20px}
+.who{font-size:13px;color:var(--grey);display:flex;gap:10px;align-items:center;margin-top:2px}
+.who button{font:inherit;font-size:13px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.who button:hover{text-decoration:underline}
 [hidden]{display:none!important}
 @media (max-width:640px){header img{height:48px} header .tag{display:none} .cal{max-height:calc(100vh - 260px)} .datelabel{font-size:16px;flex-basis:100%;order:-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
+<div class="login" id="login" hidden><form class="box" id="lform"><img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170"><h2>Belépés</h2><p>Kiegészítő szolgáltatások és tárgyalófoglalás</p><div class="f"><div><label for="lem">E-mail-cím</label><input id="lem" type="email" autocomplete="username" required></div><div><label for="lpw">Jelszó</label><input id="lpw" type="password" autocomplete="current-password" required></div><div class="err" id="lerr" role="alert"></div><button class="btn" type="submit" id="lbtn">Belépés</button></div></form></div>
 <div class="wrap">
   <header>
     <img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170">
@@ -130,7 +144,7 @@ footer{margin-top:24px;color:var(--grey);font-size:12.5px}
   </header>
 
   <div class="titlebar">
-    <div><h1>Tárgyalófoglalás</h1><div class="status" id="st">Betöltés…</div></div>
+    <div><h1>Tárgyalófoglalás</h1><div class="status" id="st">Betöltés…</div><div class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></div></div>
     <div class="toolbar" style="margin:0"><button class="btn ghost sm" id="impbtn">Skedda import</button><button class="btn" id="newbtn">+ Új foglalás</button></div>
   </div>
 
@@ -159,6 +173,7 @@ footer{margin-top:24px;color:var(--grey);font-size:12.5px}
   <footer>Új foglaláshoz húzd végig az egeret a naptárban, vagy koppints egy időpontra. A foglalást áthúzhatod másik időpontra vagy terembe, az alsó szélénél pedig megnyújthatod. A foglalt tárgyalóórák automatikusan megjelennek a Kiegészítő szolgáltatások havi összesítőjében.</footer>
 </div>
 
+<button class="fab" id="fab" type="button" aria-label="Új foglalás" title="Új foglalás">+</button>
 <dialog id="dlg" aria-labelledby="dh">
   <form class="dlg" id="bform" method="dialog">
     <h2 id="dh">Új foglalás</h2>
@@ -221,7 +236,7 @@ function hash(s){let h=2166136261;for(const ch of norm(s)){h^=ch.charCodeAt(0);h
 function colorOf(b){const k=b.company||b.title||b.person||"?";return PALETTE[hash(k)%PALETTE.length]}
 function say(id,t,bad){const el=$(id);el.textContent=t||"";el.classList.toggle("bad",!!bad)}
 function arm(bt,label,fn){if(bt.dataset.arm!=="1"){const old=bt.textContent;bt.dataset.arm="1";bt.textContent=label;setTimeout(()=>{if(bt.isConnected){bt.dataset.arm="";bt.textContent=old}},3000);return}bt.dataset.arm="";fn()}
-async function api(p,o={}){const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json"}});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||("HTTP "+r.status));e.status=r.status;throw e}return d}
+async function api(p,o={}){if(!TOKEN){showLogin();const e=new Error("Jelentkezz be.");e.status=401;throw e}const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json","authorization":"Bearer "+TOKEN}});const d=await r.json().catch(()=>({}));if(d&&d.auth){if(r.status===401){TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}showLogin(d.error);setWho()}else showLogin(d.error)}if(!r.ok){const e=new Error(d.error||("HTTP "+r.status));e.status=r.status;throw e}return d}
 
 // ---------- állapot ----------
 let view="nap",cur=todayS(),room=ROOMS[0].id,BK=[],CFG={clients:[],items:[],base:[]},loadedRange="",editing=null;
@@ -335,6 +350,7 @@ $("frep").onchange=syncRep;
 $("fst").addEventListener("change",()=>{if(toMin($("fen").value)<=toMin($("fst").value)){const m=Math.min(toMin($("fst").value)+60,24*60);$("fen").value=toHM(m);clientInfo()}});
 $("fcancel").onclick=()=>$("dlg").close();
 $("newbtn").onclick=()=>{const n=new Date();let m=Math.ceil((n.getHours()*60+n.getMinutes())/STEP)*STEP;if(cur!==todayS()||m<8*60||m>19*60)m=9*60;openNew(view==="het"?cur:cur,view==="het"?room:ROOMS[0].id,m,m+60)};
+$("fab").onclick=()=>$("newbtn").click();
 $("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api("bookings/"+encodeURIComponent(editing.id),{method:"DELETE"});BK=BK.filter(x=>x.id!==editing.id);say("msg","✓ Törölve: "+(editing.company||editing.title||"foglalás")+" · "+editing.date+" "+editing.start+"–"+editing.end);$("dlg").close();render()}catch(e){say("fmsg",e.message,1)}});
 $("bform").onsubmit=async ev=>{ev.preventDefault();
  if($("fco").value.trim()&&!findClient($("fco").value.trim())){try{await addClient({n:$("fco").value.trim(),eur:false,free:0,note:"",prices:[]})}catch(e){say("fmsg","Az új ügyfelet nem sikerült felvenni: "+e.message,1);return}}
@@ -350,6 +366,7 @@ $("bform").onsubmit=async ev=>{ev.preventDefault();
    BK=BK.concat(ok.filter(x=>{const [a,z]=range();return x.date>=a&&x.date<=z}));
    if(bad.length){say("fmsg",ok.length+" foglalás elkészült. Nem sikerült:\n"+bad.join("\n"),1);$("repw").hidden=true;editing=null}
    else{say("msg","✓ Lefoglalva: "+(b.company||b.title)+" · "+roomById(b.room).name+" · "+b.date+" "+b.start+"–"+b.end+(n>1?" · "+n+" alkalom":""));$("dlg").close()}}
+  {const [ra,rz]=range();if(!$("dlg").open&&(b.date<ra||b.date>rz)){cur=b.date;if(view==="het")room=b.room;render();loadBK();return}}
   render()}
  catch(e){say("fmsg",e.message,1)}finally{$("fsave").disabled=false}};
 
@@ -371,7 +388,7 @@ $("ncs").onclick=async()=>{const n=$("ncn").value.trim();if(!n){say("ncm","Add m
 const tip=document.createElement("div");tip.className="tip";tip.hidden=true;document.body.appendChild(tip);
 function showTip(el,x,y){const b=BK.find(q=>q.id===el.dataset.id);if(!b||act){tip.hidden=true;return}const r=roomById(b.room),cl=b.company&&findClient(b.company);
  tip.style.setProperty("--c",colorOf(b));
- tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
+ tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
  tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let left=x+14,top=y+14;if(left+w>innerWidth-8)left=x-w-14;if(top+h>innerHeight-8)top=y-h-14;tip.style.left=Math.max(8,left)+"px";tip.style.top=Math.max(8,top)+"px"}
 $("cal").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest(".bk");if(el)showTip(el,e.clientX,e.clientY);else tip.hidden=true});
 $("cal").addEventListener("pointerleave",()=>{tip.hidden=true});
@@ -414,7 +431,18 @@ $("impgo").onclick=async()=>{$("impgo").disabled=true;let t={added:0,dup:0,confl
   say("impmsg","✓ Kész: "+t.added+" új foglalás."+(t.dup?" "+t.dup+" már megvolt.":"")+(t.conflict?" "+t.conflict+" ütközött egy meglévővel, ezeket kihagytam.":"")+(t.bad?" "+t.bad+" hibás.":""));IMP=[];$("impfile").value="";loadBK(true)}
  catch(e){say("impmsg","Megszakadt az importálás: "+e.message+". Futtasd újra: a már átvitt foglalásokat nem duplázza meg.",1);$("impgo").disabled=false}};
 
+// ---------- belépés ----------
+let TOKEN="",ME="",booted=false;try{TOKEN=localStorage.getItem("vpo_token")||"";ME=localStorage.getItem("vpo_user")||""}catch(e){}
+function showLogin(msg){$("login").hidden=false;$("lerr").textContent=msg||"";if(ME&&!$("lem").value)$("lem").value=ME;setTimeout(()=>($("lem").value?$("lpw"):$("lem")).focus(),30)}
+function setWho(){$("who").hidden=!ME||!TOKEN;$("whoe").textContent=ME?"Belépve: "+ME:""}
+$("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
+ try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("lem").value,password:$("lpw").value})});const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
+  $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
+$("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
+function boot(){loadCfg();loadBK(true)}
 // ---------- indulás ----------
+setWho();if(!TOKEN)showLogin();
 readHash();setView(view);
 loadCfg();
 setInterval(()=>{if(!document.hidden&&!act&&!$("dlg").open)loadBK(true)},20000);
