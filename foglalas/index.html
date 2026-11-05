@@ -121,6 +121,11 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .tday li .by{font-size:11.5px;color:var(--grey)}
 .tday li .x{font:inherit;background:none;border:0;color:var(--grey);cursor:pointer;padding:0 4px;font-size:13px;opacity:.6}
 .tday li .x:hover{color:var(--warn);opacity:1}
+.tadd{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tadd input[type=text]{flex:1 1 240px;padding:7px 10px;font-size:13.5px;border-radius:8px}
+.tadd input[type=date]{flex:0 0 auto;width:auto;padding:6px 8px;font-size:13.5px;border-radius:8px}
+.tadd button{font:inherit;font-size:13.5px;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:0 14px;cursor:pointer}
+.tadd button:hover{border-color:var(--ink)}
 .tday form{display:flex;gap:6px}
 .tday form input{padding:6px 9px;font-size:13.5px;border-radius:8px}
 .tday form button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:0 10px;cursor:pointer}
@@ -323,23 +328,26 @@ function rememberPeople(){BK.forEach(b=>addPerson(b.company,b.person))}
 function renderPlates(){const box=$("plates"),L=BK.filter(b=>b.date===cur&&b.plate).sort((a,b)=>a.start.localeCompare(b.start));
  const rows=[];L.forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,b})));
  box.hidden=false;
- box.innerHTML=`<b>Parkolás${rows.length?" ("+rows.length+")":""}:</b>`+(rows.length?rows.map(({p,b})=>`<span class="it"><span class="pl">${esc(p)}</span>${esc(who(b))} ${b.start}</span>`).join("")+'<button type="button" class="lk" id="pcopy">másolás</button>':'<span class="mute">erre a napra nincs megadott rendszám</span>');
- const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+who(b)+" ("+b.start+"–"+b.end+")").join("\n");
+ box.innerHTML=`<b>Parkolás${rows.length?" ("+rows.length+")":""}:</b>`+(rows.length?rows.map(({p,b})=>`<span class="it"><span class="pl">${esc(p)}</span>${esc((b.company||b.person||b.title||""))} ${b.start}</span>`).join("")+'<button type="button" class="lk" id="pcopy">másolás</button>':'<span class="mute">erre a napra nincs megadott rendszám</span>');
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+(b.company||b.person||b.title||"")+" ("+b.start+"–"+b.end+")").join("\n");
   try{await navigator.clipboard.writeText(txt);c.textContent="✓ másolva"}catch(e){c.textContent="nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="másolás"},2000)}}
 let NOTES={};
 async function loadNotes(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`notes?from=${a}&to=${b}`);NOTES={...NOTES,...Object.fromEntries(Object.keys(NOTES).filter(d=>d<a||d>b).map(d=>[d,NOTES[d]]))};Object.keys(NOTES).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete NOTES[d]});Object.assign(NOTES,N);renderTodo()}catch(e){}}
 function noteDays(){if(view==="het"){const m=mondayOf(cur);return Array.from({length:7},(_,i)=>addDays(m,i))}return[cur]}
 function renderTodo(){const box=$("todo"),days=noteDays(),t=todayS();
- if(document.activeElement&&box.contains(document.activeElement)&&document.activeElement.tagName==="INPUT"&&document.activeElement.type==="text"&&document.activeElement.value)return;
+ {const ae=document.activeElement;if(ae&&box.contains(ae)&&(ae.id==="tdate"||(ae.id==="ttext"&&ae.value)))return}
  const open=days.reduce((n,d)=>n+(NOTES[d]||[]).filter(x=>!x.done).length,0);
  let h=`<div class="th"><h3>Leadandó infók <small>${view==="het"?"a hétre":(cur===t?"ma":esc(parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})))}${open?" · "+open+" teendő":""}</small></h3></div><div class="tdays" style="grid-template-columns:repeat(${days.length},minmax(${days.length>1?130:0}px,1fr))">`;
  days.forEach(d=>{const L=NOTES[d]||[];h+=`<div class="tday">${days.length>1?`<div class="dl${d===t?" today":""}">${esc(shortDay(d))}</div>`:""}`+
   (L.length?"<ul>"+L.map(x=>`<li class="${x.done?"done":""}"><input type="checkbox" data-d="${d}" data-id="${esc(x.id)}" ${x.done?"checked":""} aria-label="Kész"><span class="tx">${esc(x.t)} <span class="by">${esc((x.by||"").split("@")[0])}${x.done&&x.dby?" · kész: "+esc(x.dby.split("@")[0]):""}</span></span><button type="button" class="x" data-del="${esc(x.id)}" data-d="${d}" aria-label="Törlés">✕</button></li>`).join("")+"</ul>":(days.length===1?'<div class="none">Nincs teendő erre a napra.</div>':""))+
-  `<form data-d="${d}"><input type="text" placeholder="${days.length>1?"+ új":"Új tétel, pl. 2 belépőkártya leadása – Gordius"}" aria-label="Új tétel ${d}" maxlength="400"><button type="submit">${days.length>1?"+":"Hozzáadás"}</button></form></div>`});
- box.innerHTML=h+"</div>"}
+  `</div>`});
+ if(TDFOR!==view+cur){TDATE=cur;TDFOR=view+cur}
+ h+=`</div><form class="tadd" id="tform"><input type="text" id="ttext" placeholder="Új tétel, pl. 2 belépőkártya leadása – Gordius" aria-label="Új tétel" maxlength="400"><input type="date" id="tdate" value="${TDATE}" aria-label="Melyik napra"><button type="submit">Hozzáadás</button></form>`;
+ box.innerHTML=h;$("tdate").onchange=()=>{TDATE=$("tdate").value||cur}}
+let TDATE=null,TDFOR=null;
 async function noteOp(d,fn){try{const N=await api(`notes?from=${d}&to=${d}`);const items=fn((N[d]||[]).slice());const r=await api("notes/"+d,{method:"PUT",body:JSON.stringify({items})});if(r.items.length)NOTES[d]=r.items;else delete NOTES[d]}catch(e){say("msg","Nem sikerült menteni a teendőt: "+e.message,1)}renderTodo()}
-$("todo").addEventListener("submit",ev=>{ev.preventDefault();const f=ev.target,inp=f.querySelector("input"),t=inp.value.trim();if(!t)return;inp.value="";
- noteOp(f.dataset.d,L=>L.concat({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false,by:ME,ts:Date.now()})).then(()=>{const ni=$("todo").querySelector(`form[data-d="${f.dataset.d}"] input`);if(ni)ni.focus()})});
+$("todo").addEventListener("submit",ev=>{ev.preventDefault();const t=$("ttext").value.trim(),d=$("tdate").value||cur;if(!t){$("ttext").focus();return}$("ttext").value="";TDATE=d;
+ noteOp(d,L=>L.concat({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false,by:ME,ts:Date.now()})).then(()=>{if(!noteDays().includes(d))say("msg","✓ Felírva ide: "+parseD(d).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"})+" – "+t);const ni=$("ttext");if(ni)ni.focus()})});
 $("todo").addEventListener("change",ev=>{const c=ev.target;if(c.type!=="checkbox")return;noteOp(c.dataset.d,L=>L.map(x=>x.id===c.dataset.id?{...x,done:c.checked,dby:c.checked?ME:""}:x))});
 $("todo").addEventListener("click",ev=>{const b=ev.target.closest("button[data-del]");if(!b)return;arm(b,"Törlöd?",()=>noteOp(b.dataset.d,L=>L.filter(x=>x.id!==b.dataset.del)))});
 function render(){renderPlates();renderTodo();rememberPeople();
