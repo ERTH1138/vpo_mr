@@ -45,19 +45,22 @@ function easter(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d =
 function holidays(y) { const e = easter(y), D = (ms) => isoD(new Date(ms));
   return new Set([`${y}-01-01`, `${y}-03-15`, `${y}-05-01`, `${y}-08-20`, `${y}-10-23`, `${y}-11-01`, `${y}-12-24`, `${y}-12-25`, `${y}-12-26`,
     D(e - 2 * 864e5), D(e + 864e5), D(e + 50 * 864e5)]); }
+function workdaysBefore(date, n) { if (!(n > 0)) return date; let d = date; for (let i = 0; i < n; i++) d = prevWorkday(d); return d; }
 function prevWorkday(date) { const d = new Date(date + "T12:00:00Z");
   for (let i = 0; i < 14; i++) { d.setUTCDate(d.getUTCDate() - 1); const w = d.getUTCDay(), s = isoD(d); if (w !== 0 && w !== 6 && !holidays(d.getUTCFullYear()).has(s)) return s; }
   return isoD(d); }
 const ROOMNAMES = { panorama: "Panoráma terem", "kis-tav": "Kisterem távolabbi", nagy: "Nagyterem", "kis-koz": "Kisterem közelebbi" };
 function cateringText(b) { const d = new Date(b.date + "T12:00:00Z");
   const day = d.toLocaleDateString("hu-HU", { month: "long", day: "numeric", weekday: "long", timeZone: "UTC" });
-  return `Emlékeztető: catering rendelés – ${b.company || b.title || "foglalás"}${b.person ? " (" + b.person + ")" : ""}, ${day} ${b.start}, ${ROOMNAMES[b.room] || b.room}: ${b.catering}`; }
-async function noteEdit(store, date, fn) { const key = `n/${date.slice(0, 7)}/${date}`; const v = (await store.get(key, { type: "json" })) || { items: [] };
+  return `${b.company || b.title || "foglalás"}${b.person ? " (" + b.person + ")" : ""}: ${b.catering} — tárgyalás: ${day} ${b.start}, ${ROOMNAMES[b.room] || b.room}`; }
+async function noteEdit(store, date, fn, pre = "c") { const key = `${pre}/${date.slice(0, 7)}/${date}`; const v = (await store.get(key, { type: "json" })) || { items: [] };
   const items = fn((v.items || []).slice()); if (items.length) await store.setJSON(key, { items }); else await store.delete(key); }
 // Régi és új állapot alapján frissíti a foglaláshoz tartozó emlékeztetőt (azonosító: cat-<foglalás id>)
 async function syncCatering(store, user, oldB, oldId, newB, newId) {
-  const oldDay = oldB && oldB.catering ? prevWorkday(oldB.date) : null, newDay = newB && newB.catering ? prevWorkday(newB.date) : null;
-  const newItem = newDay ? { id: "cat-" + newId, t: cateringText(newB).slice(0, 400), done: false, by: user, ts: Date.now(), dby: "", bk: newId, kind: "catering" } : null;
+  const lead = (b) => (b.cdays === undefined || b.cdays === null || b.cdays === "" ? 1 : +b.cdays);
+  if (oldB && oldB.catering) await noteEdit(store, prevWorkday(oldB.date), (L) => L.filter((x) => x.id !== "cat-" + oldId), "n");
+  const oldDay = oldB && oldB.catering ? workdaysBefore(oldB.date, lead(oldB)) : null, newDay = newB && newB.catering ? workdaysBefore(newB.date, lead(newB)) : null;
+  const newItem = newDay ? { id: "cat-" + newId, t: cateringText(newB).slice(0, 400), done: false, by: user, ts: Date.now(), dby: "", bk: newId, kind: "catering", for: newB.date } : null;
   if (oldDay && (oldDay !== newDay || oldId !== newId)) await noteEdit(store, oldDay, (L) => L.filter((x) => x.id !== "cat-" + oldId));
   if (newDay) await noteEdit(store, newDay, (L) => { const i = L.findIndex((x) => x.id === newItem.id);
     if (i >= 0) { if (L[i].t === newItem.t) return L; L[i] = { ...newItem, ts: L[i].ts }; return L; } return L.concat(newItem); });
@@ -137,7 +140,8 @@ export default async (req) => {
   }
 
   // Leadandó infók / napi teendők: n/<YYYY-MM>/<YYYY-MM-DD> = {items:[{id,t,done,by,ts}]}
-  if (parts[0] === "notes") {
+  if (parts[0] === "notes" || parts[0] === "catering") {
+    const PRE = parts[0] === "notes" ? "n" : "c";
     const DAY = /^\d{4}-\d{2}-\d{2}$/;
     if (m === "GET") {
       const from = url.searchParams.get("from") || "", to = url.searchParams.get("to") || from;
@@ -146,7 +150,7 @@ export default async (req) => {
       while ((y < y2 || (y === y2 && mo <= m2)) && months.length < 24) { months.push(`${y}-${String(mo).padStart(2, "0")}`); mo++; if (mo > 12) { mo = 1; y++; } }
       const out = {};
       for (const month of months) {
-        const { blobs } = await store.list({ prefix: `n/${month}/` });
+        const { blobs } = await store.list({ prefix: `${PRE}/${month}/` });
         await Promise.all(blobs.map(async (b) => { const d = b.key.split("/").pop(); if (d >= from && d <= to) { const v = await store.get(b.key, { type: "json" }); if (v && v.items && v.items.length) out[d] = v.items; } }));
       }
       return json(out);
@@ -156,8 +160,8 @@ export default async (req) => {
       const items = (Array.isArray(body.items) ? body.items : []).slice(0, 200).map((x) => ({
         id: String(x.id || "").slice(0, 40) || Math.random().toString(36).slice(2, 10), t: String(x.t || "").slice(0, 400), done: !!x.done,
         by: String(x.by || user).slice(0, 120), ts: +x.ts || Date.now(), dby: x.done ? String(x.dby || user).slice(0, 120) : "",
-        ...(x.bk ? { bk: String(x.bk).slice(0, 64), kind: String(x.kind || "").slice(0, 20) } : {}) })).filter((x) => x.t.trim());
-      const key = `n/${parts[1].slice(0, 7)}/${parts[1]}`;
+        ...(x.bk ? { bk: String(x.bk).slice(0, 64), kind: String(x.kind || "").slice(0, 20), for: String(x.for || "").slice(0, 10) } : {}) })).filter((x) => x.t.trim());
+      const key = `${PRE}/${parts[1].slice(0, 7)}/${parts[1]}`;
       if (items.length) await store.setJSON(key, { items }); else await store.delete(key);
       return json({ date: parts[1], items });
     }
@@ -178,7 +182,7 @@ export default async (req) => {
       if (toMin(end) <= toMin(start)) return { error: "A befejezésnek a kezdés után kell lennie." };
       if (!r.room) return { error: "Válassz termet." };
       return { b: { room: String(r.room).slice(0, 80), date, start, end, company: String(r.company || "").slice(0, 200), title: String(r.title || "").slice(0, 200),
-        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
+        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), cdays: Math.max(0, Math.min(10, r.cdays === undefined || r.cdays === "" ? 1 : parseInt(r.cdays, 10) || 0)), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
     };
     const clash = (list, b, selfId) => list.find((x) => x.id !== selfId && x.room === b.room && x.date === b.date && toMin(x.start) < toMin(b.end) && toMin(b.start) < toMin(x.end));
     const newId = (month) => `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
