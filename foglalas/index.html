@@ -100,6 +100,14 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .fab{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:40;width:60px;height:60px;border-radius:50%;border:0;background:var(--red);color:#fff;font:inherit;font-size:34px;font-weight:400;line-height:1;cursor:pointer;box-shadow:0 8px 22px rgba(239,65,48,.38),0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
 .fab:hover{background:var(--red-dark);transform:scale(1.06)}
 .fab:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.plates{border:1px solid var(--line);border-left:4px solid var(--orange);border-radius:12px;background:var(--soft);padding:10px 14px;margin:0 0 12px}
+.plates .ph{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin-bottom:6px}
+.plates h3{margin:0;font-size:14.5px}
+.plates h3 small{font-weight:400;color:var(--grey);font-size:13px}
+.plates ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px}
+.plates li{font-size:13.5px;white-space:nowrap}
+.plate{display:inline-block;font-weight:700;letter-spacing:.06em;background:#fff;border:1.5px solid var(--ink);border-radius:5px;padding:0 6px;margin-right:6px;font-variant-numeric:tabular-nums}
+.plates .mute{font-size:13px}
 .tip{position:fixed;z-index:50;max-width:320px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 12px;font-size:13px;line-height:1.4;pointer-events:none;border-top:4px solid var(--c)}
 .tip b{display:block;font-size:14px}
 .tip .t{color:#5a5a5a}
@@ -166,6 +174,7 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
     <select id="roomsel" aria-label="Terem" hidden></select>
     <div class="seg" role="group" aria-label="Nézet"><button data-v="nap" aria-pressed="true">Nap</button><button data-v="het" aria-pressed="false">Hét</button><button data-v="lista" aria-pressed="false">Lista</button></div>
   </div>
+  <div class="plates" id="plates" hidden></div>
   <div class="legend" id="legend"></div>
   <div class="msg" id="msg" role="status"></div>
   <div class="cal" id="cal"></div>
@@ -193,7 +202,8 @@ footer{margin-top:24px;padding-right:72px;color:var(--grey);font-size:12.5px}
       <div><label for="fda">Dátum</label><input type="date" id="fda"></div>
       <div><label for="fst">Kezdés</label><select id="fst"></select></div>
       <div><label for="fen">Befejezés</label><select id="fen"></select></div>
-      <div class="wide"><label for="fpe">Foglaló személy</label><input id="fpe" autocomplete="off" placeholder="név"></div>
+      <div><label for="fpe">Foglaló személy</label><input id="fpe" autocomplete="off" placeholder="név"></div>
+      <div><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div>
       <div class="wide" id="repw"><span class="lbl">Ismétlés</span><div class="repeat"><select id="frep" aria-label="Ismétlés"><option value="0">Nem ismétlődik</option><option value="7">Hetente</option><option value="14">Kéthetente</option></select><input type="number" id="fcnt" min="2" max="52" value="4" aria-label="Alkalmak száma" hidden><span class="mute" id="fcntl" hidden>alkalom</span></div></div>
       <div class="wide"><label for="fno">Megjegyzés</label><textarea id="fno" rows="2"></textarea></div>
     </div>
@@ -276,7 +286,15 @@ function columns(){if(view==="nap")return ROOMS.map(r=>({date:cur,room:r.id,head
  const m=mondayOf(cur),t=todayS();return Array.from({length:7},(_,i)=>{const d=addDays(m,i);return{date:d,room:room,head:`${esc(shortDay(d))}`,today:d===t}})}
 function bounds(cols){let s=DAY_START,e=DAY_END;BK.forEach(b=>{if(cols.some(c=>c.date===b.date&&c.room===b.room)){s=Math.min(s,Math.floor(toMin(b.start)/60)*60);e=Math.max(e,Math.ceil(toMin(b.end)/60)*60)}});return[s,Math.min(e,24*60)]}
 let GEO=null;
-function render(){
+function renderPlates(){const box=$("plates"),L=BK.filter(b=>b.date===cur&&b.plate).sort((a,b)=>a.start.localeCompare(b.start));
+ const rows=[];L.forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,b})));
+ const t=cur===todayS()?"Ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"long"});
+ box.hidden=false;
+ box.innerHTML=`<div class="ph"><h3>Parkolás · rendszámok a recepciónak <small>${esc(t)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="btn ghost sm" id="pcopy">Lista másolása</button>':""}</div>`+
+  (rows.length?"<ul>"+rows.map(({p,b})=>{const r=roomById(b.room);return `<li><span class="plate">${esc(p)}</span>${esc(b.company||b.person||b.title||"")} <span class="mute">· ${b.start}–${b.end}${r?" · "+esc(r.name):""}</span></li>`}).join("")+"</ul>":'<div class="mute">Erre a napra még nincs rendszám megadva. A foglalásnál a „Rendszám(ok)” mezőben adhatod meg.</div>');
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=(cur)+" – parkolás\n"+rows.map(({p,b})=>p+" – "+(b.company||b.person||b.title||"")+" ("+b.start+"–"+b.end+")").join("\n");
+  try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült másolni"}setTimeout(()=>{if(c.isConnected)c.textContent="Lista másolása"},2000)}}
+function render(){renderPlates();
  writeHash();$("date").value=cur;$("roomsel").value=room;
  if(view==="nap")$("dlabel").textContent=longDate(cur);
  else if(view==="het"){const m=mondayOf(cur),e=addDays(m,6);$("dlabel").textContent=parseD(m).toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+" – "+parseD(e).toLocaleDateString("hu-HU",{month:"long",day:"numeric",year:"numeric"})}
@@ -300,10 +318,10 @@ function render(){
  const used=[...new Set(BK.filter(b=>cols.some(c=>c.date===b.date&&c.room===b.room)).map(b=>b.company||b.title||b.person||"?"))].sort((a,b)=>a.localeCompare(b,"hu"));
  $("legend").innerHTML=used.length?used.map(n=>`<span><span class="dot" style="--c:${colorOf({company:n})}"></span>${esc(n)}</span>`).join(""):'<span>Ebben az időszakban nincs foglalás.</span>'}
 function renderList(){const q=norm($("lq")?$("lq").value:"");const L=BK.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
- let h=`<div style="padding:12px;border-bottom:1px solid var(--line)"><input id="lq" type="search" placeholder="Szűrés ügyfélre vagy megnevezésre…" value="${esc(q)}" style="max-width:320px"></div><table><tr><th>Időpont</th><th>Terem</th><th>Ügyfél</th><th>Megnevezés</th><th>Foglaló</th><th>Időtartam</th></tr>`;
- let last="",n=0;L.filter(b=>!q||norm(b.company+" "+b.title+" "+b.person).includes(q)).forEach(b=>{n++;if(b.date!==last){last=b.date;h+=`<tr class="day"><td colspan="6">${esc(longDate(b.date))}</td></tr>`}
-  const r=roomById(b.room);h+=`<tr class="click" data-id="${esc(b.id)}"><td>${b.start}–${b.end}</td><td>${esc(r?r.name:b.room)}</td><td><span class="dot" style="--c:${colorOf(b)}"></span>${esc(b.company)}</td><td>${esc(b.title)}</td><td>${esc(b.person)}</td><td>${fmtDur(toMin(b.end)-toMin(b.start))}</td></tr>`});
- if(!n)h+=`<tr><td colspan="6" class="empty">${q?"Nincs találat.":"Ebben az időszakban nincs foglalás."}</td></tr>`;
+ let h=`<div style="padding:12px;border-bottom:1px solid var(--line)"><input id="lq" type="search" placeholder="Szűrés ügyfélre vagy megnevezésre…" value="${esc(q)}" style="max-width:320px"></div><table><tr><th>Időpont</th><th>Terem</th><th>Ügyfél</th><th>Megnevezés</th><th>Foglaló</th><th>Rendszám</th><th>Időtartam</th></tr>`;
+ let last="",n=0;L.filter(b=>!q||norm(b.company+" "+b.title+" "+b.person).includes(q)).forEach(b=>{n++;if(b.date!==last){last=b.date;h+=`<tr class="day"><td colspan="7">${esc(longDate(b.date))}</td></tr>`}
+  const r=roomById(b.room);h+=`<tr class="click" data-id="${esc(b.id)}"><td>${b.start}–${b.end}</td><td>${esc(r?r.name:b.room)}</td><td><span class="dot" style="--c:${colorOf(b)}"></span>${esc(b.company)}</td><td>${esc(b.title)}</td><td>${esc(b.person)}</td><td>${esc(b.plate||"")}</td><td>${fmtDur(toMin(b.end)-toMin(b.start))}</td></tr>`});
+ if(!n)h+=`<tr><td colspan="7" class="empty">${q?"Nincs találat.":"Ebben az időszakban nincs foglalás."}</td></tr>`;
  $("list").innerHTML=h+"</table>";$("legend").innerHTML="";const lq=$("lq");lq.oninput=()=>{const p=lq.selectionStart;renderList();$("lq").focus();$("lq").setSelectionRange(p,p)}}
 $("list").onclick=e=>{const tr=e.target.closest("tr[data-id]");if(tr)openEdit(tr.dataset.id)};
 
@@ -341,7 +359,7 @@ $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.cl
 const timeOpts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
 $("fst").innerHTML=timeOpts(0,24*60-STEP);$("fen").innerHTML=timeOpts(STEP,24*60);
 function ensureOpt(sel,v){if(v&&![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v))}
-function fill(b){$("ncw").hidden=true;$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
+function fill(b){$("ncw").hidden=true;$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";syncRep();say("fmsg","");clientInfo()}
 function openNew(date,roomId,a,b){editing=null;$("dh").textContent="Új foglalás";$("fdel").hidden=true;$("repw").hidden=false;fill({date:date||cur,room:roomId||ROOMS[0].id,start:toHM(a??9*60),end:toHM(b??10*60)});$("dlg").showModal();setTimeout(()=>$("fco").focus(),30)}
 function openEdit(id){tip.hidden=true;const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
 function syncRep(){const on=$("frep").value!=="0";$("fcnt").hidden=!on;$("fcntl").hidden=!on}
@@ -355,7 +373,7 @@ $("fdel").onclick=()=>arm($("fdel"),"Biztosan törlöd?",async()=>{try{await api
 $("bform").onsubmit=async ev=>{ev.preventDefault();
  if($("fco").value.trim()&&!findClient($("fco").value.trim())){try{await addClient({n:$("fco").value.trim(),eur:false,free:0,note:"",prices:[]})}catch(e){say("fmsg","Az új ügyfelet nem sikerült felvenni: "+e.message,1);return}}
  const fc=findClient($("fco").value.trim());
- const b={company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
+ const b={plate:$("fpl").value.toUpperCase().replace(/\s+/g," ").trim(),company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
  if(!b.company&&!b.title){say("fmsg","Add meg az ügyfelet vagy a megnevezést.",1);return}
  if(!b.date){say("fmsg","Add meg a dátumot.",1);return}
  if(toMin(b.end)<=toMin(b.start)){say("fmsg","A befejezésnek a kezdés után kell lennie.",1);return}
@@ -388,7 +406,7 @@ $("ncs").onclick=async()=>{const n=$("ncn").value.trim();if(!n){say("ncm","Add m
 const tip=document.createElement("div");tip.className="tip";tip.hidden=true;document.body.appendChild(tip);
 function showTip(el,x,y){const b=BK.find(q=>q.id===el.dataset.id);if(!b||act){tip.hidden=true;return}const r=roomById(b.room),cl=b.company&&findClient(b.company);
  tip.style.setProperty("--c",colorOf(b));
- tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
+ tip.innerHTML=`<b>${esc(b.company||b.title||"Foglalás")}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.plate?`<div class="t">Rendszám: <b style="display:inline">${esc(b.plate)}</b></div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
  tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let left=x+14,top=y+14;if(left+w>innerWidth-8)left=x-w-14;if(top+h>innerHeight-8)top=y-h-14;tip.style.left=Math.max(8,left)+"px";tip.style.top=Math.max(8,top)+"px"}
 $("cal").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest(".bk");if(el)showTip(el,e.clientX,e.clientY);else tip.hidden=true});
 $("cal").addEventListener("pointerleave",()=>{tip.hidden=true});
