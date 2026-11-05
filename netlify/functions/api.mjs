@@ -1,4 +1,34 @@
 import { getStore } from "@netlify/blobs";
+import crypto from "node:crypto";
+
+// ---------- Belépés ----------
+// A felhasználók az APP_USERS környezeti változóban vannak (Netlify → Environment variables), soha nem a kódban:
+// {"office@vpo.hu":"pbkdf2$<iterációk>$<só>$<hash>", ...}
+const b64u = (b) => Buffer.from(b).toString("base64url");
+function users() { try { const u = JSON.parse(process.env.APP_USERS || "null"); return u && typeof u === "object" ? u : null; } catch { return null; } }
+const secret = () => crypto.createHash("sha256").update("vpo-session|" + (process.env.SESSION_SECRET || process.env.APP_USERS || "")).digest();
+const fp = (stored) => crypto.createHash("sha256").update(stored).digest("base64url").slice(0, 10);
+function checkPw(stored, pw) {
+  const [alg, it, salt, hash] = String(stored).split("$");
+  if (alg !== "pbkdf2" || !+it) return false;
+  const h = crypto.pbkdf2Sync(String(pw), Buffer.from(salt, "base64url"), +it, 32, "sha256"), H = Buffer.from(hash, "base64url");
+  return H.length === h.length && crypto.timingSafeEqual(h, H);
+}
+function sign(email, stored) {
+  const p = b64u(JSON.stringify({ e: email, f: fp(stored), x: Date.now() + 30 * 864e5 }));
+  return p + "." + b64u(crypto.createHmac("sha256", secret()).update(p).digest());
+}
+function whoIs(req) {
+  const t = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  const [p, s] = t.split(".");
+  if (!p || !s) return null;
+  const exp = b64u(crypto.createHmac("sha256", secret()).update(p).digest());
+  if (s.length !== exp.length || !crypto.timingSafeEqual(Buffer.from(s), Buffer.from(exp))) return null;
+  let o; try { o = JSON.parse(Buffer.from(p, "base64url").toString()); } catch { return null; }
+  const U = users();
+  if (!U || !U[o.e] || o.x < Date.now() || o.f !== fp(U[o.e])) return null;
+  return o.e;
+}
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
@@ -14,6 +44,25 @@ export default async (req) => {
 
   // GET /api/ping
   if (parts[0] === "ping") return json({ ok: true });
+
+  // POST /api/login {email, password}
+  if (parts[0] === "login" && m === "POST") {
+    const U = users();
+    if (!U) return json({ error: "A belépés még nincs beállítva a szerveren (APP_USERS)." }, 503);
+    const body = await req.json().catch(() => ({}));
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!U[email] || !checkPw(U[email], body.password || "")) {
+      await new Promise((r) => setTimeout(r, 600));
+      return json({ error: "Hibás e-mail-cím vagy jelszó." }, 401);
+    }
+    return json({ token: sign(email, U[email]), email });
+  }
+
+  // Minden más kéréshez belépés kell
+  if (!users()) return json({ error: "A belépés még nincs beállítva a szerveren (APP_USERS).", auth: true }, 503);
+  const user = whoIs(req);
+  if (!user) return json({ error: "Jelentkezz be újra.", auth: true }, 401);
+  if (parts[0] === "me") return json({ email: user });
 
   // GET /api/mnb?date=YYYY-MM-DD – MNB hivatalos EUR árfolyam az adott napra (vagy a legutóbbi jegyzés)
   if (parts[0] === "mnb" && m === "GET") {
@@ -96,7 +145,7 @@ export default async (req) => {
         cache[month] = cache[month] || await loadMonth(month);
         if (cache[month].some((x) => (b.ext && x.ext === b.ext) || (x.room === b.room && x.date === b.date && x.start === b.start && x.end === b.end && x.company === b.company))) { dup++; continue; }
         if (clash(cache[month], b)) { conflict++; continue; }
-        const id = newId(month); await store.setJSON(`b/${month}/${id}`, b); cache[month].push({ ...b, id }); added++;
+        b.by = user; const id = newId(month); await store.setJSON(`b/${month}/${id}`, b); cache[month].push({ ...b, id }); added++;
       }
       return json({ added, dup, conflict, bad });
     }
@@ -108,11 +157,12 @@ export default async (req) => {
         const oldKey = `b/${parts[1].slice(0, 7)}/${parts[1]}`;
         const prev = await store.get(oldKey, { type: "json" });
         if (!prev) return json({ error: "A foglalás már nem létezik (lehet, hogy valaki törölte)." }, 404);
-        b.ts = prev.ts; b.src = prev.src || b.src; b.ext = prev.ext || "";
+        b.ts = prev.ts; b.src = prev.src || b.src; b.ext = prev.ext || ""; b.by = prev.by || ""; b.upd = user;
         if (parts[1].slice(0, 7) === month) id = parts[1]; else moveFrom = oldKey;
       }
       const x = clash(await loadMonth(month), b, parts[1]);
       if (x) return json({ error: `Ütközik egy másik foglalással: ${x.start}–${x.end} ${x.company || x.title || ""}`.trim(), clash: x }, 409);
+      if (m === "POST") b.by = user;
       id = id || newId(month);
       await store.setJSON(`b/${month}/${id}`, b);
       if (moveFrom) await store.delete(moveFrom);
@@ -153,7 +203,7 @@ export default async (req) => {
       const entry = {
         date: String(r.date).slice(0, 10), company: String(r.company).slice(0, 200), person: String(r.person || "").slice(0, 200),
         cat: String(r.cat || "Egyéb"), item: String(r.item || "").slice(0, 300), qty: +r.qty || 0, unit: +r.unit || 0,
-        total: +r.total || 0, cur: r.cur === "EUR" ? "EUR" : "HUF", note: String(r.note || "").slice(0, 500), ts: +r.ts || Date.now(),
+        total: +r.total || 0, cur: r.cur === "EUR" ? "EUR" : "HUF", note: String(r.note || "").slice(0, 500), ts: +r.ts || Date.now(), by: user,
       };
       await store.setJSON(`e/${month}/${id}`, entry);
       if (moveFrom) await store.delete(moveFrom);
