@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tárgyalófoglalás · Vista Plus Offices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Ügyfélportál: csak a tárgyalófoglalás. Mások foglalásai névtelen „Foglalt” sávként látszanak. */
+:root{
+  --red:#EF4130; --red-dark:#D1372A; --orange:#F5975A; --peach:#FDEEE4;
+  --ink:#2B2B2B; --grey:#7D7D7D; --line:#E6E3E0; --bg:#FFFFFF; --soft:#FAF8F6;
+  --ok:#1F7A4D; --okbg:#E8F5EE; --warn:#9B2418; --warnbg:#FFF1EF;
+  --busy:#ECE8E4; --busyline:#CFC8C1;
+  --slot:15px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;font-size:15px}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:28px max(20px,env(safe-area-inset-right,0px)) 96px max(20px,env(safe-area-inset-left,0px))}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--orange),var(--red)) 1}
+header img{height:64px;width:auto;display:block}
+.who{font-size:13.5px;color:var(--grey);text-align:right;line-height:1.4}
+.who b{color:var(--ink);display:block;font-size:15px}
+.who button{font:inherit;font-size:13px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.who button:hover{text-decoration:underline}
+.titlebar{margin:24px 0 14px}
+h1{font-size:clamp(26px,3.6vw,34px);line-height:1.15;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--grey);font-size:14px;margin:0}
+.btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;background:var(--red);color:#fff;white-space:nowrap}
+.btn:hover{background:var(--red-dark)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:var(--ink)}
+.btn.danger{background:transparent;color:var(--warn);border:1.5px solid #F2C9C2}.btn.danger:hover{background:var(--warnbg)}
+.btn.ok{background:var(--ok)}.btn.ok:hover{background:#17623D}
+.btn.sm{padding:6px 13px;font-size:13px}
+.btn:focus-visible,.iconbtn:focus-visible,.bk:focus-visible,.linkbtn:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.linkbtn{font:inherit;font-size:13.5px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.linkbtn:hover{text-decoration:underline}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--grey);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:15px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--peach)}
+textarea{resize:vertical;min-height:60px}
+.msg{font-size:13.5px;min-height:20px;font-weight:600;color:var(--ok)}.msg.bad{color:var(--warn)}
+/* eszköztár */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:10px}
+.iconbtn{font:inherit;font-size:18px;line-height:1;width:38px;height:38px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.iconbtn:hover{border-color:var(--ink)}
+.datelabel{font-weight:700;font-size:18px;letter-spacing:-.01em;flex:1 1 auto}
+.datepick{width:auto;padding:7px 10px;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--grey);margin:0 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--line);background:#fff}
+.legend i.b{background:repeating-linear-gradient(135deg,var(--busy) 0 5px,#F4F1EE 5px 10px);border-color:var(--busyline)}
+.legend i.m{background:var(--peach);border-left:4px solid var(--red)}
+/* naptár */
+.cal{border:1px solid var(--line);border-radius:14px;overflow:auto;position:relative;background:#fff}
+.calgrid{display:grid;min-width:560px}
+.colhead{position:sticky;top:0;z-index:5;background:#fff;border-bottom:2px solid var(--ink);padding:8px 6px 7px;font-size:13px;font-weight:700;text-align:center;line-height:1.25}
+.colhead small{display:block;font-weight:400;color:var(--grey);font-size:12px}
+.corner{position:sticky;top:0;left:0;z-index:7;background:#fff;border-bottom:2px solid var(--ink)}
+.times{position:sticky;left:0;z-index:4;background:#fff;border-right:1px solid var(--line)}
+.times div{height:calc(var(--slot)*4);font-size:11.5px;color:var(--grey);text-align:right;padding:0 8px;transform:translateY(-8px);font-variant-numeric:tabular-nums}
+.times div:first-child{transform:none}
+.col{position:relative;border-left:1px solid var(--line);cursor:crosshair;touch-action:pan-y;
+  background-image:linear-gradient(to bottom,var(--line) 1px,transparent 1px),linear-gradient(to bottom,#F3F0EE 1px,transparent 1px);
+  background-size:100% calc(var(--slot)*4),100% var(--slot)}
+.col.off{cursor:not-allowed;background-color:#F7F5F3}
+.pastmask{position:absolute;left:0;right:0;top:0;background:rgba(247,245,243,.85);z-index:1;pointer-events:none}
+.sel{position:absolute;left:3px;right:3px;background:rgba(239,65,48,.14);border:1.5px dashed var(--red);border-radius:8px;pointer-events:none;z-index:2;font-size:12px;font-weight:700;color:var(--red-dark);padding:2px 6px}
+.bk{position:absolute;left:3px;right:3px;border-radius:8px;padding:3px 7px;font-size:12px;line-height:1.3;overflow:hidden;z-index:3;user-select:none;-webkit-user-select:none}
+.bk.busy{background:repeating-linear-gradient(135deg,var(--busy) 0 6px,#F4F1EE 6px 12px);border:1px solid var(--busyline);color:#6b645e;cursor:not-allowed}
+.bk.mine{background:var(--peach);border:1px solid #F6CDB6;border-left:4px solid var(--red);cursor:pointer}
+.bk.mine:hover{box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.bk b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#5a5a5a}
+.closed{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:var(--grey);font-weight:700;font-size:14px;text-align:center;padding:20px;pointer-events:none}
+.now{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--red);z-index:4;pointer-events:none}
+/* saját foglalások */
+.panel{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:22px;background:#fff}
+.panel h2{margin:0 0 4px;font-size:18px}
+.mylist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+.mylist li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:11px 0;border-top:1px solid var(--line)}
+.mylist li:first-child{border-top:0}
+.mylist .when{font-weight:700;min-width:210px}
+.mylist .what{flex:1 1 200px;color:#5a5a5a;font-size:14px}
+.mylist .acts{display:flex;gap:6px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);white-space:nowrap}
+.badge.ok{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
+.badge.wait{background:#FFF6E5;border-color:#F3D9A4;color:#8A5A00}
+.badge.off{color:var(--grey)}
+.empty{color:var(--grey);font-size:14px;padding:8px 0}
+/* párbeszédablak */
+dialog{border:0;border-radius:16px;padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.25);color:var(--ink)}
+dialog::backdrop{background:rgba(30,20,15,.35)}
+.dlg{padding:22px}
+.dlg h2{margin:0 0 14px;font-size:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid .wide{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--grey);margin-top:3px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
+.foot .acts{display:flex;gap:8px;margin-left:auto}
+.det{font-size:15px;line-height:1.6}
+.det .r{font-weight:700;font-size:17px}
+.det .n{margin-top:8px;color:#5a5a5a;white-space:pre-line;font-size:14px}
+/* belépés */
+.auth{position:fixed;inset:0;z-index:100;background:var(--soft);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.auth .box{width:100%;max-width:400px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.auth img{height:60px;width:auto;display:block;margin:0 auto 14px}
+.auth h2{margin:0 0 4px;font-size:20px;text-align:center}
+.auth p{margin:0 0 18px;color:var(--grey);font-size:13.5px;text-align:center}
+.auth .f{display:flex;flex-direction:column;gap:12px}
+.auth .err{color:var(--warn);font-weight:600;font-size:13.5px;min-height:20px}
+.auth .okm{color:var(--ok);font-weight:600;font-size:14px}
+.auth .alt{text-align:center;margin-top:4px}
+.resp .det{background:var(--soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left}
+.resp .two{display:flex;gap:8px}.resp .two .btn{flex:1}
+@media (max-width:640px){header img{height:46px}.grid{grid-template-columns:1fr}.datelabel{font-size:16px;flex-basis:100%;order:-1}.mylist .when{min-width:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<!-- Belépés / jelszó / emlékeztető-válasz -->
+<div class="auth" id="auth" hidden>
+  <div class="box">
+    <img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170">
+    <form id="flogin" class="f" hidden>
+      <h2>Tárgyalófoglalás</h2><p>Lépj be az ügyfélfiókoddal.</p>
+      <div><label for="lem">E-mail-cím</label><input id="lem" type="email" autocomplete="username" required></div>
+      <div><label for="lpw">Jelszó</label><input id="lpw" type="password" autocomplete="current-password" required></div>
+      <div class="err" id="lerr" role="alert"></div>
+      <button class="btn" type="submit" id="lbtn">Belépés</button>
+      <div class="alt"><button type="button" class="linkbtn" id="toforgot">Elfelejtett jelszó</button></div>
+    </form>
+    <form id="fforgot" class="f" hidden>
+      <h2>Elfelejtett jelszó</h2><p>Add meg az e-mail-címedet, és küldünk egy linket, amellyel új jelszót állíthatsz be.</p>
+      <div><label for="fem">E-mail-cím</label><input id="fem" type="email" autocomplete="username" required></div>
+      <div class="err" id="ferr" role="alert"></div><div class="okm" id="fok" role="status"></div>
+      <button class="btn" type="submit" id="fbtn">Link küldése</button>
+      <div class="alt"><button type="button" class="linkbtn" id="tologin">Vissza a belépéshez</button></div>
+    </form>
+    <form id="fset" class="f" hidden>
+      <h2>Jelszó beállítása</h2><p id="setsub">Add meg a jelszavadat (legalább 8 karakter).</p>
+      <input type="email" id="setem" autocomplete="username" hidden>
+      <div><label for="spw">Új jelszó</label><input id="spw" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div><label for="spw2">Új jelszó még egyszer</label><input id="spw2" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="err" id="serr" role="alert"></div>
+      <button class="btn" type="submit" id="sbtn">Jelszó mentése és belépés</button>
+    </form>
+    <div id="fresp" class="resp" hidden>
+      <h2 id="rh">Jössz a tárgyalásra?</h2><p id="rsub">Kérjük, erősítsd meg a foglalást, vagy mondd le, ha mégsem lesz rá szükség.</p>
+      <div class="det" id="rdet"></div>
+      <div class="err" id="rerr" role="alert"></div><div class="okm" id="rok" role="status"></div>
+      <div class="two" id="rbtns"><button class="btn danger" type="button" id="rno">Lemondom</button><button class="btn ok" type="button" id="ryes">Igen, jövök</button></div>
+      <div class="alt" style="margin-top:14px"><a class="linkbtn" href="/ugyfel/" id="rlink">Tovább az ügyfélportálra</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170">
+    <div class="who"><b id="wco"></b><span id="wem"></span> · <button type="button" id="logout">Kilépés</button></div>
+  </header>
+  <div class="titlebar">
+    <h1>Tárgyalófoglalás</h1>
+    <p class="sub">Foglalni munkanapokon 8:00 és 18:00 között lehet. Kattints egy szabad sávra, vagy húzd végig rajta az egeret.</p>
+  </div>
+  <div class="toolbar">
+    <button class="iconbtn" id="prev" aria-label="Előző nap">‹</button>
+    <button class="btn ghost sm" id="today">Ma</button>
+    <button class="iconbtn" id="next" aria-label="Következő nap">›</button>
+    <div class="datelabel" id="dlabel"></div>
+    <input type="date" class="datepick" id="dpick" aria-label="Dátum választása">
+    <button class="btn" id="newbtn">+ Új foglalás</button>
+  </div>
+  <div class="legend"><span><i></i>Szabad</span><span><i class="b"></i>Foglalt</span><span><i class="m"></i>Saját foglalás</span></div>
+  <div class="msg" id="msg" role="status"></div>
+  <div class="cal" id="cal"></div>
+
+  <section class="panel">
+    <h2>Foglalásaim</h2>
+    <p class="sub">A céged közelgő foglalásai. A portálon rögzített foglalást a kezdés előtt legalább 24 órával mondhatod le; a 24 órás emlékeztetőben is megerősítheted vagy lemondhatod.</p>
+    <ul class="mylist" id="mine"></ul>
+  </section>
+</div>
+
+<dialog id="dlg"><form class="dlg" id="bform" method="dialog">
+  <h2>Új foglalás</h2>
+  <div class="grid">
+    <div class="wide"><label for="fro">Terem</label><select id="fro"></select></div>
+    <div class="wide"><label for="fda">Dátum</label><input type="date" id="fda" required></div>
+    <div><label for="fst">Kezdés</label><select id="fst"></select></div>
+    <div><label for="fen">Befejezés</label><select id="fen"></select></div>
+    <div class="wide"><label for="fti">Megnevezés (nem kötelező)</label><input id="fti" maxlength="200" placeholder="pl. Ügyféltárgyalás"></div>
+    <div><label for="fpe">Foglaló neve</label><input id="fpe" maxlength="200" autocomplete="name"></div>
+    <div><label for="fpl">Rendszám (parkoláshoz)</label><input id="fpl" maxlength="120" placeholder="pl. ABC-123" autocapitalize="characters"></div>
+    <div class="wide"><label for="fca">Catering igény (nem kötelező)</label><input id="fca" maxlength="1000" placeholder="pl. kávé, víz 6 főre"></div>
+    <div class="wide"><label for="fno">Megjegyzés</label><textarea id="fno" maxlength="1000"></textarea></div>
+  </div>
+  <div class="foot"><div class="msg" id="fmsg" role="status"></div><div class="acts"><button type="button" class="btn ghost" id="fcancel">Mégse</button><button type="submit" class="btn" id="fsave">Foglalás</button></div></div>
+</form></dialog>
+
+<dialog id="det"><div class="dlg">
+  <h2>Foglalás</h2>
+  <div class="det" id="dbody"></div>
+  <div class="foot"><div class="msg" id="dmsg" role="status"></div><div class="acts"><button type="button" class="btn ghost" id="dclose">Bezárás</button><button type="button" class="btn ok" id="dconf" hidden>Megerősítem</button><button type="button" class="btn danger" id="ddel" hidden>Lemondás</button></div></div>
+</div></dialog>
+
+<script>
+const ROOMS=[
+ {id:"panorama",name:"Panoráma terem",cap:10},
+ {id:"kis-tav",name:"Kisterem távolabbi",cap:6},
+ {id:"nagy",name:"Nagyterem",cap:12},
+ {id:"kis-koz",name:"Kisterem közelebbi",cap:6}];
+const OPEN=8*60,CLOSE=18*60,STEP=15;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const toMin=t=>+t.slice(0,2)*60+ +t.slice(3,5);
+const toHM=m=>pad(Math.floor(m/60))+":"+pad(m%60);
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseD=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parseD(s);d.setDate(d.getDate()+n);return iso(d)};
+const todayS=()=>iso(new Date());
+const roomById=id=>ROOMS.find(r=>r.id===id);
+const longDate=s=>parseD(s).toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+const midDate=s=>parseD(s).toLocaleDateString("hu-HU",{month:"long",day:"numeric",weekday:"short"});
+function say(id,t,bad){const el=$(id);el.textContent=t||"";el.classList.toggle("bad",!!bad)}
+function arm(bt,label,fn){if(bt.dataset.arm!=="1"){const old=bt.textContent;bt.dataset.arm="1";bt.textContent=label;setTimeout(()=>{if(bt.isConnected&&bt.dataset.arm==="1"){bt.dataset.arm="";bt.textContent=old}},3500);return}bt.dataset.arm="";fn()}
+function easterD(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+function isHoliday(s){const y=+s.slice(0,4),e=easterD(y),D=n=>{const x=new Date(e);x.setDate(x.getDate()+n);return iso(x)};return [y+"-01-01",y+"-03-15",y+"-05-01",y+"-08-20",y+"-10-23",y+"-11-01",y+"-12-24",y+"-12-25",y+"-12-26",D(-2),D(1),D(50)].includes(s)}
+const isOpenDay=s=>{const w=parseD(s).getDay();return w!==0&&w!==6&&!isHoliday(s)};
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+// a mai napon az aktuális időpont előtti sávok nem foglalhatók
+const firstFree=s=>s<todayS()?CLOSE:s>todayS()?OPEN:Math.min(CLOSE,Math.ceil(nowMin()/STEP)*STEP);
+
+// ---------- API ----------
+let TOKEN="",ME=null;try{TOKEN=localStorage.getItem("vpo_ctoken")||"";ME=JSON.parse(localStorage.getItem("vpo_cuser")||"null")}catch(e){}
+function saveAuth(d){TOKEN=d.token;ME={email:d.email,company:d.company,name:d.name||""};try{localStorage.setItem("vpo_ctoken",TOKEN);localStorage.setItem("vpo_cuser",JSON.stringify(ME))}catch(e){}}
+function clearAuth(){TOKEN="";try{localStorage.removeItem("vpo_ctoken")}catch(e){}}
+async function post(p,b){const r=await fetch("/api/"+p,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.error||"Hiba történt ("+r.status+").");e.status=r.status;throw e}return d}
+async function api(p,o={}){const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json","authorization":"Bearer "+TOKEN}});const d=await r.json().catch(()=>({}));
+ if(r.status===401||(d&&d.auth)){clearAuth();showAuth("login",d.error);const e=new Error(d.error||"Jelentkezz be.");e.status=r.status;throw e}
+ if(!r.ok){const e=new Error(d.error||("HTTP "+r.status));e.status=r.status;throw e}return d}
+
+// ---------- belépés, jelszó, emlékeztető-válasz ----------
+function showAuth(mode,msg){$("auth").hidden=false;$("app").hidden=true;["flogin","fforgot","fset","fresp"].forEach(id=>$(id).hidden=true);
+ const f={login:"flogin",forgot:"fforgot",set:"fset",resp:"fresp"}[mode];$(f).hidden=false;
+ if(mode==="login"){$("lerr").textContent=msg||"";if(ME&&ME.email&&!$("lem").value)$("lem").value=ME.email;setTimeout(()=>($("lem").value?$("lpw"):$("lem")).focus(),30)}
+ if(mode==="forgot"){$("fem").value=$("lem").value;$("ferr").textContent="";$("fok").textContent="";setTimeout(()=>$("fem").focus(),30)}}
+$("toforgot").onclick=()=>showAuth("forgot");
+$("tologin").onclick=()=>showAuth("login");
+$("flogin").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
+ try{const d=await post("login",{email:$("lem").value,password:$("lpw").value});
+  if(d.role!=="client"){$("lerr").innerHTML='Ez munkatársi fiók. Az irodai foglalási felület itt van: <a href="/foglalas/">Tárgyalófoglalás</a>.';return}
+  saveAuth(d);$("lpw").value="";start()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
+$("fforgot").onsubmit=async ev=>{ev.preventDefault();$("fbtn").disabled=true;$("ferr").textContent="";
+ try{await post("forgot",{email:$("fem").value});$("fok").textContent="Ha ehhez a címhez tartozik fiók, néhány percen belül megérkezik a levél a linkkel."}catch(e){$("ferr").textContent=e.message}finally{$("fbtn").disabled=false}};
+let INVITE="";
+$("fset").onsubmit=async ev=>{ev.preventDefault();$("serr").textContent="";
+ if($("spw").value.length<8){$("serr").textContent="A jelszó legalább 8 karakter legyen.";return}
+ if($("spw").value!==$("spw2").value){$("serr").textContent="A két jelszó nem egyezik.";return}
+ $("sbtn").disabled=true;try{const d=await post("setpw",{token:INVITE,password:$("spw").value});saveAuth(d);history.replaceState(null,"","/ugyfel/");start()}
+ catch(e){$("serr").textContent=e.message}finally{$("sbtn").disabled=false}};
+let RTOK="";
+async function openResp(t){RTOK=t;showAuth("resp");$("rbtns").hidden=true;$("rdet").textContent="Betöltés…";
+ try{const r=await fetch("/api/respond?t="+encodeURIComponent(t));const d=await r.json();if(!r.ok)throw new Error(d.error||"Hiba");showResp(d)}
+ catch(e){$("rdet").hidden=true;$("rerr").textContent=e.message;$("rh").textContent="A foglalás nem érhető el";$("rsub").textContent=""}}
+function showResp(d,done){$("rdet").hidden=false;$("rdet").innerHTML=`<div class="r">${esc(d.room)}</div>${esc(longDate(d.date))}<br>${esc(d.start)}–${esc(d.end)}${d.title?"<br>"+esc(d.title):""}<br><span style="color:var(--grey)">${esc(d.company)}</span>`;
+ $("rbtns").hidden=!!(d.past||d.cancelled);
+ if(d.cancelled){$("rh").textContent="A foglalást lemondtad";$("rsub").textContent="Küldtünk róla egy visszaigazoló e-mailt.";$("rdet").style.opacity=".55"}
+ else if(d.past){$("rh").textContent="Ez a foglalás már elkezdődött";$("rsub").textContent=""}
+ else if(d.conf==="yes"){$("rh").textContent=done?"Köszönjük, várunk!":"A részvételt már megerősítetted";$("rsub").textContent="Ha mégsem tudsz jönni, itt még lemondhatod.";$("ryes").hidden=true}
+ else{$("rh").textContent="Jössz a tárgyalásra?";$("ryes").hidden=false}}
+async function respond(a){$("rerr").textContent="";$("ryes").disabled=$("rno").disabled=true;
+ try{const d=await post("respond",{t:RTOK,a});showResp(d,true)}catch(e){$("rerr").textContent=e.message}finally{$("ryes").disabled=$("rno").disabled=false}}
+$("ryes").onclick=()=>respond("yes");
+$("rno").onclick=()=>arm($("rno"),"Biztosan lemondod?",()=>respond("no"));
+$("logout").onclick=()=>{clearAuth();location.href="/ugyfel/"};
+
+// ---------- naptár ----------
+let cur=todayS(),BK=[],MINE=[];
+function readHash(){const p=new URLSearchParams(location.hash.slice(1));if(/^\d{4}-\d{2}-\d{2}$/.test(p.get("d")||""))cur=p.get("d")}
+function setDay(d){cur=d;try{history.replaceState(null,"","#d="+cur)}catch(e){}render();load()}
+async function load(){const d=cur;try{const L=await api(`portal/bookings?from=${d}&to=${d}`);if(d===cur){BK=L;render()}if($("msg").classList.contains("bad"))say("msg","")}catch(e){if(e.status!==401)say("msg","Nem sikerült betölteni: "+e.message,1)}}
+async function loadMine(){try{MINE=await api("portal/mine");renderMine()}catch(e){}}
+let GEO={slot:15};
+function render(){const open=isOpenDay(cur),ff=firstFree(cur);
+ $("dlabel").textContent=longDate(cur)+(cur===todayS()?" · ma":"");$("dpick").value=cur;
+ GEO.slot=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--slot"))||15;
+ const n=(CLOSE-OPEN)/STEP,H=n*GEO.slot;
+ let h=`<div class="calgrid" style="grid-template-columns:56px repeat(${ROOMS.length},minmax(120px,1fr))"><div class="corner"></div>`;
+ ROOMS.forEach(r=>h+=`<div class="colhead">${esc(r.name)}<small>${r.cap} fő</small></div>`);
+ h+=`<div class="times" style="height:${H}px">`;for(let m=OPEN;m<CLOSE;m+=60)h+=`<div>${toHM(m)}</div>`;h+="</div>";
+ ROOMS.forEach((r,i)=>{h+=`<div class="col${open?"":" off"}" data-room="${r.id}" style="height:${H}px">`;
+  if(open&&ff>OPEN)h+=`<div class="pastmask" style="height:${(Math.min(ff,CLOSE)-OPEN)/STEP*GEO.slot}px"></div>`;
+  if(!open&&i===0)h+="";
+  BK.filter(b=>b.room===r.id&&b.date===cur).forEach(b=>{const s=Math.max(OPEN,toMin(b.start)),e=Math.min(CLOSE,toMin(b.end));if(e<=s)return;
+   const top=(s-OPEN)/STEP*GEO.slot,ht=Math.max(GEO.slot,(e-s)/STEP*GEO.slot-2);
+   if(b.mine)h+=`<div class="bk mine" tabindex="0" role="button" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px"><b>${esc(b.title||ME.company)}</b><span>${b.start}–${b.end}${b.person?" · "+esc(b.person):""}</span></div>`;
+   else h+=`<div class="bk busy" style="top:${top}px;height:${ht}px" title="Foglalt ${b.start}–${b.end}"><b>Foglalt</b><span>${b.start}–${b.end}</span></div>`});
+  if(open&&cur===todayS()){const nm=nowMin();if(nm>=OPEN&&nm<=CLOSE)h+=`<div class="now" style="top:${(nm-OPEN)/STEP*GEO.slot}px"></div>`}
+  h+="</div>"});
+ h+="</div>";
+ if(!open)h+=`<div class="closed">${parseD(cur).getDay()%6===0?"Hétvégén":"Munkaszüneti napon"} nem lehet foglalni.</div>`;
+ $("cal").innerHTML=h;$("newbtn").disabled=false}
+function statusBadge(b){if(b.src!=="portal")return'<span class="badge off">irodai foglalás</span>';if(b.conf==="yes")return'<span class="badge ok">✓ megerősítve</span>';if(b.remAt)return'<span class="badge wait">megerősítésre vár</span>';return'<span class="badge">rögzítve</span>'}
+function renderMine(){const L=MINE;$("mine").innerHTML=L.length?L.map(b=>{const r=roomById(b.room);
+  return `<li><span class="when">${esc(midDate(b.date))}, ${b.start}–${b.end}</span><span class="what">${esc(r?r.name:b.room)}${b.title?" · "+esc(b.title):""}${b.person?" · "+esc(b.person):""}</span>${statusBadge(b)}<span class="acts"><button class="btn ghost sm" data-open="${esc(b.id)}" data-date="${b.date}">Részletek</button></span></li>`}).join(""):'<li class="empty">Nincs közelgő foglalásotok.</li>'}
+$("mine").onclick=ev=>{const b=ev.target.closest("[data-open]");if(!b)return;const x=MINE.find(q=>q.id===b.dataset.open);if(x){if(x.date!==cur)setDay(x.date);openDet(x)}};
+
+// kijelölés: kattintás vagy húzás egy szabad sávon
+const slotAt=(col,y)=>{const r=col.getBoundingClientRect();return OPEN+Math.floor((y-r.top)/GEO.slot)*STEP};
+const freeAt=(room,m)=>!BK.some(b=>b.room===room&&b.date===cur&&toMin(b.start)<=m&&m<toMin(b.end));
+let act=null;
+$("cal").addEventListener("pointerdown",ev=>{const bk=ev.target.closest(".bk");if(bk){if(bk.classList.contains("mine")){const b=BK.find(x=>x.id===bk.dataset.id);if(b)openDet(b)}else say("msg","Ez a sáv foglalt.",1);return}
+ const col=ev.target.closest(".col");if(!col||!isOpenDay(cur)||ev.button>0)return;const m=slotAt(col,ev.clientY);
+ if(m<firstFree(cur)||!freeAt(col.dataset.room,m)){say("msg",m<firstFree(cur)?"Ez az időpont már elmúlt.":"Ez a sáv foglalt.",1);return}
+ if(ev.pointerType==="touch"){openNew(col.dataset.room,m,m+60);return}
+ ev.preventDefault();const sel=document.createElement("div");sel.className="sel";col.appendChild(sel);act={col,room:col.dataset.room,a:m,b:m+STEP,sel};drawSel();col.setPointerCapture(ev.pointerId)});
+$("cal").addEventListener("pointermove",ev=>{if(!act)return;let m=slotAt(act.col,ev.clientY)+STEP;m=Math.max(act.a+STEP,Math.min(CLOSE,m));
+ for(let x=act.a;x<m;x+=STEP)if(!freeAt(act.room,x)){m=x;break}act.b=Math.max(act.a+STEP,m);drawSel()});
+$("cal").addEventListener("pointerup",()=>{if(!act)return;const {room,a,b,sel}=act;sel.remove();act=null;openNew(room,a,b-a<=STEP?Math.min(CLOSE,a+60):b)});
+$("cal").addEventListener("pointercancel",()=>{if(act){act.sel.remove();act=null}});
+function drawSel(){act.sel.style.top=(act.a-OPEN)/STEP*GEO.slot+"px";act.sel.style.height=(act.b-act.a)/STEP*GEO.slot-2+"px";act.sel.textContent=toHM(act.a)+"–"+toHM(act.b)}
+$("cal").addEventListener("keydown",ev=>{const bk=ev.target.closest(".bk.mine");if(bk&&(ev.key==="Enter"||ev.key===" ")){ev.preventDefault();const b=BK.find(x=>x.id===bk.dataset.id);if(b)openDet(b)}});
+
+// ---------- új foglalás ----------
+const opts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
+$("fro").innerHTML=ROOMS.map(r=>`<option value="${r.id}">${esc(r.name)} (${r.cap} fő)</option>`).join("");
+$("fst").innerHTML=opts(OPEN,CLOSE-STEP);$("fen").innerHTML=opts(OPEN+STEP,CLOSE);
+function openNew(room,a,b){if(!isOpenDay(cur)){say("msg","Ezen a napon nem lehet foglalni.",1);return}
+ let s=a??Math.max(firstFree(cur),9*60);if(s>=CLOSE){s=OPEN}let e=Math.min(CLOSE,b??s+60);if(e<=s)e=Math.min(CLOSE,s+STEP);
+ $("fro").value=room||ROOMS[0].id;$("fda").value=cur;$("fda").min=todayS();$("fst").value=toHM(s);$("fen").value=toHM(e);
+ ["fti","fpl","fca","fno"].forEach(id=>$(id).value="");$("fpe").value=ME.name||"";say("fmsg","");$("fsave").disabled=false;$("dlg").showModal();setTimeout(()=>$("fti").focus(),30)}
+$("newbtn").onclick=()=>{if(!isOpenDay(cur)||firstFree(cur)>=CLOSE){let d=cur<todayS()?todayS():cur;for(let i=0;i<14&&(!isOpenDay(d)||firstFree(d)>=CLOSE);i++)d=addDays(d,1);setDay(d)}openNew()};
+$("fst").onchange=()=>{if(toMin($("fen").value)<=toMin($("fst").value))$("fen").value=toHM(Math.min(CLOSE,toMin($("fst").value)+60))};
+$("fcancel").onclick=()=>$("dlg").close();
+$("bform").onsubmit=async ev=>{ev.preventDefault();const b={room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,title:$("fti").value.trim(),person:$("fpe").value.trim(),plate:$("fpl").value.trim(),catering:$("fca").value.trim(),note:$("fno").value.trim()};
+ if(!b.date){say("fmsg","Add meg a dátumot.",1);return}
+ if(!isOpenDay(b.date)){say("fmsg","Foglalni csak munkanapokon lehet.",1);return}
+ if(toMin(b.end)<=toMin(b.start)){say("fmsg","A befejezésnek a kezdés után kell lennie.",1);return}
+ $("fsave").disabled=true;say("fmsg","Mentés…");
+ try{const d=await api("portal/bookings",{method:"POST",body:JSON.stringify(b)});$("dlg").close();
+  if(b.date!==cur)setDay(b.date);else load();loadMine();
+  say("msg","✓ Lefoglaltad: "+(roomById(b.room)||{}).name+", "+midDate(b.date)+" "+b.start+"–"+b.end+(d.mailed?". A visszaigazolást elküldtük e-mailben.":"."))}
+ catch(e){say("fmsg",e.message,1);$("fsave").disabled=false}};
+
+// ---------- saját foglalás részletei ----------
+let DET=null;
+function openDet(b){DET=b;const r=roomById(b.room);
+ $("dbody").innerHTML=`<div class="r">${esc(r?r.name:b.room)}</div>${esc(longDate(b.date))}, ${b.start}–${b.end}${b.title?"<br>"+esc(b.title):""}${b.person?"<br>Foglaló: "+esc(b.person):""}${b.plate?"<br>Rendszám: "+esc(b.plate):""}<div style="margin-top:6px">${statusBadge(b)}</div>${b.catering?`<div class="n"><b>Catering:</b> ${esc(b.catering)}</div>`:""}${b.note?`<div class="n">${esc(b.note)}</div>`:""}${b.src==="portal"&&!b.canCancel?'<div class="n">A kezdés előtti 24 órán belül a portálon már nem mondható le – kérjük, ilyenkor írj nekünk, vagy használd az emlékeztető e-mailt.</div>':""}${b.src!=="portal"?'<div class="n">Ezt a foglalást az iroda rögzítette. Módosításhoz kérjük, írj nekünk.</div>':""}`;
+ $("ddel").hidden=!b.canCancel;$("ddel").dataset.arm="";$("ddel").textContent="Lemondás";
+ $("dconf").hidden=!(b.src==="portal"&&b.remAt&&b.conf!=="yes");say("dmsg","");$("det").showModal()}
+$("dclose").onclick=()=>$("det").close();
+$("ddel").onclick=()=>arm($("ddel"),"Biztosan lemondod?",async()=>{try{await api("portal/bookings/"+encodeURIComponent(DET.id),{method:"DELETE"});$("det").close();say("msg","A foglalást lemondtad, erről e-mailt is küldtünk.");load();loadMine()}catch(e){say("dmsg",e.message,1)}});
+$("dconf").onclick=async()=>{try{await api("portal/confirm/"+encodeURIComponent(DET.id),{method:"POST"});$("det").close();say("msg","✓ Köszönjük, megerősítetted a részvételt.");load();loadMine()}catch(e){say("dmsg",e.message,1)}};
+
+$("prev").onclick=()=>setDay(addDays(cur,-1));
+$("next").onclick=()=>setDay(addDays(cur,1));
+$("today").onclick=()=>setDay(todayS());
+$("dpick").onchange=()=>{if($("dpick").value)setDay($("dpick").value)};
+
+// ---------- indulás ----------
+function start(){$("auth").hidden=true;$("app").hidden=false;$("wco").textContent=ME.company||"";$("wem").textContent=ME.email||"";render();load();loadMine()}
+const Q=new URLSearchParams(location.search);
+readHash();
+if(Q.get("r"))openResp(Q.get("r"));
+else if(Q.get("invite")){INVITE=Q.get("invite");let em="";try{em=atob(INVITE.split(".")[0].replace(/-/g,"+").replace(/_/g,"/"))}catch(e){}$("setem").value=em;$("setsub").textContent=(em?em+" – ":"")+"add meg a jelszavadat (legalább 8 karakter).";showAuth("set");setTimeout(()=>$("spw").focus(),30)}
+else if(TOKEN&&ME){start();api("me").then(d=>{if(d.role!=="client"){clearAuth();showAuth("login")}else{ME={...ME,company:d.company,name:d.name};$("wco").textContent=ME.company}}).catch(()=>{})}
+else showAuth("login");
+window.addEventListener("hashchange",()=>{const o=cur;readHash();if(cur!==o&&TOKEN&&!$("app").hidden){render();load()}});
+setInterval(()=>{if(!document.hidden&&TOKEN&&!act&&!$("dlg").open&&!$("det").open)load()},30000);
+setInterval(()=>{if(!document.hidden&&TOKEN&&!act)render()},60000);
+</script>
+</body>
+</html>
