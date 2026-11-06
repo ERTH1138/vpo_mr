@@ -123,6 +123,16 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
 [hidden]{display:none!important}
 @media (max-width:560px){header img{height:48px} header .tag{display:none} .panel{padding:16px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+#log thead th{position:sticky;top:0;background:#fff;z-index:1}
+#log .hrow th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
+#log .hrow th[data-k]:hover{color:var(--ink)}
+#log .hrow th[data-k]::after{content:"";display:inline-block;width:12px;margin-left:3px;color:var(--red)}
+#log .hrow th.asc::after{content:"▲";font-size:9px}
+#log .hrow th.desc::after{content:"▼";font-size:9px}
+#log .frow th{border-bottom:1px solid var(--line);padding:4px 6px 8px;top:34px}
+#log .frow input{padding:5px 8px;font-size:12.5px;border-radius:7px;min-width:70px;font-weight:400}
+#log .frow input:not(:placeholder-shown){border-color:var(--orange);background:#FFFBF8}
+#log td.rec{font-size:12.5px;color:var(--grey);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -189,8 +199,11 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
     </div>
 
     <div class="panel">
-      <div class="phead"><div><h2>Rögzített tételek</h2><p class="sub" id="logsub"></p></div><div style="min-width:200px"><label for="fc">Szűrés ügyfélre</label><select id="fc"></select></div></div>
-      <div class="tablebox"><table id="log"></table></div>
+      <div class="phead"><div><h2>Rögzített tételek</h2><p class="sub" id="logsub"></p></div><button type="button" class="btn ghost sm" id="fclear" hidden>Szűrők törlése</button></div>
+      <div class="tablebox"><table id="log"><thead>
+        <tr class="hrow"><th data-k="ts">Rögzítve</th><th data-k="date">Dátum</th><th data-k="company">Ügyfél</th><th data-k="person">Ki kérte</th><th data-k="item">Tétel</th><th data-k="qty" class=num>Db</th><th data-k="total" class=num>Összeg</th><th data-k="note">Megjegyzés</th><th></th></tr>
+        <tr class="frow"><th><input data-f="ts" placeholder="szűrés" aria-label="Szűrés: rögzítve"></th><th><input data-f="date" placeholder="szűrés" aria-label="Szűrés: dátum"></th><th><input data-f="company" placeholder="szűrés" aria-label="Szűrés: ügyfél"></th><th><input data-f="person" placeholder="szűrés" aria-label="Szűrés: ki kérte"></th><th><input data-f="item" placeholder="szűrés" aria-label="Szűrés: tétel"></th><th><input data-f="qty" placeholder="pl. >2" aria-label="Szűrés: darab"></th><th><input data-f="total" placeholder="pl. >5000" aria-label="Szűrés: összeg"></th><th><input data-f="note" placeholder="szűrés" aria-label="Szűrés: megjegyzés"></th><th></th></tr>
+      </thead><tbody id="logb"></tbody></table></div>
     </div>
   </section>
 
@@ -395,6 +408,22 @@ function aggregate(M,FR,R){const by={};M.forEach(e=>{const o=by[e.company]||(by[
   o.h[cat]+=conv(e.total,c,"HUF",R);o.e[cat]+=conv(e.total,c,"EUR",R);o.fq+=f.q;o.fah+=conv(f.a,c,"HUF",R);o.fae+=conv(f.a,c,"EUR",R)});
  Object.values(by).forEach(o=>{o.nh=o.h.Konyhai+o.h.Irodai+o.h["Egyéb"]-o.fah;o.ne=o.e.Konyhai+o.e.Irodai+o.e["Egyéb"]-o.fae});return by}
 function renderPeople(){const c=norm($("co").value);const ps=[...new Set(E.filter(e=>norm(e.company)===c&&e.person).map(e=>e.person))];$("pl").innerHTML=ps.map(p=>`<option value="${esc(p)}">`).join("")}
+// ---------- Rögzített tételek: rendezés és oszlopszűrők ----------
+let LSORT={k:"ts",d:-1},LF={};
+const recTs=e=>e.virtual?Date.parse(e.date+"T23:59:00"):(+e.ts||Date.parse(e.date+"T00:00:00"));
+function recTxt(e){if(e.virtual)return "foglalásokból";const d=new Date(recTs(e));return pad2(d.getMonth()+1)+"."+pad2(d.getDate())+". "+pad2(d.getHours())+":"+pad2(d.getMinutes())+(e.by?" · "+String(e.by).split("@")[0]:"")}
+const pad2=n=>String(n).padStart(2,"0");
+const fold=s=>String(s??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function logVal(e,k){if(k==="ts")return recTxt(e);if(k==="item")return e.item+(e.virtual?" foglalásból":"");if(k==="total")return money(e.total,curOf(e));return e[k]}
+function numFilter(f,v){const m=f.replace(/\s/g,"").match(/^(>=|<=|>|<|=)(-?\d+(?:[.,]\d+)?)$/);if(!m)return null;const x=+m[2].replace(",","."),y=+v;
+ return m[1]===">"?y>x:m[1]===">="?y>=x:m[1]==="<"?y<x:m[1]==="<="?y<=x:y===x}
+function logMatch(e){for(const k in LF){const f=LF[k].trim();if(!f)continue;
+  if(k==="qty"||k==="total"){const r=numFilter(f,k==="qty"?e.qty:e.total);if(r!==null){if(!r)return false;continue}}
+  if(!fold(logVal(e,k)).includes(fold(f)))return false}return true}
+function logCmp(a,b){const k=LSORT.k,d=LSORT.d;let x,y;
+ if(k==="ts"){x=recTs(a);y=recTs(b)}else if(k==="qty"||k==="total"){x=+a[k]||0;y=+b[k]||0}else if(k==="date"){x=a.date+String(recTs(a)).padStart(15,"0");y=b.date+String(recTs(b)).padStart(15,"0")}
+ else{const c=String(a[k]||"").localeCompare(String(b[k]||""),"hu");return c?c*d:recTs(b)-recTs(a)}
+ return x<y?-d:x>y?d:0}
 function render(){
  const cs=[...new Set([...CLIENTS.map(c=>c.n),...E.map(e=>e.company)])].sort((a,b)=>a.localeCompare(b,"hu"));
  $("cl").innerHTML=cs.map(c=>`<option value="${esc(c)}">`).join("");renderPeople();
@@ -408,16 +437,18 @@ function render(){
   h+=`<tr><td>${esc(c)}${X?' <span class="badge eur">EUR</span>':""}</td><td class=num>${show(k.Konyhai,o.cur)}</td><td class=num>${show(k.Irodai,o.cur)}</td><td class=num>${show(k["Egyéb"],o.cur)}</td><td class=num>${o.fq?"−"+show(fa,o.cur)+" <span class=mute>("+fmtN(o.fq)+" óra)</span>":"<span class=mute>–</span>"}</td><td class=num><b>${show(o.nh,"HUF")}</b></td><td class=num>${X?"<b>"+show(o.ne,"EUR")+"</b>":"<span class=mute>–</span>"}</td></tr>`});
  h+=`<tr class=total><td>Összesen</td><td></td><td></td><td></td><td></td><td class=num><span class=big>${show(g,"HUF")}</span></td><td class=num>${gx?show(ge,"EUR"):""}</td></tr>`;
  $("sum").innerHTML=Object.keys(by).length?h:"<tr><td class=empty>Ebben a hónapban még nincs rögzített tétel.</td></tr>";
- const prev=$("fc").value;$("fc").innerHTML='<option value="">Minden ügyfél</option>'+Object.keys(by).sort((a,b)=>a.localeCompare(b,"hu")).map(c=>`<option>${esc(c)}</option>`).join("");$("fc").value=by[prev]?prev:"";
- const L=M.filter(e=>!$("fc").value||e.company===$("fc").value).sort((a,b)=>(b.date+b.ts).localeCompare(a.date+a.ts));
+ const L=M.filter(logMatch).sort(logCmp),act=Object.values(LF).some(v=>v.trim());$("fclear").hidden=!act;
  $("logsub").textContent=M.length?(M.length-VB.length)+" rögzített tétel"+(VB.length?" · "+BKN+" tárgyalófoglalás "+VB.length+" összesített sorban":"")+" ebben a hónapban":"";
- $("log").innerHTML=L.length?"<tr><th>Dátum</th><th>Ügyfél</th><th>Ki kérte</th><th>Tétel</th><th class=num>Db</th><th class=num>Összeg</th><th>Megjegyzés</th><th></th></tr>"+
-  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
-  :"<tr><td class=empty>Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra.</td></tr>";
+ document.querySelectorAll("#log .hrow th[data-k]").forEach(th=>{th.classList.toggle("asc",th.dataset.k===LSORT.k&&LSORT.d>0);th.classList.toggle("desc",th.dataset.k===LSORT.k&&LSORT.d<0)});
+ $("logb").innerHTML=L.length?
+  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td class=rec>${esc(recTxt(e))}</td><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
+  :`<tr><td class=empty colspan=9>${M.length?"Nincs a szűrésnek megfelelő tétel.":"Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra."}</td></tr>`;
 }
 $("log").onclick=ev=>{const bt=ev.target.closest("button");if(!bt)return;if(bt.dataset.ed){startEdit(bt.dataset.ed);return}const id=bt.dataset.id;if(!id)return;
  arm(bt,"Biztos?",async()=>{try{await api("entries/"+encodeURIComponent(id),{method:"DELETE"});E=E.filter(e=>e.id!==id);if(editId===id)endEdit();render()}catch(e){say("msg","Nem sikerült törölni.",1)}})};
-$("fc").onchange=render;
+$("log").querySelector(".hrow").onclick=ev=>{const th=ev.target.closest("th[data-k]");if(!th)return;const k=th.dataset.k;LSORT=LSORT.k===k?{k,d:-LSORT.d}:{k,d:(k==="ts"||k==="date"||k==="qty"||k==="total")?-1:1};render()};
+$("log").querySelector(".frow").addEventListener("input",ev=>{const i=ev.target;if(!i.dataset.f)return;LF[i.dataset.f]=i.value;render()});
+$("fclear").onclick=()=>{LF={};$("log").querySelectorAll(".frow input").forEach(i=>i.value="");render()};
 $("mon").onchange=()=>{E=[];VB=[];fillRate(true);render();loadE();loadBK()};
 
 // ---------- árfolyam ----------
