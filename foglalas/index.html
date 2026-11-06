@@ -140,6 +140,9 @@ dialog::backdrop{background:rgba(30,20,15,.35)}
 .plates .mute{font-size:13px}
 .tip{position:fixed;z-index:50;max-width:320px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 12px;font-size:13px;line-height:1.4;pointer-events:none;border-top:4px solid var(--c)}
 .tip b{display:block;font-size:14px}
+.pst{font-style:normal;font-weight:700;display:inline-block;min-width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;font-size:10px;margin-right:4px;background:#fff;color:var(--grey);border:1px solid var(--line);vertical-align:1px}
+.pst.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.pst.wait{background:#F3B33D;color:#fff;border-color:#E0A02A}
 .tip .t{color:#5a5a5a}
 .tip .n{margin-top:6px;white-space:pre-line}
 .tip .n i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
@@ -343,6 +346,7 @@ const money=(n,c)=>c==="EUR"?fmtE(n)+" EUR":fmt(n)+" Ft";
 const longDate=s=>parseD(s).toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
 const shortDay=s=>parseD(s).toLocaleDateString("hu-HU",{weekday:"short",month:"2-digit",day:"2-digit"});
 function hash(s){let h=2166136261;for(const ch of norm(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}h^=h>>>13;h=Math.imul(h,2246822507)>>>0;h^=h>>>16;return h>>>0}
+const pst=b=>!b.own?"":b.conf==="yes"?'<em class="pst ok" title="Ügyfél megerősítette">✓</em>':b.remAt?'<em class="pst wait" title="Nem erősítette meg">?</em>':'<em class="pst" title="Ügyfélportálon foglalva">●</em>';
 const who=b=>{const c=b.company||b.title||"",p=b.person||"";return c&&p?c+" ("+p+")":(c||p||"Foglalás")};
 function colorOf(b){const k=b.company||b.title||b.person||"?";return PALETTE[hash(k)%PALETTE.length]}
 function say(id,t,bad){const el=$(id);el.textContent=t||"";el.classList.toggle("bad",!!bad)}
@@ -456,7 +460,7 @@ function render(){renderPlates();renderCater();renderTodo();rememberPeople();
  const t=todayS();
  cols.forEach((c,i)=>{h+=`<div class="col${c.date<t?" past":""}" data-i="${i}" style="height:${rows*slot}px">`;
   BK.filter(b=>b.date===c.date&&b.room===c.room).forEach(b=>{const top=(toMin(b.start)-s)/STEP*slot,ht=Math.max(slot,(toMin(b.end)-toMin(b.start))/STEP*slot-2),col=colorOf(b);
-   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" aria-label="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${esc(who(b))}</b><span>${b.repLast?'<em class="lastrep">utolsó alkalom</em> ':""}${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
+   h+=`<div class="bk" tabindex="0" data-id="${esc(b.id)}" style="top:${top}px;height:${ht}px;--c:${col};--cbg:${col}1F" aria-label="${esc(b.start+"–"+b.end+" · "+(b.company||"")+(b.title?" · "+b.title:""))}"><b>${pst(b)}${esc(who(b))}</b><span>${b.repLast?'<em class="lastrep">utolsó alkalom</em> ':""}${b.start}–${b.end}${b.title&&b.company?" · "+esc(b.title):""}</span><div class="rs"></div></div>`});
   if(c.date===t){const n=new Date(),nm=n.getHours()*60+n.getMinutes();if(nm>=s&&nm<=e)h+=`<div class="now" style="top:${(nm-s)/STEP*slot}px"></div>`}
   h+="</div>"});
  h+="</div>";
@@ -467,7 +471,7 @@ function render(){renderPlates();renderCater();renderTodo();rememberPeople();
 function renderList(){const q=norm($("lq")?$("lq").value:"");const L=BK.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
  let h=`<div style="padding:12px;border-bottom:1px solid var(--line)"><input id="lq" type="search" placeholder="Szűrés ügyfélre vagy megnevezésre…" value="${esc(q)}" style="max-width:320px"></div><table><tr><th>Időpont</th><th>Terem</th><th>Ügyfél</th><th>Megnevezés</th><th>Foglaló</th><th>Rendszám</th><th>Időtartam</th></tr>`;
  let last="",n=0;L.filter(b=>!q||norm(b.company+" "+b.title+" "+b.person).includes(q)).forEach(b=>{n++;if(b.date!==last){last=b.date;h+=`<tr class="day"><td colspan="7">${esc(longDate(b.date))}</td></tr>`}
-  const r=roomById(b.room);h+=`<tr class="click" data-id="${esc(b.id)}"><td>${b.start}–${b.end}</td><td>${esc(r?r.name:b.room)}</td><td><span class="dot" style="--c:${colorOf(b)}"></span>${esc(b.company)}</td><td>${esc(b.title)}${b.repLast?' <em class="lastrep">utolsó alkalom</em>':""}</td><td>${esc(b.person)}</td><td>${esc(b.plate||"")}</td><td>${fmtDur(toMin(b.end)-toMin(b.start))}</td></tr>`});
+  const r=roomById(b.room);h+=`<tr class="click" data-id="${esc(b.id)}"><td>${b.start}–${b.end}</td><td>${esc(r?r.name:b.room)}</td><td><span class="dot" style="--c:${colorOf(b)}"></span>${esc(b.company)}</td><td>${pst(b)}${esc(b.title)}${b.repLast?' <em class="lastrep">utolsó alkalom</em>':""}</td><td>${esc(b.person)}</td><td>${esc(b.plate||"")}</td><td>${fmtDur(toMin(b.end)-toMin(b.start))}</td></tr>`});
  if(!n)h+=`<tr><td colspan="7" class="empty">${q?"Nincs találat.":"Ebben az időszakban nincs foglalás."}</td></tr>`;
  $("list").innerHTML=h+"</table>";$("legend").innerHTML="";const lq=$("lq");lq.oninput=()=>{const p=lq.selectionStart;renderList();$("lq").focus();$("lq").setSelectionRange(p,p)}}
 $("list").onclick=e=>{const tr=e.target.closest("tr[data-id]");if(tr)openEdit(tr.dataset.id)};
@@ -561,7 +565,7 @@ $("ncs").onclick=async()=>{const n=$("ncn").value.trim();if(!n){say("ncm","Add m
 const tip=document.createElement("div");tip.className="tip";tip.hidden=true;document.body.appendChild(tip);
 function showTip(el,x,y){const b=BK.find(q=>q.id===el.dataset.id);if(!b||act){tip.hidden=true;return}const r=roomById(b.room),cl=b.company&&findClient(b.company);
  tip.style.setProperty("--c",colorOf(b));
- tip.innerHTML=`<b>${esc(who(b))}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.rep?`<div class="t"${b.repLast?' style="color:var(--red);font-weight:700"':""}>${b.repLast?"Ismétlődő foglalás – ez az utolsó alkalom":"Ismétlődő foglalás · utolsó alkalom: "+esc(b.repEnd)}</div>`:""}${b.catering?`<div class="n"><i>Catering</i>${esc(b.catering)}</div>`:""}${b.plate?`<div class="t">Rendszám: <b style="display:inline">${esc(b.plate)}</b></div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
+ tip.innerHTML=`<b>${esc(who(b))}</b><div class="t">${esc(b.start)}–${esc(b.end)} · ${esc(r?r.name:b.room)}</div>${b.title&&b.company?`<div class="t">${esc(b.title)}</div>`:""}${b.person?`<div class="t">Foglaló: ${esc(b.person)}</div>`:""}${b.rep?`<div class="t"${b.repLast?' style="color:var(--red);font-weight:700"':""}>${b.repLast?"Ismétlődő foglalás – ez az utolsó alkalom":"Ismétlődő foglalás · utolsó alkalom: "+esc(b.repEnd)}</div>`:""}${b.catering?`<div class="n"><i>Catering</i>${esc(b.catering)}</div>`:""}${b.plate?`<div class="t">Rendszám: <b style="display:inline">${esc(b.plate)}</b></div>`:""}${b.own?`<div class="t" style="font-weight:700;color:${b.conf==="yes"?"var(--ok)":b.remAt?"#8A5A00":"var(--ink)"}">Ügyfélportálon foglalva · ${b.conf==="yes"?"✓ megerősítette":b.remAt?"nem erősítette meg (emlékeztető elküldve)":"emlékeztető a kezdés előtt 24 órával"}</div>`:""}${b.by?`<div class="t">Rögzítette: ${esc(b.by)}${b.upd&&b.upd!==b.by?", módosította: "+esc(b.upd):""}</div>`:""}${b.note?`<div class="n"><i>Megjegyzés</i>${esc(b.note)}</div>`:""}${cl&&cl.note?`<div class="n"><i>Ügyfél megjegyzése</i>${esc(cl.note)}</div>`:""}`;
  tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let left=x+14,top=y+14;if(left+w>innerWidth-8)left=x-w-14;if(top+h>innerHeight-8)top=y-h-14;tip.style.left=Math.max(8,left)+"px";tip.style.top=Math.max(8,top)+"px"}
 $("cal").addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest(".bk");if(el)showTip(el,e.clientX,e.clientY);else tip.hidden=true});
 $("cal").addEventListener("pointerleave",()=>{tip.hidden=true});
@@ -610,7 +614,7 @@ function showLogin(msg){$("login").hidden=false;$("lerr").textContent=msg||"";if
 function setWho(){$("who").hidden=!ME||!TOKEN;$("whoe").textContent=ME?"Belépve: "+ME:""}
 $("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
  try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("lem").value,password:$("lpw").value})});const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
+  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");if(d.role==="client")throw new Error("Ez ügyfélfiók – az ügyfélportálon tudsz foglalni: "+location.origin+"/ugyfel/");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
   $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
 $("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
 function boot(){loadCfg();loadPeople();loadBK(true)}
