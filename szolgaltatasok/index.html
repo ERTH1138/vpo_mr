@@ -71,6 +71,8 @@ input[type=checkbox]{width:auto;accent-color:var(--red)}
 .badge.eur{background:#EEF3FF;border-color:#CCD9F7;color:#24448F}
 .badge.free{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
 .badge.price{background:var(--peach);border-color:#F6CDB6;color:#8A3A16}
+.badge.portal{background:#F1ECFA;border-color:#D9CCF0;color:#4B2C86;margin-left:6px}
+.linkbox{display:flex;gap:6px;margin-top:6px}.linkbox input{font-size:13px;padding:6px 9px}
 .inline{display:flex;gap:6px}
 .inline select{width:auto;min-width:76px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
@@ -238,6 +240,13 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
       <div style="margin-top:20px">
         <div class="phead" style="margin-bottom:8px"><div><h2 style="font-size:16px">Egyedi (kedvezményes) árak</h2><p class="sub">Rögzítéskor ennél az ügyfélnél ezek az árak töltődnek be az árlista helyett. Az ár forintban vagy euróban is megadható.</p></div><button class="btn ghost sm" id="cpadd">+ Egyedi ár</button></div>
         <div class="tablebox"><table id="cptab"></table></div>
+      </div>
+
+      <div style="margin-top:22px" id="pacc" hidden>
+        <div class="phead" style="margin-bottom:8px"><div><h2 style="font-size:16px">Ügyfélportál-hozzáférések</h2><p class="sub">Ezekkel az e-mail-címekkel az ügyfél munkatársai maguk foglalhatnak tárgyalót az <a href="/ugyfel/" target="_blank" rel="noopener">ügyfélportálon</a> (mások foglalásaiból csak annyit látnak, hogy foglalt). Új cím felvételekor meghívó e-mailt küldünk, amellyel jelszót állíthat be.</p></div></div>
+        <div class="tablebox"><table id="patab"></table></div>
+        <div class="grid" style="margin-top:10px"><div class="wide"><label for="paem">E-mail-cím</label><input id="paem" type="email" autocomplete="off" placeholder="nev@ceg.hu"></div><div><label for="pana">Név</label><input id="pana" autocomplete="off" placeholder="pl. Kovács Anna"></div><div style="display:flex;align-items:flex-end"><button type="button" class="btn ghost" id="paadd" style="width:100%">Meghívás</button></div></div>
+        <div class="msg" id="pam" role="status"></div>
       </div>
 
       <div class="formfoot"><div class="msg" id="cm" role="status"></div><div class="actions"><button class="btn danger" id="cdel" hidden>Ügyfél törlése</button><button class="btn ghost" id="ccancel">Mégse</button><button class="btn" id="csave">Mentés</button></div></div>
@@ -479,7 +488,7 @@ $("xl").onclick=()=>{
 // ---------- ügyfelek ----------
 function renderClients(){const q=norm($("cq").value);$("ccount").textContent=CLIENTS.length;
  const L=CLIENTS.filter(c=>!q||norm(c.n).includes(q)).sort((a,b)=>a.n.localeCompare(b.n,"hu"));
- $("ctab").innerHTML=L.length?"<tr><th>Ügyfél</th><th>Számlázás</th><th class=num>Ingyenes óra / hó</th><th>Egyedi árak</th><th>Megjegyzés</th><th>Gyakori</th><th></th></tr>"+L.map(c=>`<tr class="click${edOrig&&c.n===edOrig?" sel":""}" data-n="${esc(c.n)}"><td><b>${esc(c.n)}</b></td><td>${c.eur?'<span class="badge eur">EUR</span>':'<span class=mute>Ft</span>'}</td><td class=num>${c.free?fmtN(c.free):'<span class=mute>–</span>'}</td><td class=wrap>${c.prices.length?c.prices.map(p=>esc(shortName(p.i))+": <b>"+money(p.u,p.cur)+"</b>").join("<br>"):'<span class=mute>–</span>'}</td><td class=notecell>${c.note?esc(c.note.length>140?c.note.slice(0,140)+"…":c.note):'<span class=mute>–</span>'}</td><td>${inQL(c.n)?"★":""}</td><td class=act><button type="button" class="x">Szerkesztés</button></td></tr>`).join("")
+ $("ctab").innerHTML=L.length?"<tr><th>Ügyfél</th><th>Számlázás</th><th class=num>Ingyenes óra / hó</th><th>Egyedi árak</th><th>Megjegyzés</th><th>Gyakori</th><th></th></tr>"+L.map(c=>`<tr class="click${edOrig&&c.n===edOrig?" sel":""}" data-n="${esc(c.n)}"><td><b>${esc(c.n)}</b>${accsOf(c.n).length?`<span class="badge portal" title="Ügyfélportál-hozzáférések">portál: ${accsOf(c.n).length}</span>`:""}</td><td>${c.eur?'<span class="badge eur">EUR</span>':'<span class=mute>Ft</span>'}</td><td class=num>${c.free?fmtN(c.free):'<span class=mute>–</span>'}</td><td class=wrap>${c.prices.length?c.prices.map(p=>esc(shortName(p.i))+": <b>"+money(p.u,p.cur)+"</b>").join("<br>"):'<span class=mute>–</span>'}</td><td class=notecell>${c.note?esc(c.note.length>140?c.note.slice(0,140)+"…":c.note):'<span class=mute>–</span>'}</td><td>${inQL(c.n)?"★":""}</td><td class=act><button type="button" class="x">Szerkesztés</button></td></tr>`).join("")
   :`<tr><td class=empty>${q?"Nincs ilyen nevű ügyfél.":"Még nincs ügyfél. Az „+ Új ügyfél” gombbal vehetsz fel egyet."}</td></tr>`}
 $("ctab").onclick=e=>{const tr=e.target.closest("tr[data-n]");if(tr)openClient(tr.dataset.n)};
 $("cq").oninput=renderClients;
@@ -487,7 +496,7 @@ $("cnew").onclick=()=>openClient(null,"");
 function openClient(name,prefill){const c=name?findClient(name):null;edOrig=c?c.n:null;
  ED=c?{n:c.n,eur:!!c.eur,free:c.free||0,note:c.note||"",prices:c.prices.map(p=>({...p}))}:{n:prefill||"",eur:false,free:0,note:"",prices:[]};
  $("ced").hidden=false;$("ceh").textContent=c?c.n:"Új ügyfél";$("cname").value=ED.n;setEdCur(ED.eur);$("cfree").value=ED.free||"";$("cquick").checked=c?inQL(c.n):true;$("cnote").value=ED.note;
- $("cdel").hidden=!c;$("cdel").dataset.arm="";$("cdel").textContent="Ügyfél törlése";say("cm","");renderCP();renderClients();
+ $("cdel").hidden=!c;$("cdel").dataset.arm="";$("cdel").textContent="Ügyfél törlése";say("cm","");renderCP();renderClients();$("pacc").hidden=!c;say("pam","");$("paem").value="";$("pana").value="";renderAcc();
  $("ced").scrollIntoView({behavior:"smooth",block:"start"});if(!c)setTimeout(()=>$("cname").focus(),50)}
 function closeClient(){ED=null;edOrig=null;$("ced").hidden=true;renderClients()}
 function setEdCur(e){if(ED)ED.eur=e;document.querySelectorAll("#ced .toggle button").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.cur==="EUR")===e)))}
@@ -511,9 +520,28 @@ $("csave").onclick=async()=>{if(!ED)return;const n=$("cname").value.trim();if(!n
  if(edOrig){const ix=CLIENTS.findIndex(c=>c.n===edOrig);CLIENTS[ix]=rec;QL=QL.map(q=>norm(q)===norm(edOrig)?n:q)}else CLIENTS.push(rec);
  const q=inQL(n);if($("cquick").checked&&!q)QL=QL.concat(n);if(!$("cquick").checked&&q)QL=QL.filter(x=>norm(x)!==norm(n));
  try{await saveCfg()}catch(e){CLIENTS=bC;QL=bQ;say("cm","Nem sikerült menteni: "+e.message,1);return}
- const renamed=edOrig&&edOrig!==n;closeClient();say("clm","✓ Mentve: "+n+(renamed?" – a korábban rögzített tételek a régi néven maradnak.":""));refreshAll(false)};
+ const renamed=edOrig&&edOrig!==n;if(renamed){for(const a of accsOf(edOrig)){try{await api("accounts/"+encodeURIComponent(a.email),{method:"PUT",body:JSON.stringify({company:n})})}catch(e){}}loadAcc()}closeClient();say("clm","✓ Mentve: "+n+(renamed?" – a korábban rögzített tételek a régi néven maradnak.":""));refreshAll(false)};
 $("cdel").onclick=()=>arm($("cdel"),"Biztosan törlöd?",async()=>{const n=edOrig,bC=CLIENTS.slice(),bQ=QL.slice();CLIENTS=CLIENTS.filter(c=>c.n!==n);QL=QL.filter(q=>norm(q)!==norm(n));
  try{await saveCfg()}catch(e){CLIENTS=bC;QL=bQ;say("cm","Nem sikerült törölni.",1);return}closeClient();say("clm","✓ Törölve: "+n+". A rögzített tételei megmaradtak.");refreshAll(false)});
+
+// ---------- ügyfélportál-hozzáférések ----------
+let ACC=[];
+const accsOf=n=>ACC.filter(a=>norm(a.company)===norm(n));
+async function loadAcc(){try{ACC=await api("accounts");renderClients();renderAcc()}catch(e){}}
+function accState(a){if(a.off)return'<span class="badge">letiltva</span>';if(a.active)return'<span class="badge free">aktív</span>';if(a.invX>Date.now())return'<span class="badge price">meghívó elküldve</span>';return'<span class="badge">meghívó lejárt</span>'}
+function renderAcc(){if(!edOrig||$("pacc").hidden)return;const L=accsOf(edOrig);
+ $("patab").innerHTML=L.length?"<tr><th>E-mail</th><th>Név</th><th>Állapot</th><th>Utolsó belépés</th><th></th></tr>"+L.map(a=>`<tr><td>${esc(a.email)}</td><td>${esc(a.name)||'<span class=mute>–</span>'}</td><td>${accState(a)}</td><td>${a.last?new Date(a.last).toLocaleDateString("hu-HU"):'<span class=mute>–</span>'}</td><td class=act><button type="button" class="x" data-inv="${esc(a.email)}">${a.active?"Jelszó-link küldése":"Meghívó újraküldése"}</button> <button type="button" class="x" data-off="${esc(a.email)}">${a.off?"Engedélyezés":"Letiltás"}</button> <button type="button" class="x del" data-adel="${esc(a.email)}">Törlés</button></td></tr>`).join("")
+  :"<tr><td class=empty>Még nincs portál-hozzáférés ennél az ügyfélnél.</td></tr>"}
+function showLink(r,ok){if(r.mailed){say("pam",ok+" – e-mailt küldtünk a(z) "+r.email+" címre.");return}
+ const m=$("pam");m.classList.add("bad");m.innerHTML=`${esc(ok.replace(/^✓\s*/,""))}, de az e-mail nem ment ki${r.mailError?" ("+esc(r.mailError.replace(/\.$/,""))+")":""}. Küldd el kézzel ezt a linket:<div class="linkbox"><input readonly value="${esc(r.link)}" aria-label="Meghívó link"><button type="button" class="btn ghost sm" data-copy>Másolás</button></div>`}
+$("pam").onclick=ev=>{if(ev.target.closest("[data-copy]")){const i=$("pam").querySelector("input");i.select();try{navigator.clipboard.writeText(i.value)}catch(e){document.execCommand("copy")}ev.target.textContent="✓ Másolva"}};
+$("paadd").onclick=async()=>{const em=$("paem").value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){say("pam","Adj meg egy érvényes e-mail-címet.",1);return}
+ $("paadd").disabled=true;try{const r=await api("accounts",{method:"POST",body:JSON.stringify({email:em,name:$("pana").value.trim(),company:edOrig})});$("paem").value="";$("pana").value="";await loadAcc();showLink(r,"✓ Hozzáférés létrehozva")}
+ catch(e){say("pam",e.message,1)}finally{$("paadd").disabled=false}};
+$("patab").onclick=async ev=>{const t=ev.target;
+ if(t.dataset.inv){t.disabled=true;try{const r=await api("accounts/"+encodeURIComponent(t.dataset.inv)+"/invite",{method:"POST"});await loadAcc();showLink(r,"✓ Új link elkészült")}catch(e){say("pam",e.message,1)}t.disabled=false}
+ else if(t.dataset.off){const a=ACC.find(x=>x.email===t.dataset.off);try{await api("accounts/"+encodeURIComponent(a.email),{method:"PUT",body:JSON.stringify({off:!a.off})});await loadAcc();say("pam",a.off?"✓ Engedélyezve.":"✓ Letiltva – ezzel a címmel most nem lehet belépni.")}catch(e){say("pam",e.message,1)}}
+ else if(t.dataset.adel)arm(t,"Biztosan?",async()=>{try{await api("accounts/"+encodeURIComponent(t.dataset.adel),{method:"DELETE"});await loadAcc();say("pam","✓ Hozzáférés törölve. A már rögzített foglalások megmaradnak.")}catch(e){say("pam",e.message,1)}})};
 
 // ---------- árlista ----------
 function renderB(){if($("btab").contains(document.activeElement))return;const base=baseItems(),Q=quickItems();
@@ -548,7 +576,7 @@ let busy=false;
 async function loadE(){const mo=$("mon").value;if(!mo)return;try{const L=await api("entries?month="+mo);if(mo===$("mon").value){E=L;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}}
  catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
 async function loadCfg(first){if(!first&&(dragging||$("ced").contains(document.activeElement)||$("btab").contains(document.activeElement)))return;try{applyCfg(await api("config"));refreshAll(first)}catch(e){if(first)refreshAll(true)}}
-async function start(){await loadCfg(true);await loadE();loadBK();initSort();
+async function start(){await loadCfg(true);await loadE();loadBK();loadAcc();initSort();
  if(!busy){busy=true;setInterval(()=>{if(!document.hidden){loadE();loadBK()}},20000);setInterval(()=>{if(!document.hidden)loadCfg(false)},60000)}}
 // ---------- belépés ----------
 let TOKEN="",ME="",booted=false;try{TOKEN=localStorage.getItem("vpo_token")||"";ME=localStorage.getItem("vpo_user")||""}catch(e){}
@@ -556,10 +584,10 @@ function showLogin(msg){$("login").hidden=false;$("lerr").textContent=msg||"";if
 function setWho(){$("who").hidden=!ME||!TOKEN;$("whoe").textContent=ME?"Belépve: "+ME:""}
 $("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
  try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("lem").value,password:$("lpw").value})});const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
+  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");if(d.role==="client")throw new Error("Ez ügyfélfiók – az ügyfélportálon tudsz foglalni: "+location.origin+"/ugyfel/");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
   $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
 $("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
-function boot(){if(!booted){booted=true;start()}else{loadCfg(false);loadE();loadBK()}}
+function boot(){if(!booted){booted=true;start()}else{loadCfg(false);loadE();loadBK();loadAcc()}}
 CLIENTS=migrate({});refreshAll(true);
 setWho();if(TOKEN){booted=true;start()}else showLogin();
 </script>
