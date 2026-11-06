@@ -182,7 +182,7 @@ export default async (req) => {
       if (toMin(end) <= toMin(start)) return { error: "A befejezésnek a kezdés után kell lennie." };
       if (!r.room) return { error: "Válassz termet." };
       return { b: { room: String(r.room).slice(0, 80), date, start, end, company: String(r.company || "").slice(0, 200), title: String(r.title || "").slice(0, 200),
-        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), cdays: Math.max(0, Math.min(10, r.cdays === undefined || r.cdays === "" ? 1 : parseInt(r.cdays, 10) || 0)), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
+        person: String(r.person || "").slice(0, 200), note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), rep: String(r.rep || "").slice(0, 40), repEnd: /^\d{4}-\d{2}-\d{2}$/.test(r.repEnd || "") ? r.repEnd : "", repLast: !!r.repLast, cdays: Math.max(0, Math.min(10, r.cdays === undefined || r.cdays === "" ? 1 : parseInt(r.cdays, 10) || 0)), plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: String(r.src || "").slice(0, 40), ext: String(r.ext || "").slice(0, 120), ts: +r.ts || Date.now() } };
     };
     const clash = (list, b, selfId) => list.find((x) => x.id !== selfId && x.room === b.room && x.date === b.date && toMin(x.start) < toMin(b.end) && toMin(b.start) < toMin(x.end));
     const newId = (month) => `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -217,6 +217,7 @@ export default async (req) => {
         prev = await store.get(oldKey, { type: "json" });
         if (!prev) return json({ error: "A foglalás már nem létezik (lehet, hogy valaki törölte)." }, 404);
         b.ts = prev.ts; b.src = prev.src || b.src; b.ext = prev.ext || ""; b.by = prev.by || ""; b.upd = user;
+        if (!b.rep && prev.rep) { b.rep = prev.rep; b.repEnd = prev.repEnd || ""; b.repLast = !!prev.repLast; }
         if (parts[1].slice(0, 7) === month) id = parts[1]; else moveFrom = oldKey;
       }
       const x = clash(await loadMonth(month), b, parts[1]);
