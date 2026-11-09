@@ -71,6 +71,7 @@ input[type=checkbox]{width:auto;accent-color:var(--red)}
 .badge.eur{background:#EEF3FF;border-color:#CCD9F7;color:#24448F}
 .badge.free{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
 .badge.price{background:var(--peach);border-color:#F6CDB6;color:#8A3A16}
+.qhint{font-size:12.5px;font-weight:700;color:var(--ok);min-height:18px;margin-top:3px}.qhint.bad{color:var(--warn)}
 .badge.portal{background:#F1ECFA;border-color:#D9CCF0;color:#4B2C86;margin-left:6px}
 .linkbox{display:flex;gap:6px;margin-top:6px}.linkbox input{font-size:13px;padding:6px 9px}
 .inline{display:flex;gap:6px}
@@ -134,6 +135,13 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
 #log .frow th{border-bottom:1px solid var(--line);padding:4px 6px 8px;top:34px}
 #log .frow input{padding:5px 8px;font-size:12.5px;border-radius:7px;min-width:70px;font-weight:400}
 #log .frow input:not(:placeholder-shown){border-color:var(--orange);background:#FFFBF8}
+#log tr>:nth-child(1),#log tr>:nth-child(2){position:sticky;background:#fff;z-index:2}
+#log tr>:nth-child(1){left:0;min-width:104px}
+#log tr>:nth-child(2){left:var(--c1,104px);max-width:220px;overflow:hidden;text-overflow:ellipsis;box-shadow:inset -1px 0 0 var(--line)}
+#log.scrolled tr>:nth-child(2){box-shadow:inset -1px 0 0 var(--line),6px 0 8px -6px rgba(0,0,0,.18)}
+#log thead tr>:nth-child(1),#log thead tr>:nth-child(2){z-index:3}
+#log tr.ed>td:nth-child(-n+2){background:var(--peach)}
+#log td.empty{position:static}
 #log td.rec{font-size:12.5px;color:var(--grey);font-variant-numeric:tabular-nums}
 </style>
 </head>
@@ -192,7 +200,7 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
       <div class="grid">
         <div class="wide"><label for="it">Tétel</label><select id="it"></select></div>
         <div class="wide" id="cnw" hidden><label for="cn">Mi az pontosan?</label><input id="cn" placeholder="pl. víz, kulcsmásolás…" autocomplete="off"></div>
-        <div><label for="qty">Mennyiség</label><input type="number" id="qty" value="1" min="0" step="any" inputmode="decimal"></div>
+        <div><label for="qty">Mennyiség</label><input type="text" id="qty" value="1" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="pl. 2+3"><div class="qhint" id="qhint" aria-live="polite"></div></div>
         <div><label for="up">Egységár (nettó)</label><div class="inline"><input type="number" id="up" min="0" step="any" inputmode="decimal"><select id="cur" aria-label="Pénznem"><option value="HUF">Ft</option><option value="EUR">EUR</option></select></div></div>
         <div><label for="tot">Összeg (nettó, <span id="tcur">Ft</span>)</label><input type="number" id="tot" min="0" step="any" inputmode="decimal"></div>
         <div><label for="nt">Megjegyzés / hová</label><input id="nt" placeholder="pl. Kisterem"></div>
@@ -203,8 +211,8 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
     <div class="panel">
       <div class="phead"><div><h2>Rögzített tételek</h2><p class="sub" id="logsub"></p></div><button type="button" class="btn ghost sm" id="fclear" hidden>Szűrők törlése</button></div>
       <div class="tablebox"><table id="log"><thead>
-        <tr class="hrow"><th data-k="ts">Rögzítve</th><th data-k="date">Dátum</th><th data-k="company">Ügyfél</th><th data-k="person">Ki kérte</th><th data-k="item">Tétel</th><th data-k="qty" class=num>Db</th><th data-k="total" class=num>Összeg</th><th data-k="note">Megjegyzés</th><th></th></tr>
-        <tr class="frow"><th><input data-f="ts" placeholder="szűrés" aria-label="Szűrés: rögzítve"></th><th><input data-f="date" placeholder="szűrés" aria-label="Szűrés: dátum"></th><th><input data-f="company" placeholder="szűrés" aria-label="Szűrés: ügyfél"></th><th><input data-f="person" placeholder="szűrés" aria-label="Szűrés: ki kérte"></th><th><input data-f="item" placeholder="szűrés" aria-label="Szűrés: tétel"></th><th><input data-f="qty" placeholder="pl. >2" aria-label="Szűrés: darab"></th><th><input data-f="total" placeholder="pl. >5000" aria-label="Szűrés: összeg"></th><th><input data-f="note" placeholder="szűrés" aria-label="Szűrés: megjegyzés"></th><th></th></tr>
+        <tr class="hrow"><th data-k="date">Dátum</th><th data-k="company">Ügyfél</th><th data-k="ts">Rögzítve</th><th data-k="person">Ki kérte</th><th data-k="item">Tétel</th><th data-k="qty" class=num>Db</th><th data-k="total" class=num>Összeg</th><th data-k="note">Megjegyzés</th><th></th></tr>
+        <tr class="frow"><th><input data-f="date" placeholder="szűrés" aria-label="Szűrés: dátum"></th><th><input data-f="company" placeholder="szűrés" aria-label="Szűrés: ügyfél"></th><th><input data-f="ts" placeholder="szűrés" aria-label="Szűrés: rögzítve"></th><th><input data-f="person" placeholder="szűrés" aria-label="Szűrés: ki kérte"></th><th><input data-f="item" placeholder="szűrés" aria-label="Szűrés: tétel"></th><th><input data-f="qty" placeholder="pl. >2" aria-label="Szűrés: darab"></th><th><input data-f="total" placeholder="pl. >5000" aria-label="Szűrés: összeg"></th><th><input data-f="note" placeholder="szűrés" aria-label="Szűrés: megjegyzés"></th><th></th></tr>
       </thead><tbody id="logb"></tbody></table></div>
     </div>
   </section>
@@ -371,8 +379,20 @@ function setCur(c){$("cur").value=c==="EUR"?"EUR":"HUF";$("tcur").textContent=$(
 function pick(){const x=allItems()[$("it").value],c=$("co").value.trim();
  if(!x){$("up").value="";$("tot").value="";$("cnw").hidden=true;setCur("HUF");markI();clientInfo();return}
  const o=c?priceOf(c,x[0]):null;$("up").value=(o?o.u:x[2])||"";setCur(o?o.cur:"HUF");calc();$("cnw").hidden=!x[0].startsWith("Egyéb");markI();clientInfo()}
-function calc(){const u=+$("up").value,q=+$("qty").value;if(u)$("tot").value=+(u*q).toFixed(2)}
-$("it").onchange=pick;$("qty").oninput=calc;$("up").oninput=calc;$("cur").onchange=()=>setCur($("cur").value);
+// Mennyiség képlettel, mint Excelben: 2+3, =4*2,5, (3+2)/2
+function evalQty(str){let s=String(str||"").trim().replace(/^=/,"").replace(/\s+/g,"").replace(/[x×]/gi,"*").replace(/÷/g,"/").replace(/,/g,".");if(s==="")return NaN;let i=0;
+ const num=()=>{const m=s.slice(i).match(/^\d*\.?\d+/);if(!m)throw 0;i+=m[0].length;return +m[0]};
+ const fac=()=>{if(s[i]==="-"){i++;return -fac()}if(s[i]==="+"){i++;return fac()}if(s[i]==="("){i++;const v=exp();if(s[i]!==")")throw 0;i++;return v}return num()};
+ const term=()=>{let v=fac();while(s[i]==="*"||s[i]==="/"){const o=s[i++],w=fac();v=o==="*"?v*w:v/w}return v};
+ const exp=()=>{let v=term();while(s[i]==="+"||s[i]==="-"){const o=s[i++],w=term();v=o==="+"?v+w:v-w}return v};
+ try{const v=exp();return i===s.length&&isFinite(v)?Math.round(v*10000)/10000:NaN}catch(e){return NaN}}
+const qtyVal=()=>evalQty($("qty").value);
+const isFormula=v=>/[-+*/x×÷()=]/i.test(String(v).trim().replace(/^-?\d+([.,]\d+)?$/,""));
+function qtyHint(){const v=$("qty").value,q=qtyVal(),h=$("qhint");if(!v.trim()){h.textContent="";h.className="qhint";return}
+ if(isNaN(q)){h.textContent="hibás képlet";h.className="qhint bad"}else if(isFormula(v)){h.textContent="= "+fmtN(q);h.className="qhint"}else{h.textContent="";h.className="qhint"}}
+function qtyCommit(){const q=qtyVal();if(!isNaN(q)&&isFormula($("qty").value)){$("qty").value=String(q).replace(".",",");qtyHint()}}
+function calc(){qtyHint();const u=+$("up").value,q=qtyVal();if(u&&!isNaN(q))$("tot").value=+(u*q).toFixed(2)}
+$("it").onchange=pick;$("qty").oninput=calc;$("qty").onblur=qtyCommit;$("qty").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&isFormula($("qty").value)){ev.preventDefault();qtyCommit()}});$("up").oninput=calc;$("cur").onchange=()=>setCur($("cur").value);
 $("co").oninput=()=>{onClientChange();render()};
 const inMon=e=>(e.date||"").slice(0,7)===$("mon").value;
 // Tárgyalófoglalások (a /foglalas/ oldalról): ügyfelenként és termenként havonta összesítve, minden megkezdett óra egész órának számít.
@@ -384,14 +404,15 @@ function buildVB(L){const g={};L.forEach(b=>{const r=BK_ROOMS[b.room];if(!r)retu
   return{id:"bk:"+norm(name)+":"+o.room,virtual:true,date:o.last,company:name,person:"",cat:it?it[1]:"Egyéb",item:item.replace(" (óra)","")+" (óra)",qty,unit,total:cu==="EUR"?r2(qty*unit):qty*unit,cur:cu,note:rn+": "+o.n+" foglalás, "+Math.round(o.min)+" perc",ts:0}})}
 async function loadBK(){const mo=$("mon").value;if(!mo)return;try{const L=await api("bookings?from="+mo+"-01&to="+lastDay(mo));if(mo===$("mon").value){VB=buildVB(L);BKN=L.length;render()}}catch(e){}}
 const monthRows=()=>E.filter(inMon).concat(VB);
-function clearForm(){$("co").value="";$("pe").value="";$("it").value="";$("qty").value=1;$("nt").value="";$("cn").value="";$("dt").value=today;onClientChange()}
+function clearForm(){$("co").value="";$("pe").value="";$("it").value="";$("qty").value=1;qtyHint();$("nt").value="";$("cn").value="";$("dt").value=today;onClientChange()}
 $("add").onclick=async()=>{
  const co=$("co").value.trim(),pe=$("pe").value.trim(),tot=+$("tot").value;
  if(!co){say("msg","Add meg az ügyfelet!",1);return}
  const x=allItems()[$("it").value];if(!x){say("msg","Válassz tételt!",1);return}
+ if(isNaN(qtyVal())){say("msg","A mennyiség nem érvényes szám vagy képlet (pl. 2+3).",1);$("qty").focus();return}
  if($("tot").value===""||isNaN(tot)){say("msg","Add meg az összeget!",1);return}
  const fc=findClient(co),name=fc?fc.n:co,old=editId&&E.find(e=>e.id===editId);
- const r={date:$("dt").value||today,company:name,person:pe,cat:x[1],item:(x[0].startsWith("Egyéb")&&$("cn").value.trim())||x[0].replace(" (kézi ár)",""),qty:+$("qty").value||0,unit:+$("up").value||0,total:tot,cur:$("cur").value==="EUR"?"EUR":"HUF",note:$("nt").value.trim(),ts:old?old.ts:Date.now()};
+ const r={date:$("dt").value||today,company:name,person:pe,cat:x[1],item:(x[0].startsWith("Egyéb")&&$("cn").value.trim())||x[0].replace(" (kézi ár)",""),qty:qtyVal()||0,unit:+$("up").value||0,total:tot,cur:$("cur").value==="EUR"?"EUR":"HUF",note:$("nt").value.trim(),ts:old?old.ts:Date.now()};
  let added="";if(!fc){CLIENTS.push({n:co,eur:false,free:0,prices:[]});try{await saveCfg();added=" · új ügyfél felvéve"}catch(e){}}
  try{if(editId){const id=editId,sv=await api("entries/"+encodeURIComponent(id),{method:"PUT",body:JSON.stringify(r)});E=E.filter(e=>e.id!==id);if(inMon(sv))E.push(sv);
    endEdit();say("msg","✓ Módosítva: "+name+" – "+r.item+" ("+money(tot,r.cur)+")"+(inMon(sv)?"":" – átkerült ide: "+sv.date.slice(0,7))+added);render();renderClients();return}
@@ -403,7 +424,7 @@ function startEdit(id){const e=E.find(x=>x.id===id);if(!e)return;editId=id;
  $("co").value=e.company;$("pe").value=e.person||"";$("dt").value=e.date;$("nt").value=e.note||"";buildCChips();renderPeople();
  const A=allItems();let k=A.findIndex(x=>x[0]===e.item||x[0].replace(" (kézi ár)","")===e.item);if(k<0)k=A.findIndex(x=>x[0].startsWith("Egyéb"));
  $("it").value=k>=0?k:"";pick();$("cn").value=A[k]&&A[k][0].startsWith("Egyéb")&&A[k][0].replace(" (kézi ár)","")!==e.item?e.item:"";
- $("qty").value=e.qty;$("up").value=e.unit||"";$("tot").value=e.total;setCur(curOf(e));
+ $("qty").value=String(e.qty).replace(".",",");qtyHint();$("up").value=e.unit||"";$("tot").value=e.total;setCur(curOf(e));
  $("fh").textContent="Tétel módosítása";$("add").textContent="Módosítás mentése";$("cx").hidden=false;say("msg","Szerkesztés: "+e.date+" – "+e.company+" – "+e.item);
  render();$("fh").scrollIntoView({behavior:"smooth",block:"start"})}
 $("cx").onclick=()=>{endEdit();say("msg","")};
@@ -446,13 +467,18 @@ function render(){
   h+=`<tr><td>${esc(c)}${X?' <span class="badge eur">EUR</span>':""}</td><td class=num>${show(k.Konyhai,o.cur)}</td><td class=num>${show(k.Irodai,o.cur)}</td><td class=num>${show(k["Egyéb"],o.cur)}</td><td class=num>${o.fq?"−"+show(fa,o.cur)+" <span class=mute>("+fmtN(o.fq)+" óra)</span>":"<span class=mute>–</span>"}</td><td class=num><b>${show(o.nh,"HUF")}</b></td><td class=num>${X?"<b>"+show(o.ne,"EUR")+"</b>":"<span class=mute>–</span>"}</td></tr>`});
  h+=`<tr class=total><td>Összesen</td><td></td><td></td><td></td><td></td><td class=num><span class=big>${show(g,"HUF")}</span></td><td class=num>${gx?show(ge,"EUR"):""}</td></tr>`;
  $("sum").innerHTML=Object.keys(by).length?h:"<tr><td class=empty>Ebben a hónapban még nincs rögzített tétel.</td></tr>";
- const L=M.filter(logMatch).sort(logCmp),act=Object.values(LF).some(v=>v.trim());$("fclear").hidden=!act;
- $("logsub").textContent=M.length?(M.length-VB.length)+" rögzített tétel"+(VB.length?" · "+BKN+" tárgyalófoglalás "+VB.length+" összesített sorban":"")+" ebben a hónapban":"";
+ const L=M.filter(e=>!e.virtual).filter(logMatch).sort(logCmp),act=Object.values(LF).some(v=>v.trim());$("fclear").hidden=!act;
+ $("logsub").textContent=M.length?(M.length-VB.length)+" rögzített tétel ebben a hónapban"+(VB.length?" · a tárgyalófoglalások itt nem látszanak, csak a havi összesítőben":""):"";
  document.querySelectorAll("#log .hrow th[data-k]").forEach(th=>{th.classList.toggle("asc",th.dataset.k===LSORT.k&&LSORT.d>0);th.classList.toggle("desc",th.dataset.k===LSORT.k&&LSORT.d<0)});
+ requestAnimationFrame(syncSticky);
  $("logb").innerHTML=L.length?
-  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td class=rec>${esc(recTxt(e))}</td><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
-  :`<tr><td class=empty colspan=9>${M.length?"Nincs a szűrésnek megfelelő tétel.":"Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra."}</td></tr>`;
+  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td class=rec>${esc(recTxt(e))}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
+  :`<tr><td class=empty colspan=9>${M.some(e=>!e.virtual)?"Nincs a szűrésnek megfelelő tétel.":"Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra."}</td></tr>`;
 }
+// Dátum és Ügyfél oszlop rögzítése vízszintes görgetéskor
+function syncSticky(){const t=$("log"),th=t.querySelector(".hrow th");if(th)t.style.setProperty("--c1",th.getBoundingClientRect().width+"px");const b=t.parentElement;t.classList.toggle("scrolled",b.scrollLeft>2)}
+$("log").parentElement.addEventListener("scroll",()=>$("log").classList.toggle("scrolled",$("log").parentElement.scrollLeft>2),{passive:true});
+window.addEventListener("resize",syncSticky);
 $("log").onclick=ev=>{const bt=ev.target.closest("button");if(!bt)return;if(bt.dataset.ed){startEdit(bt.dataset.ed);return}const id=bt.dataset.id;if(!id)return;
  arm(bt,"Biztos?",async()=>{try{await api("entries/"+encodeURIComponent(id),{method:"DELETE"});E=E.filter(e=>e.id!==id);if(editId===id)endEdit();render()}catch(e){say("msg","Nem sikerült törölni.",1)}})};
 $("log").querySelector(".hrow").onclick=ev=>{const th=ev.target.closest("th[data-k]");if(!th)return;const k=th.dataset.k;LSORT=LSORT.k===k?{k,d:-LSORT.d}:{k,d:(k==="ts"||k==="date"||k==="qty"||k==="total")?-1:1};render()};
