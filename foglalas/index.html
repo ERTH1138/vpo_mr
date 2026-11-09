@@ -206,12 +206,25 @@ body{font-size:14px}
 .tday li .x:hover{background:var(--warnbg);color:var(--warn)}
 .tday li .x[data-arm="1"]{color:var(--warn);font-size:12.5px;font-weight:700}
 .tadd input[type=text],.tadd input[type=date],.tadd button{font-size:13.5px}
-.plates{font-size:13.5px;color:var(--ink);line-height:1.5}
-.plates ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
-.plates li{display:flex;gap:8px;align-items:baseline}
-.plates .pl{font-size:12.5px;padding:0 5px;margin:0}
-.plates .tm{color:var(--grey);font-size:12.5px;margin-left:auto;font-variant-numeric:tabular-nums}
-.plates .none{color:var(--grey);font-size:13px}
+.plates{font-size:13.5px;color:var(--ink);line-height:1.4}
+.plates ul{list-style:none;margin:0;padding:0;display:block}
+.plates li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;white-space:normal;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.plates li:first-child{border-top:0;padding-top:2px}
+.plates .pl{font-size:12.5px;padding:1px 6px;margin:0;white-space:nowrap;min-width:88px;text-align:center}
+.plates .co{min-width:0;overflow-wrap:anywhere;font-weight:600}
+.plates .tm{color:var(--grey);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.plates .src{grid-column:2/-1;font-size:11.5px;color:var(--grey);margin-top:-2px}
+.plates .x{font:inherit;background:none;border:0;color:#9a9390;cursor:pointer;padding:0 4px;border-radius:6px;font-size:12.5px}
+.plates .x:hover{background:var(--warnbg);color:var(--warn)}
+.plates .x[data-arm="1"]{color:var(--warn);font-weight:700}
+.plates .none{color:var(--grey);font-size:13px;padding:2px 0 4px}
+.plates form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.plates form input{padding:6px 9px;font-size:13px;border-radius:8px}
+.plates form #pnum{text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.plates form button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:0 12px;cursor:pointer;white-space:nowrap}
+.plates form button:hover{border-color:var(--ink)}
+.plates .perr{grid-column:1/-1;font-size:12.5px;color:var(--warn);font-weight:600;min-height:0}
+.plates form button{padding:6px 12px}
 footer{margin-top:18px}
 .tadd input[type=text]{flex:1 1 100%}
 .tadd input[type=date]{flex:1 1 140px}
@@ -372,7 +385,7 @@ function clientInfo(){const c=$("fco").value.trim(),r=roomById($("fro").value),b
 
 // ---------- betöltés ----------
 function range(){if(view==="nap")return[cur,cur];if(view==="het"){const m=mondayOf(cur);return[m,addDays(m,6)]}return[cur,addDays(cur,30)]}
-async function loadBK(force){loadNotes();loadCater();const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
+async function loadBK(force){loadNotes();loadCater();loadPark();const [a,b]=range(),key=a+"|"+b;if(!force&&key===loadedRange)return;
  try{const L=await api(`bookings?from=${a}&to=${b}`);const [a2,b2]=range();if(a2!==a||b2!==b)return;BK=L;loadedRange=key;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}
  catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
 let PEOPLE={};
@@ -398,14 +411,30 @@ function columns(){if(view==="nap")return ROOMS.map(r=>({date:cur,room:r.id,head
 function bounds(cols){let s=DAY_START,e=DAY_END;BK.forEach(b=>{if(cols.some(c=>c.date===b.date&&c.room===b.room)){s=Math.min(s,Math.floor(toMin(b.start)/60)*60);e=Math.max(e,Math.ceil(toMin(b.end)/60)*60)}});return[s,Math.min(e,24*60)]}
 let GEO=null;
 function rememberPeople(){BK.forEach(b=>addPerson(b.company,b.person))}
-function renderPlates(){const box=$("plates"),L=BK.filter(b=>b.date===cur&&b.plate).sort((a,b)=>a.start.localeCompare(b.start));
- const rows=[];L.forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,b})));
- const co=b=>b.company||b.person||b.title||"";
+// Parkolás: a foglalásokban megadott rendszámok + a dobozban közvetlenül rögzítettek (p/ tároló)
+let PARK={};
+async function loadPark(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`parking?from=${a}&to=${b}`);Object.keys(PARK).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete PARK[d]});Object.assign(PARK,N);renderPlates()}catch(e){}}
+async function parkOp(d,fn){try{const N=await api(`parking?from=${d}&to=${d}`);const items=fn((N[d]||[]).slice());const r=await api("parking/"+d,{method:"PUT",body:JSON.stringify({items})});if(r.items.length)PARK[d]=r.items;else delete PARK[d];return true}catch(e){const pe=$("perr");if(pe)pe.textContent="Nem sikerült menteni: "+e.message;return false}finally{renderPlates()}}
+function tmKey(t){const m=String(t||"").match(/(\d{1,2})(?:[:.](\d{2}))?/);return m?pad(+m[1])+":"+(m[2]||"00"):"99:99"}
+function parkRows(){const rows=[];
+ BK.filter(b=>b.date===cur&&b.plate).forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,co:b.company||b.person||b.title||"",tm:b.start+"–"+b.end,k:b.start,bk:b})));
+ (PARK[cur]||[]).forEach(x=>rows.push({p:x.t,co:x.co,tm:x.tm,k:tmKey(x.tm),id:x.id,by:x.by}));
+ return rows.sort((a,b)=>a.k.localeCompare(b.k)||a.p.localeCompare(b.p))}
+function renderPlates(){const box=$("plates");
+ const keep=box.querySelector("form")?{n:$("pnum").value,c:$("pco").value,t:$("ptm").value,f:box.contains(document.activeElement)?document.activeElement.id:""}:null;
+ const rows=parkRows();
  const day=cur===todayS()?"ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric"});
  box.innerHTML=`<div class="th"><h3>Parkolás<small>${esc(day)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="lk" id="pcopy">Másolás</button>':""}</div>`+
-  (rows.length?"<ul>"+rows.map(({p,b})=>`<li><span class="pl">${esc(p)}</span><span>${esc(co(b))}</span><span class="tm">${b.start}–${b.end}</span></li>`).join("")+"</ul>":'<div class="none">Erre a napra nincs megadott rendszám.</div>');
- const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(({p,b})=>p+" – "+co(b)+" ("+b.start+"–"+b.end+")").join("\n");
+  (rows.length?"<ul>"+rows.map(r=>`<li><span class="pl">${esc(r.p)}</span><span class="co">${esc(r.co)||'<span class="mute">–</span>'}</span><span class="tm">${esc(r.tm)}${r.id?` <button type="button" class="x" data-pdel="${esc(r.id)}" aria-label="Rendszám törlése">✕</button>`:""}</span>${r.bk?'<span class="src">foglalásból</span>':""}</li>`).join("")+"</ul>":'<div class="none">Erre a napra még nincs rendszám.</div>')+
+  `<form id="pform" autocomplete="off"><input id="pnum" placeholder="Rendszám" aria-label="Rendszám" maxlength="40" required><input id="pco" list="cl" placeholder="Cég" aria-label="Cég" maxlength="200"><input id="ptm" placeholder="pl. 9:00–12:00" aria-label="Időpont" maxlength="40"><button type="submit">Hozzáad</button><div class="perr" id="perr" role="alert"></div></form>`;
+ if(keep){$("pnum").value=keep.n;$("pco").value=keep.c;$("ptm").value=keep.t;if(keep.f&&$(keep.f))$(keep.f).focus()}
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(r=>r.p+" – "+(r.co||"?")+(r.tm?" ("+r.tm+")":"")).join("\n");
   try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
+$("plates").addEventListener("submit",async ev=>{ev.preventDefault();const p=$("pnum").value.toUpperCase().replace(/\s+/g," ").trim(),co=$("pco").value.trim(),tm=$("ptm").value.trim();
+ if(!p){$("perr").textContent="Add meg a rendszámot.";return}
+ const d=cur,it={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:p,co,tm,by:ME,ts:Date.now()};
+ const ok=await parkOp(d,L=>L.concat(it));if(ok){$("pnum").value="";$("pco").value="";$("ptm").value="";$("pnum").focus()}});
+$("plates").addEventListener("click",ev=>{const b=ev.target.closest("button[data-pdel]");if(!b)return;arm(b,"Törlöd?",()=>parkOp(cur,L=>L.filter(x=>x.id!==b.dataset.pdel)))});
 let NOTES={};
 async function loadNotes(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`notes?from=${a}&to=${b}`);NOTES={...NOTES,...Object.fromEntries(Object.keys(NOTES).filter(d=>d<a||d>b).map(d=>[d,NOTES[d]]))};Object.keys(NOTES).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete NOTES[d]});Object.assign(NOTES,N);renderTodo()}catch(e){}}
 function noteDays(){if(view==="het"){const m=mondayOf(cur);return Array.from({length:7},(_,i)=>addDays(m,i))}return[cur]}
