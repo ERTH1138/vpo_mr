@@ -210,7 +210,8 @@ body{font-size:14px}
 .plates ul{list-style:none;margin:0;padding:0;display:block}
 .plates li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;white-space:normal;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
 .plates li:first-child{border-top:0;padding-top:2px}
-.plates .pl{font-size:12.5px;padding:1px 6px;margin:0;white-space:nowrap;min-width:88px;text-align:center}
+.plates .pl{font-size:12.5px;padding:1px 6px;margin:0;min-width:88px;max-width:150px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+.plates .nm{display:block;font-weight:400;font-size:12.5px;color:#5a5a5a}
 .plates .co{min-width:0;overflow-wrap:anywhere;font-weight:600}
 .plates .tm{color:var(--grey);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
 .plates .src{grid-column:2/-1;font-size:11.5px;color:var(--grey);margin-top:-2px}
@@ -416,8 +417,17 @@ let PARK={};
 async function loadPark(){const [a,b]=view==="lista"?[cur,cur]:range();try{const N=await api(`parking?from=${a}&to=${b}`);Object.keys(PARK).forEach(d=>{if(d>=a&&d<=b&&!N[d])delete PARK[d]});Object.assign(PARK,N);renderPlates()}catch(e){}}
 async function parkOp(d,fn){try{const N=await api(`parking?from=${d}&to=${d}`);const items=fn((N[d]||[]).slice());const r=await api("parking/"+d,{method:"PUT",body:JSON.stringify({items})});if(r.items.length)PARK[d]=r.items;else delete PARK[d];return true}catch(e){const pe=$("perr");if(pe)pe.textContent="Nem sikerült menteni: "+e.message;return false}finally{renderPlates()}}
 function tmKey(t){const m=String(t||"").match(/(\d{1,2})(?:[:.](\d{2}))?/);return m?pad(+m[1])+":"+(m[2]||"00"):"99:99"}
+// „Sprőber Soma: PZE-790 Pető Sándor: PAB-287” → két sor: rendszám + név
+const PLATE_RE=/(^|[^A-Z0-9])([A-Z]{1,4}(?:[ -]?[A-Z]{2})?[ -]?\d{2,4})(?![A-Z0-9])/g;
+const nice=t=>t.toLowerCase().replace(/(^|[\s-])(\p{L})/gu,(m,a,c)=>a+c.toUpperCase());
+function splitPlates(str){const out=[];String(str||"").split(/[,;\n]+|\s+és\s+/i).map(x=>x.trim()).filter(Boolean).forEach(part=>{
+  const ms=[...part.toUpperCase().matchAll(PLATE_RE)];
+  if(!ms.length){out.push({p:part,nm:""});return}
+  let prev=0;ms.forEach((m,i)=>{const st=m.index+m[1].length,en=st+m[2].length;const before=part.slice(prev,st).replace(/[\s:–—-]+$/,"").replace(/^[\s:–—-]+/,"");
+   const after=i===ms.length-1?part.slice(en).replace(/^[\s:–—-]+/,"").trim():"";out.push({p:m[2].replace(/\s+/g," "),nm:nice([before,after].filter(Boolean).join(" ").replace(/[()]/g,"").trim())});prev=en})});
+ return out}
 function parkRows(){const rows=[];
- BK.filter(b=>b.date===cur&&b.plate).forEach(b=>String(b.plate).split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>rows.push({p,co:b.company||b.person||b.title||"",tm:b.start+"–"+b.end,k:b.start,bk:b})));
+ BK.filter(b=>b.date===cur&&b.plate).forEach(b=>splitPlates(b.plate).forEach(x=>rows.push({p:x.p,nm:x.nm,co:b.company||b.person||b.title||"",tm:b.start+"–"+b.end,k:b.start,bk:b})));
  (PARK[cur]||[]).forEach(x=>rows.push({p:x.t,co:x.co,tm:x.tm,k:tmKey(x.tm),id:x.id,by:x.by}));
  return rows.sort((a,b)=>a.k.localeCompare(b.k)||a.p.localeCompare(b.p))}
 function renderPlates(){const box=$("plates");
@@ -426,8 +436,8 @@ function renderPlates(){const box=$("plates");
  const rows=parkRows();
  const day=cur===todayS()?"ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric"});
  $("phead").innerHTML=`<h3>Parkolás<small>${esc(day)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="lk" id="pcopy">Másolás</button>':""}`;
- $("plist").innerHTML=rows.length?"<ul>"+rows.map(r=>`<li><span class="pl">${esc(r.p)}</span><span class="co">${esc(r.co)||'<span class="mute">–</span>'}</span><span class="tm">${esc(r.tm)}${r.id?` <button type="button" class="x" data-pdel="${esc(r.id)}" aria-label="Rendszám törlése">✕</button>`:""}</span>${r.bk?'<span class="src">foglalásból</span>':""}</li>`).join("")+"</ul>":'<div class="none">Erre a napra még nincs rendszám.</div>';
- const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(r=>r.p+" – "+(r.co||"?")+(r.tm?" ("+r.tm+")":"")).join("\n");
+ $("plist").innerHTML=rows.length?"<ul>"+rows.map(r=>`<li><span class="pl">${esc(r.p)}</span><span class="co">${esc(r.co)||'<span class="mute">–</span>'}${r.nm?`<span class="nm">${esc(r.nm)}</span>`:""}</span><span class="tm">${esc(r.tm)}${r.id?` <button type="button" class="x" data-pdel="${esc(r.id)}" aria-label="Rendszám törlése">✕</button>`:""}</span>${r.bk?'<span class="src">foglalásból</span>':""}</li>`).join("")+"</ul>":'<div class="none">Erre a napra még nincs rendszám.</div>';
+ const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(r=>r.p+" – "+(r.co||"?")+(r.nm?" ("+r.nm+")":"")+(r.tm?" ("+r.tm+")":"")).join("\n");
   try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
 $("plates").addEventListener("submit",async ev=>{ev.preventDefault();const p=$("pnum").value.toUpperCase().replace(/\s+/g," ").trim(),co=$("pco").value.trim(),tm=$("ptm").value.trim();
  $("perr").textContent="";if(!p){$("perr").textContent="Add meg a rendszámot.";$("pnum").focus();return}
