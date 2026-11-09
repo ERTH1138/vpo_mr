@@ -42,14 +42,16 @@ async function whoIs(req, store) {
   return { email: o.e, role: "admin" };
 }
 
-// ---------- E-mail (Resend) ----------
-// Környezeti változók: RESEND_API_KEY (kötelező a küldéshez), MAIL_FROM (pl. "Vista Plus Offices <foglalas@vpo.hu>"),
+// ---------- E-mail: Microsoft 365 (Graph API) vagy Resend ----------
+// Microsoft 365: MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET (Entra alkalmazás, Mail.Send jog), MAIL_SENDER (pl. foglalas@vpo.hu).
+// Resend (alternatíva): RESEND_API_KEY, MAIL_FROM (pl. "Vista Plus Offices <foglalas@mail.vpo.hu>").
+// Közös: MAIL_REPLY_TO (pl. info@vpo.hu),
 // NOTIFY_EMAIL (opcionális: ide megy értesítés az ügyfélportálos foglalásokról / lemondásokról), SITE_URL (opcionális).
 const SITE = () => (process.env.SITE_URL || process.env.URL || "https://vpo-room-hours.netlify.app").replace(/\/$/, "");
 const escH = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 async function sendMail(to, subject, lines, button) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key || !to) return { ok: false, error: "Az e-mail-küldés nincs beállítva (RESEND_API_KEY)." };
+  if (!to) return { ok: false, error: "Nincs címzett." };
+  if (!mailReady()) return { ok: false, error: "Az e-mail-küldés még nincs beállítva a Netlify-ban." };
   const html = `<!doctype html><html><body style="margin:0;background:#FAF8F6;font-family:Arial,Helvetica,sans-serif;color:#2B2B2B">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF8F6;padding:24px 0"><tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #E6E3E0">
@@ -61,6 +63,8 @@ ${button ? `<tr><td style="padding:10px 28px 6px"><a href="${escH(button.href)}"
 <tr><td style="padding:18px 28px 24px;font-size:12.5px;color:#7D7D7D">Vista Plus Offices · Ez egy automatikus üzenet.</td></tr>
 </table></td></tr></table></body></html>`;
   const text = lines.map((l) => l.replace(/<br\s*\/?>/g, "\n").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')).join("\n\n") + (button ? `\n\n${button.label}: ${button.href}` : "");
+  if (msReady()) return sendMs(to, subject, html);
+  const key = process.env.RESEND_API_KEY;
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST", headers: { authorization: "Bearer " + key, "content-type": "application/json" },
@@ -70,6 +74,37 @@ ${button ? `<tr><td style="padding:10px 28px 6px"><a href="${escH(button.href)}"
     });
     return r.ok ? { ok: true } : { ok: false, error: "Resend: " + (await r.text()).slice(0, 300) };
   } catch (e) { return { ok: false, error: "Resend: " + e.message }; }
+}
+
+const E = process.env;
+const msReady = () => !!(E.MS_TENANT_ID && E.MS_CLIENT_ID && E.MS_CLIENT_SECRET && E.MAIL_SENDER);
+const mailReady = () => msReady() || !!E.RESEND_API_KEY;
+let MSTOK = { t: "", x: 0 };
+async function msToken() {
+  if (MSTOK.t && MSTOK.x > Date.now() + 60000) return MSTOK.t;
+  const r = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(E.MS_TENANT_ID)}/oauth2/v2.0/token`, {
+    method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: E.MS_CLIENT_ID, client_secret: E.MS_CLIENT_SECRET, scope: "https://graph.microsoft.com/.default", grant_type: "client_credentials" }),
+    signal: AbortSignal.timeout(10000),
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || !d.access_token) throw new Error("Microsoft-belépés: " + (d.error_description || d.error || "HTTP " + r.status).split("\r")[0].slice(0, 200));
+  MSTOK = { t: d.access_token, x: Date.now() + (+d.expires_in || 3000) * 1000 };
+  return MSTOK.t;
+}
+async function sendMs(to, subject, html) {
+  try {
+    const tok = await msToken();
+    const r = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(E.MAIL_SENDER)}/sendMail`, {
+      method: "POST", headers: { authorization: "Bearer " + tok, "content-type": "application/json" },
+      body: JSON.stringify({ message: { subject, body: { contentType: "HTML", content: html }, toRecipients: [{ emailAddress: { address: to } }],
+        ...(E.MAIL_REPLY_TO ? { replyTo: [{ emailAddress: { address: E.MAIL_REPLY_TO } }] } : {}) }, saveToSentItems: true }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (r.ok) return { ok: true };
+    const d = await r.json().catch(() => ({}));
+    return { ok: false, error: "Microsoft 365: " + ((d.error && (d.error.code + " – " + d.error.message)) || "HTTP " + r.status).slice(0, 250) };
+  } catch (e) { return { ok: false, error: e.message }; }
 }
 
 // ---------- Budapesti idő ----------
@@ -153,7 +188,7 @@ async function cancelPortal(store, b, who, how) {
 
 // Óránként fut (reminder.mjs): a 24 órán belül kezdődő, ügyfélportálon rögzített foglalásokról emlékeztetőt küld.
 export async function runReminders(store, now = Date.now()) {
-  if (!process.env.RESEND_API_KEY) return { skipped: "Nincs RESEND_API_KEY." };
+  if (!mailReady()) return { skipped: "Az e-mail-küldés nincs beállítva." };
   let sent = 0, failed = 0;
   for (const month of [...new Set([bpToday(now).slice(0, 7), bpToday(now + 26 * 36e5).slice(0, 7)])]) {
     for (const b of await monthBk(store, month)) {
@@ -412,8 +447,9 @@ export default async (req) => {
   }
 
   // Leadandó infók / napi teendők: n/<YYYY-MM>/<YYYY-MM-DD> = {items:[{id,t,done,by,ts}]}
-  if (parts[0] === "notes" || parts[0] === "catering") {
-    const PRE = parts[0] === "notes" ? "n" : "c";
+  // Kézzel rögzített parkolás: p/<YYYY-MM>/<nap> = {items:[{id,t:rendszám,co:cég,tm:időpont,by,ts}]}
+  if (parts[0] === "notes" || parts[0] === "catering" || parts[0] === "parking") {
+    const PRE = { notes: "n", catering: "c", parking: "p" }[parts[0]];
     const DAY = /^\d{4}-\d{2}-\d{2}$/;
     if (m === "GET") {
       const from = url.searchParams.get("from") || "", to = url.searchParams.get("to") || from;
@@ -432,6 +468,7 @@ export default async (req) => {
       const items = (Array.isArray(body.items) ? body.items : []).slice(0, 200).map((x) => ({
         id: String(x.id || "").slice(0, 40) || Math.random().toString(36).slice(2, 10), t: String(x.t || "").slice(0, 400), done: !!x.done,
         by: String(x.by || user).slice(0, 120), ts: +x.ts || Date.now(), dby: x.done ? String(x.dby || user).slice(0, 120) : "",
+        ...(PRE === "p" ? { t: String(x.t || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 40), co: String(x.co || "").trim().slice(0, 200), tm: String(x.tm || "").trim().slice(0, 40) } : {}),
         ...(x.bk ? { bk: String(x.bk).slice(0, 64), kind: String(x.kind || "").slice(0, 20), for: String(x.for || "").slice(0, 10) } : {}) })).filter((x) => x.t.trim());
       const key = `${PRE}/${parts[1].slice(0, 7)}/${parts[1]}`;
       if (items.length) await store.setJSON(key, { items }); else await store.delete(key);
