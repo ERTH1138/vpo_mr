@@ -219,7 +219,7 @@ body{font-size:14px}
 .plates .x[data-arm="1"]{color:var(--warn);font-weight:700}
 .plates .none{color:var(--grey);font-size:13px;padding:2px 0 4px}
 .plates form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
-.plates form input{padding:6px 9px;font-size:13px;border-radius:8px}
+.plates form input{padding:6px 9px;font-size:13px;border-radius:8px;width:100%;min-width:0;box-sizing:border-box}
 .plates form #pnum{text-transform:uppercase;letter-spacing:.04em;font-weight:700}
 .plates form button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:0 12px;cursor:pointer;white-space:nowrap}
 .plates form button:hover{border-color:var(--ink)}
@@ -421,17 +421,16 @@ function parkRows(){const rows=[];
  (PARK[cur]||[]).forEach(x=>rows.push({p:x.t,co:x.co,tm:x.tm,k:tmKey(x.tm),id:x.id,by:x.by}));
  return rows.sort((a,b)=>a.k.localeCompare(b.k)||a.p.localeCompare(b.p))}
 function renderPlates(){const box=$("plates");
- const keep=box.querySelector("form")?{n:$("pnum").value,c:$("pco").value,t:$("ptm").value,f:box.contains(document.activeElement)?document.activeElement.id:""}:null;
+ // a beviteli sort csak egyszer hozzuk létre, így frissítéskor sem veszik el a gépelés
+ if(!$("pform"))box.innerHTML=`<div class="th" id="phead"></div><div id="plist"></div><form id="pform" autocomplete="off"><input id="pnum" placeholder="Rendszám" aria-label="Rendszám" maxlength="40"><input id="pco" list="cl" placeholder="Cég" aria-label="Cég" maxlength="200"><input id="ptm" placeholder="pl. 9:00–12:00" aria-label="Időpont" maxlength="40"><button type="submit">Hozzáad</button><div class="perr" id="perr" role="alert"></div></form>`;
  const rows=parkRows();
  const day=cur===todayS()?"ma":parseD(cur).toLocaleDateString("hu-HU",{month:"long",day:"numeric"});
- box.innerHTML=`<div class="th"><h3>Parkolás<small>${esc(day)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="lk" id="pcopy">Másolás</button>':""}</div>`+
-  (rows.length?"<ul>"+rows.map(r=>`<li><span class="pl">${esc(r.p)}</span><span class="co">${esc(r.co)||'<span class="mute">–</span>'}</span><span class="tm">${esc(r.tm)}${r.id?` <button type="button" class="x" data-pdel="${esc(r.id)}" aria-label="Rendszám törlése">✕</button>`:""}</span>${r.bk?'<span class="src">foglalásból</span>':""}</li>`).join("")+"</ul>":'<div class="none">Erre a napra még nincs rendszám.</div>')+
-  `<form id="pform" autocomplete="off"><input id="pnum" placeholder="Rendszám" aria-label="Rendszám" maxlength="40" required><input id="pco" list="cl" placeholder="Cég" aria-label="Cég" maxlength="200"><input id="ptm" placeholder="pl. 9:00–12:00" aria-label="Időpont" maxlength="40"><button type="submit">Hozzáad</button><div class="perr" id="perr" role="alert"></div></form>`;
- if(keep){$("pnum").value=keep.n;$("pco").value=keep.c;$("ptm").value=keep.t;if(keep.f&&$(keep.f))$(keep.f).focus()}
+ $("phead").innerHTML=`<h3>Parkolás<small>${esc(day)}${rows.length?" · "+rows.length+" autó":""}</small></h3>${rows.length?'<button type="button" class="lk" id="pcopy">Másolás</button>':""}`;
+ $("plist").innerHTML=rows.length?"<ul>"+rows.map(r=>`<li><span class="pl">${esc(r.p)}</span><span class="co">${esc(r.co)||'<span class="mute">–</span>'}</span><span class="tm">${esc(r.tm)}${r.id?` <button type="button" class="x" data-pdel="${esc(r.id)}" aria-label="Rendszám törlése">✕</button>`:""}</span>${r.bk?'<span class="src">foglalásból</span>':""}</li>`).join("")+"</ul>":'<div class="none">Erre a napra még nincs rendszám.</div>';
  const c=$("pcopy");if(c)c.onclick=async()=>{const txt=cur+" – parkolás\n"+rows.map(r=>r.p+" – "+(r.co||"?")+(r.tm?" ("+r.tm+")":"")).join("\n");
   try{await navigator.clipboard.writeText(txt);c.textContent="✓ Másolva"}catch(e){c.textContent="Nem sikerült"}setTimeout(()=>{if(c.isConnected)c.textContent="Másolás"},2000)}}
 $("plates").addEventListener("submit",async ev=>{ev.preventDefault();const p=$("pnum").value.toUpperCase().replace(/\s+/g," ").trim(),co=$("pco").value.trim(),tm=$("ptm").value.trim();
- if(!p){$("perr").textContent="Add meg a rendszámot.";return}
+ $("perr").textContent="";if(!p){$("perr").textContent="Add meg a rendszámot.";$("pnum").focus();return}
  const d=cur,it={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:p,co,tm,by:ME,ts:Date.now()};
  const ok=await parkOp(d,L=>L.concat(it));if(ok){$("pnum").value="";$("pco").value="";$("ptm").value="";$("pnum").focus()}});
 $("plates").addEventListener("click",ev=>{const b=ev.target.closest("button[data-pdel]");if(!b)return;arm(b,"Törlöd?",()=>parkOp(cur,L=>L.filter(x=>x.id!==b.dataset.pdel)))});
