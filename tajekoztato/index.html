@@ -20,7 +20,7 @@
   --bg:#f3f4f6; --surface:#ffffff; --surface-2:#eceef1; --line:#d9dce1;
   --fg:#1c1f24; --muted:#5d636d; --accent:#d94a1e; --accent-ink:#ffffff; --accent-soft:#fbe7df;
   --ok:#1f8a4c; --ok-soft:#e1f3e8; --warn:#a86a00; --warn-soft:#fbefd6; --info:#2b5fb4; --info-soft:#e2ebfa; --bad:#8a8f98; --bad-soft:#eceef1;
-  --focus:#2b5fb4;
+  --focus:#2b5fb4; --fu:#d0342a; --fu-bg:#fde8e6;
   /* fixed document paper (PDF pages are printed matter: identical in both themes) */
   --doc-paper:#ffffff; --doc-ink:#1b1d22; --doc-muted:#626875; --doc-line:#e3e5e9; --doc-tint:#f4f5f7;
   --doc-flame:#dc4b1c; --doc-flame-2:#f08a2c; --doc-graphite:#22252b;
@@ -33,12 +33,12 @@
   --bg:#141619; --surface:#1d2024; --surface-2:#262a2f; --line:#353a41;
   --fg:#eceef1; --muted:#a2a8b2; --accent:#f06a3a; --accent-ink:#1a0d07; --accent-soft:#3a2219;
   --ok:#5cc98a; --ok-soft:#1c3226; --warn:#e7b04a; --warn-soft:#382c14; --info:#7ea8f0; --info-soft:#1c2a42; --bad:#9aa0aa; --bad-soft:#2a2e34;
-  --focus:#7ea8f0; color-scheme:dark}}
+  --focus:#7ea8f0; --fu:#ff6e60; --fu-bg:#3b1e1b; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141619; --surface:#1d2024; --surface-2:#262a2f; --line:#353a41;
   --fg:#eceef1; --muted:#a2a8b2; --accent:#f06a3a; --accent-ink:#1a0d07; --accent-soft:#3a2219;
   --ok:#5cc98a; --ok-soft:#1c3226; --warn:#e7b04a; --warn-soft:#382c14; --info:#7ea8f0; --info-soft:#1c2a42; --bad:#9aa0aa; --bad-soft:#2a2e34;
-  --focus:#7ea8f0; color-scheme:dark}
+  --focus:#7ea8f0; --fu:#ff6e60; --fu-bg:#3b1e1b; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
@@ -82,8 +82,8 @@ h1.view-title{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,
 .toolbar{display:flex;gap:8px;margin-bottom:12px}
 .search{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-size:16px}
 .table-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
-table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:860px}
-.leads th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:1080px}
+.leads th{background:var(--surface);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 .leads td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 .leads tr:last-child td{border-bottom:0}
 .leads tbody tr{cursor:pointer}
@@ -99,6 +99,25 @@ select.pill{border:0;appearance:none;-webkit-appearance:none;cursor:pointer;padd
 .st-megnyert{background:var(--ok-soft);color:var(--ok)}
 .st-elveszett{background:var(--bad-soft);color:var(--bad)}
 .due{color:var(--accent);font-weight:600}
+.muted{color:var(--muted)}
+.leads tr.fu td{background:var(--fu-bg)}
+.leads tr.fu td:first-child{box-shadow:inset 4px 0 0 var(--fu)}
+.leads tr.lost td,.leads tr.lost td b{color:var(--muted)}
+.leads tr.lost td{background:var(--surface-2)}
+.leads .notecell{max-width:240px;font-size:13px;color:var(--muted)}
+.futag{display:inline-block;background:var(--fu);color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em;border-radius:999px;padding:2px 8px;margin-bottom:4px;white-space:nowrap}
+.fubtn{border:0;background:var(--fu);color:#fff;border-radius:999px;padding:6px 11px;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.fubtn:disabled{opacity:.6}
+.card.fu{border-color:var(--fu);background:var(--fu-bg)}
+.card.lost{background:var(--surface-2);color:var(--muted)}
+.furow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.stage.hot{border-color:var(--fu);background:var(--fu-bg)}
+.stage.hot .n{color:var(--fu)}
+.fubox{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:6px;font-size:14px;background:var(--bg)}
+.fubox.due{border-color:var(--fu);background:var(--fu-bg)}
+.fubox ul{margin:0;padding-left:18px;color:var(--muted)}
+.fubox .btn{justify-self:start}
+.st-folyamatban{background:var(--warn-soft);color:var(--warn)}
 .cards{display:none;gap:10px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:8px;cursor:pointer}
 .card .row1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -263,7 +282,7 @@ details.sec>summary>span{flex:1}
   --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#FAF8F6; --line:#E6E3E0;
   --fg:#2B2B2B; --muted:#7D7D7D; --accent:#EF4130; --accent-ink:#FFFFFF; --accent-soft:#FDEEE4;
   --ok:#1F7A4D; --ok-soft:#E8F5EE; --warn:#9B5B00; --warn-soft:#FFF4E0; --info:#2B5FB4; --info-soft:#E8EEF9; --bad:#7D7D7D; --bad-soft:#F1EFED;
-  --focus:#F5975A; --orange:#F5975A; --red-dark:#D1372A;
+  --focus:#F5975A; --orange:#F5975A; --red-dark:#D1372A; --fu:#D1372A; --fu-bg:#FDEBE8;
   --f-body:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif; --f-display:Manrope,system-ui,sans-serif;
   color-scheme:light;
 }
@@ -344,18 +363,26 @@ const LBL={"504":[178,226],"503":[356,226],"502":[512,226],"501":[668,226],"520"
  "506":[180,1029],"507":[422,1029],"508":[546,1029],"509":[677,1029],"510":[814,1029],"512":[1347,1029],"513":[1485,1029],"514":[1636,1029],"515":[1793,1029]};
 
 const STATUSES=[
- {id:"uj",hu:"Új",dot:"var(--info)"},
  {id:"kikuldve",hu:"Kiküldve",dot:"var(--accent)"},
- {id:"targyalas",hu:"Tárgyalás",dot:"var(--warn)"},
+ {id:"folyamatban",hu:"Folyamatban",dot:"var(--warn)"},
  {id:"megnyert",hu:"Megnyert",dot:"var(--ok)"},
  {id:"elveszett",hu:"Elveszett",dot:"var(--bad)"}];
+const FU_DAYS=5;
+const normSt=s=>!s||s==="uj"?"kikuldve":s==="targyalas"?"folyamatban":s;
+const sentDateOf=d=>d.sentDate||(d.sentAt||"").slice(0,10)||d.date||"";
+function addDays(iso,n){const p=parseD(iso);if(!p)return "";const t=new Date(p.y,p.m-1,p.d+n);return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+const lastFu=d=>{const f=d.followups||[];return f.length?f[f.length-1]:null};
+const fuDue=d=>{if(normSt(d.status)!=="kikuldve")return "";const base=lastFu(d)?lastFu(d).at:sentDateOf(d);return base?addDays(base,FU_DAYS):""};
+const isFu=d=>{const x=fuDue(d);return !!x&&x<=todayISO()};
+const acct=e=>e?String(e).split("@")[0]:"";
+const sender=d=>acct(d.sentBy||d.by);
 const SOURCES=["Weboldal","Telefon","E-mail","Ajánlás","Ingatlanközvetítő","Bejárás","Egyéb"];
 
 const DEF={
  terms:{parking:170,energy:11000,guestParking:750,coffee:4200,deposit:3,install:80,mr6:8000,mr10:10000,mr12:15000},
  contact:{name:"Puskádi-Szuplics Dóra",title:"Sales and Operations Manager",phone:"+36 30 394 0288",email:"sales@vpo.hu"},
- servicesHu:["Személyre szabott asszisztencia és titkársági szolgáltatás a recepción","Igényre szabott telefon- és levélkezelés","Teljesen berendezett irodák, magas minőségű, ergonomikus irodabútorokkal felszerelt tárgyalók","CISCO telefonok és hálózati infrastruktúra az irodákban","Szélessávú internetkapcsolat (100 Mbit/s), tűzfal","Biztonsági zár és 24 órás hozzáférés az irodához","Audiovizuális és prezentációs eszközökkel felszerelt tárgyalók","Business lounge WiFi-vel és TV-vel vendégei kényelméért","Minőségi Nespresso kávégép a konyhában, tea és víz","Fénymásoló, nyomtató, szkenner, lamináló és lefűzőgép","24 órás biztonsági szolgálat a Duna Tower földszintjén","Az irodaház mélygarázsának és vendégparkolójának használata","Karbantartás és napi takarítás"],
- servicesEn:["Personalised assistance and secretarial service at the reception","Customised call and mail handling","Fully furnished offices and meeting rooms with high-quality ergonomic furniture","CISCO phones and network infrastructure in the offices","Broadband internet (100 Mbit/s) with firewall","Security lock and 24-hour access to your office","Meeting rooms with audiovisual and presentation equipment","Business lounge with WiFi and TV for your guests","Nespresso coffee machine in the kitchen, tea and water","Copier, printer, scanner, laminator and binding machine","24-hour security service on the ground floor of Duna Tower","Access to the building's underground garage and guest car park","Maintenance and daily cleaning"],
+ servicesHu:["Személyre szabott asszisztencia és titkársági szolgáltatás a recepción","Igényre szabott telefon- és levélkezelés","Teljesen berendezett irodák, magas minőségű, ergonomikus irodabútorokkal felszerelt tárgyalók","CISCO telefonok és hálózati infrastruktúra az irodákban","Szélessávú internetkapcsolat (1000 Mbit/s), tűzfal","Biztonsági zár és 24 órás hozzáférés az irodához","Audiovizuális és prezentációs eszközökkel felszerelt tárgyalók","Business lounge WiFi-vel és TV-vel vendégei kényelméért","Minőségi Nespresso kávégép a konyhában, tea és víz","Fénymásoló, nyomtató, szkenner, lamináló és lefűzőgép","24 órás biztonsági szolgálat a Duna Tower földszintjén","Az irodaház mélygarázsának és vendégparkolójának használata","Karbantartás és napi takarítás"],
+ servicesEn:["Personalised assistance and secretarial service at the reception","Customised call and mail handling","Fully furnished offices and meeting rooms with high-quality ergonomic furniture","CISCO phones and network infrastructure in the offices","Broadband internet (1000 Mbit/s) with firewall","Security lock and 24-hour access to your office","Meeting rooms with audiovisual and presentation equipment","Business lounge with WiFi and TV for your guests","Nespresso coffee machine in the kitchen, tea and water","Copier, printer, scanner, laminator and binding machine","24-hour security service on the ground floor of Duna Tower","Access to the building's underground garage and guest car park","Maintenance and daily cleaning"],
  introHu:"Köszönjük megtisztelő érdeklődését a Vista Plus Offices szolgáltatásai iránt! A tájékoztatót megkeresésére hivatkozva, teljes mértékben a leírt igényeinek megfelelően alakítottuk ki.\nBízunk benne, hogy business centerünk elnyerte tetszését, és reméljük, hogy tájékoztatónkkal segíthetünk megtalálni az Ön számára leginkább megfelelő irodabérleti megoldást.\nA Vista Plus Offices a panorámás irodahelyiséggel együtt számos olyan plusz szolgáltatást biztosít, amelyek nélkülözhetetlenek egy sikeres üzlet mindennapi működéséhez. Business centerünk kialakítása, az igényre szabott szolgáltatási csomagok és képzett személyzetünk is az Ön üzletmenetének kényelmét, költséghatékonyságát és sikerét szolgálják.",
  introEn:"Thank you for your interest in the services of Vista Plus Offices. We are delighted to have prepared this proposal based on your request and tailored to your needs.\nWe hope you liked our business centre, and that this offer helps you find the office solution that suits you best.\nBesides the impressive Danube and city view, Vista Plus Offices provides the additional services that are essential to running a successful business. The design of our centre, our cost-efficient service packages and our skilled staff are all there to support your business every day."
 };
@@ -365,7 +392,7 @@ const T={
   date:"Dátum",client:"Érdeklődő",contactL:"Elérhetőség",movein:"Beköltözés",salut:s=>"Kedves "+s+"!",
   optEy:"Elérhető irodák",optT:"Az Ön igényeire szabott lehetőségek",otCols:["Lehetőség","Beköltözés dátuma","Iroda száma","Munkaállomások száma","A szerződés hossza","Havi költség"],otNote:"A havidíjak nettó árak, az ÁFA-t nem tartalmazzák.",tbd:"Egyeztetés szerint",optN:i=>i+". lehetőség",seats:"Munkaállomás",term:"Szerződés",from:"Elérhető",perMonth:"/ hó + ÁFA",max:n=>"max. "+n+" fő",fromD:d=>d+"-tól",
   incEy:"Minden egy havidíjban",incT:"A havidíj tartalmazza",exT:"A havidíj nem tartalmazza",condT:"Feltételek",
-  ex:t=>[["Parkoló a mélygarázsban",fmtN(t.parking)+" EUR / hó / beálló"],["Energetikai költség",fmtN(t.energy)+" HUF / munkaállomás / hó"],["Vendégparkoló",fmtN(t.guestParking)+" HUF / óra"],["Kávé",fmtN(t.coffee)+" HUF / 10 kredit"]],
+  ex:t=>[["Parkoló a mélygarázsban",fmtN(t.parking)+" EUR / hó / beálló"],...(Number(t.energy)>0?[["Energetikai költség",fmtN(t.energy)+" HUF / munkaállomás / hó"]]:[]),["Vendégparkoló",fmtN(t.guestParking)+" HUF / óra"],["Kávé",fmtN(t.coffee)+" HUF / 10 kredit"]],
   cond:t=>"Az iroda birtokba vételének feltétele "+t.deposit+" havi kaució és az első havi bérleti díj megfizetése.",
   inst:t=>"A szerződés megkötésekor "+fmtN(t.install)+" EUR/fő egyszeri installációs díjat számlázunk, amely tartalmazza:",
   instItems:["belépőkártyák, kulcsok","telefonvonal aktiválása és programozása","internet installáció és konfigurálás"],
@@ -379,7 +406,7 @@ const T={
   date:"Date of offer",client:"Prepared for",contactL:"Contact details",movein:"Start date",salut:s=>"Dear "+s+",",
   optEy:"Available offices",optT:"Options tailored to your needs",otCols:["Option","Move-in date","Office nr.","Nr. of workstations","Contract length","Monthly fee"],otNote:"Monthly fees are net prices, excluding VAT.",tbd:"To be agreed",optN:i=>"Option "+i,seats:"Workstations",term:"Contract",from:"Available",perMonth:"/ month + VAT",max:n=>"max. "+n,fromD:d=>"from "+d,
   incEy:"All in one monthly fee",incT:"Your monthly fee includes",exT:"Not included",condT:"Terms",
-  ex:t=>[["Garage parking space",fmtN(t.parking)+" EUR / month"],["Energy cost",fmtN(t.energy)+" HUF / workstation / month"],["Guest parking",fmtN(t.guestParking)+" HUF / hour"],["Coffee",fmtN(t.coffee)+" HUF / 10 credits"]],
+  ex:t=>[["Garage parking space",fmtN(t.parking)+" EUR / month"],...(Number(t.energy)>0?[["Energy cost",fmtN(t.energy)+" HUF / workstation / month"]]:[]),["Guest parking",fmtN(t.guestParking)+" HUF / hour"],["Coffee",fmtN(t.coffee)+" HUF / 10 credits"]],
   cond:t=>"The office can be occupied after payment of a "+t.deposit+"-month deposit together with the first month's rent.",
   inst:t=>"On signing the contract, a one-off installation fee of "+fmtN(t.install)+" EUR/person is invoiced, which includes:",
   instItems:["entry cards and keys","phone line activation and programming","internet installation and configuration"],
@@ -476,17 +503,18 @@ async function saveFile(name,blob){
   if(downloads){await downloads.save({filename:name,data:blob});return}
   const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}
 
+const fixMbit=x=>String(x).replace(/\(100 Mbit\/s\)/,"(1000 Mbit/s)");
 function defaults(){const d=S.defaults||{};return{terms:{...DEF.terms,...(d.terms||{})},contact:{...DEF.contact,...(d.contact||{})},
- servicesHu:d.servicesHu?.length?d.servicesHu:DEF.servicesHu,servicesEn:d.servicesEn?.length?d.servicesEn:DEF.servicesEn,
+ servicesHu:(d.servicesHu?.length?d.servicesHu:DEF.servicesHu).map(fixMbit),servicesEn:(d.servicesEn?.length?d.servicesEn:DEF.servicesEn).map(fixMbit),
  introHu:d.introHu||DEF.introHu,introEn:d.introEn||DEF.introEn}}
 function blankLead(){const d=defaults();return{lang:"hu",date:todayISO(),salutation:"",name:"",company:"",phone:"",email:"",moveIn:"",source:"Weboldal",
  options:[{office:"",seats:"4",term:"1 év",from:"",price:""}],note:"",terms:{...d.terms},contact:{...d.contact},
- status:"uj",nextDate:"",internal:"",createdAt:null,updatedAt:null,sentAt:null}}
+ status:"kikuldve",sentDate:todayISO(),sentBy:(typeof ME!=="undefined"&&ME)||"",followups:[],internal:"",createdAt:null,updatedAt:null,sentAt:null}}
 
 /* ---------- routing ---------- */
 function go(view,id){
   if(view==="new"){S.cur=blankLead();S.curId=null;S.dirty=false;S.lastSaved=null;S.pane="form";S.confirmDel=false;view="edit"}
-  if(view==="edit"&&id){const l=S.leads.find(x=>x.id===id);if(!l)return;S.cur=JSON.parse(JSON.stringify(l.data));S.cur.options=S.cur.options?.length?S.cur.options:[{}];S.cur.terms={...defaults().terms,...(S.cur.terms||{})};S.cur.contact={...defaults().contact,...(S.cur.contact||{})};S.curId=id;S.dirty=false;S.lastSaved=l.data.updatedAt;S.pane="form";S.confirmDel=false}
+  if(view==="edit"&&id){const l=S.leads.find(x=>x.id===id);if(!l)return;S.cur=JSON.parse(JSON.stringify(l.data));S.cur.options=S.cur.options?.length?S.cur.options:[{}];S.cur.terms={...defaults().terms,...(S.cur.terms||{})};S.cur.contact={...defaults().contact,...(S.cur.contact||{})};S.cur.status=normSt(S.cur.status);S.cur.sentDate=sentDateOf(S.cur);S.cur.followups=S.cur.followups||[];S.curId=id;S.dirty=false;S.lastSaved=l.data.updatedAt;S.pane="form";S.confirmDel=false}
   S.view=view;render();window.scrollTo(0,0)}
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>go(b.dataset.view));
 
@@ -499,59 +527,68 @@ function render(){
 function minPrice(l){const ps=(l.options||[]).map(o=>Number(o.price)).filter(n=>n>0);return ps.length?Math.min(...ps):null}
 function renderLeads(){LANG_FMT="hu";
   $("#actionbar").innerHTML="";
-  const counts={};STATUSES.forEach(s=>counts[s.id]=0);S.leads.forEach(l=>counts[l.data.status||"uj"]=(counts[l.data.status||"uj"]||0)+1);
+  const counts={fu:0};STATUSES.forEach(s=>counts[s.id]=0);S.leads.forEach(l=>{counts[normSt(l.data.status)]++;if(isFu(l.data))counts.fu++});
   const q=S.q.trim().toLowerCase();
-  const rows=S.leads.filter(l=>(S.filter==="all"||(l.data.status||"uj")===S.filter)&&(!q||[l.data.name,l.data.company,l.data.email,l.data.phone,(l.data.options||[]).map(o=>o.office).join(" ")].join(" ").toLowerCase().includes(q)));
-  const today=todayISO();
+  const rows=S.leads.filter(l=>(S.filter==="all"||(S.filter==="fu"?isFu(l.data):normSt(l.data.status)===S.filter))&&(!q||[l.data.name,l.data.company,l.data.email,l.data.phone,l.data.internal,sender(l.data),(l.data.options||[]).map(o=>o.office).join(" ")].join(" ").toLowerCase().includes(q)))
+    .sort((x,y)=>(isFu(y.data)-isFu(x.data))||(sentDateOf(y.data)||"").localeCompare(sentDateOf(x.data)||"")||(y.data.updatedAt||"").localeCompare(x.data.updatedAt||""));
   const stOpts=cur=>STATUSES.map(s=>`<option value="${s.id}"${s.id===cur?" selected":""}>${s.hu}</option>`).join("");
   const offices=l=>(l.options||[]).map(o=>o.office).filter(Boolean).join(", ")||"–";
+  const note=(d,n)=>d.internal?esc(d.internal.slice(0,n))+(d.internal.length>n?"…":""):"";
+  const fuCell=(l,d)=>{const nf=(d.followups||[]).length,cnt=nf?`<small>${nf}× follow-up</small>`:"";
+    if(isFu(d))return `<button class="fubtn" data-fu="${l.id}">Follow-up kész</button>${cnt?"<br>"+cnt:""}`;
+    const due=fuDue(d);return due?`<span class="muted">${esc(dShort(due,"hu"))}</span>${cnt?"<br>"+cnt:""}`:(cnt||"–")};
+  const rowCls=d=>isFu(d)?"fu":normSt(d.status)==="elveszett"?"lost":"";
   let body;
   if(!S.loaded&&!S.dbErr){body=`<div class="empty"><b>Leadek betöltése…</b>Pillanat, az adatok érkeznek.</div>`}
   else if(S.dbErr){body=`<div class="empty"><b>Az adatbázis nem érhető el</b>${esc(S.dbErr)}</div>`}
   else if(!S.leads.length){body=`<div class="empty"><b>Még nincs egy lead sem</b>Az első kitöltött tájékoztató automatikusan ide kerül.<br><br><button class="btn primary" onclick="go('new')">${ICON.plus} Új tájékoztató</button></div>`}
   else if(!rows.length){body=`<div class="empty"><b>Nincs találat</b>Próbálj másik keresést vagy szűrőt.</div>`}
   else{
-    body=`<div class="table-box"><table class="leads"><thead><tr><th>Dátum</th><th>Érdeklődő</th><th>Elérhetőség</th><th>Iroda</th><th>Havi díjtól</th><th>Beköltözés</th><th>Státusz</th><th>Következő lépés</th></tr></thead><tbody>`+
-    rows.map(l=>{const d=l.data,mp=minPrice(d),st=d.status||"uj",due=d.nextDate&&d.nextDate<=today&&!["megnyert","elveszett"].includes(st);
-      return `<tr data-id="${l.id}"><td class="num">${esc(dShort(d.date,"hu"))}</td><td class="who"><b>${esc(d.name||"Névtelen")}</b><small>${esc(d.company||"")}</small></td>
+    body=`<div class="table-box"><table class="leads"><thead><tr><th>Kiküldve</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Iroda</th><th>Havi díjtól</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
+    rows.map(l=>{const d=l.data,mp=minPrice(d),st=normSt(d.status);
+      return `<tr data-id="${l.id}" class="${rowCls(d)}"><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
       <td><div>${esc(d.phone||"")}</div><small>${esc(d.email||"")}</small></td><td class="num">${esc(offices(d))}</td><td class="num">${mp?"EUR "+fmtN(mp):"–"}</td>
-      <td class="num">${esc(moveInTxt(d.moveIn,"hu",true))||"–"}</td>
-      <td><select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></td>
-      <td class="num ${due?"due":""}">${esc(dShort(d.nextDate,"hu"))||"–"}${d.internal?`<br><small>${esc(d.internal.slice(0,60))}${d.internal.length>60?"…":""}</small>`:""}</td></tr>`}).join("")+
+      <td>${isFu(d)?'<span class="futag">Follow-up</span><br>':""}<select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></td>
+      <td>${esc(sender(d))||"–"}</td><td class="num">${fuCell(l,d)}</td><td class="notecell">${note(d,80)||"–"}</td></tr>`}).join("")+
     `</tbody></table></div><div class="cards">`+
-    rows.map(l=>{const d=l.data,mp=minPrice(d),st=d.status||"uj",due=d.nextDate&&d.nextDate<=today&&!["megnyert","elveszett"].includes(st);
-      return `<div class="card" data-id="${l.id}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></div>
-      <div class="meta"><span>Iroda: ${esc(offices(d))}</span><span>${mp?"EUR "+fmtN(mp)+"-tól":""}</span><span>${d.moveIn?"Beköltözés: "+esc(moveInTxt(d.moveIn,"hu",true)):""}</span></div>
+    rows.map(l=>{const d=l.data,mp=minPrice(d),st=normSt(d.status),due=fuDue(d);
+      return `<div class="card ${rowCls(d)}" data-id="${l.id}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></div>
+      ${isFu(d)?`<div class="furow"><span class="futag">Follow-up esedékes</span><button class="fubtn" data-fu="${l.id}">Follow-up kész</button></div>`:""}
+      <div class="meta"><span>Kiküldve: ${esc(dShort(sentDateOf(d),"hu"))||"–"}</span><span>${sender(d)?"Kiküldte: "+esc(sender(d)):""}</span>${due&&!isFu(d)?`<span>Follow-up: ${esc(dShort(due,"hu"))}</span>`:""}${(d.followups||[]).length?`<span>${d.followups.length}× follow-up</span>`:""}</div>
+      <div class="meta"><span>Iroda: ${esc(offices(d))}</span><span>${mp?"EUR "+fmtN(mp)+"-tól":""}</span></div>
       <div class="meta"><span>${esc(d.phone||"")}</span><span>${esc(d.email||"")}</span></div>
-      ${d.nextDate?`<div class="meta"><span class="${due?"due":""}">Következő lépés: ${esc(dShort(d.nextDate,"hu"))}${d.internal?" · "+esc(d.internal.slice(0,50)):""}</span></div>`:""}</div>`}).join("")+`</div>`;
+      ${d.internal?`<div class="meta"><span>${note(d,90)}</span></div>`:""}</div>`}).join("")+`</div>`;
   }
-  $("#main").innerHTML=`<div class="lead-head"><div><h1 class="view-title">Leadek</h1><p class="sub">Minden kitöltött tájékoztató automatikusan ide kerül.</p></div>
+  const chips=[{id:"fu",hu:"Follow-up",dot:"var(--fu)"},...STATUSES];
+  $("#main").innerHTML=`<div class="lead-head"><div><h1 class="view-title">Leadek</h1><p class="sub">Minden kitöltött tájékoztató automatikusan ide kerül. Ha a kiküldés (vagy az utolsó follow-up) után ${FU_DAYS} nap eltelt és még „Kiküldve” a státusz, a sor pirosra vált.</p></div>
    <div class="actions"><button class="btn" id="csv">Export (Excel)</button><button class="btn primary" onclick="go('new')">${ICON.plus} Új tájékoztató</button></div></div>
-   <div class="pipeline">${STATUSES.map(s=>`<button class="stage" data-f="${s.id}" aria-pressed="${S.filter===s.id}"><span class="n">${counts[s.id]||0}</span><span class="l"><i class="dot" style="background:${s.dot}"></i>${s.hu}</span></button>`).join("")}</div>
-   <div class="toolbar"><input id="q" class="search" type="search" placeholder="Keresés név, cég, e-mail, iroda szerint" value="${esc(S.q)}" aria-label="Keresés"></div>${body}`;
+   <div class="pipeline">${chips.map(s=>`<button class="stage${s.id==="fu"&&counts.fu?" hot":""}" data-f="${s.id}" aria-pressed="${S.filter===s.id}"><span class="n">${counts[s.id]||0}</span><span class="l"><i class="dot" style="background:${s.dot}"></i>${s.hu}</span></button>`).join("")}</div>
+   <div class="toolbar"><input id="q" class="search" type="search" placeholder="Keresés név, cég, e-mail, iroda, megjegyzés szerint" value="${esc(S.q)}" aria-label="Keresés"></div>${body}`;
   document.querySelectorAll(".stage").forEach(b=>b.onclick=()=>{S.filter=S.filter===b.dataset.f?"all":b.dataset.f;renderLeads()});
   const qi=$("#q");qi.oninput=()=>{S.q=qi.value;const pos=qi.selectionStart;renderLeads();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
-  document.querySelectorAll("[data-id]").forEach(r=>r.onclick=e=>{if(e.target.closest("select"))return;go("edit",r.dataset.id)});
+  document.querySelectorAll("[data-id]").forEach(r=>r.onclick=e=>{if(e.target.closest("select,button"))return;go("edit",r.dataset.id)});
   document.querySelectorAll("[data-st]").forEach(sel=>{sel.onclick=e=>e.stopPropagation();sel.onchange=async()=>{
-    const id=sel.dataset.st;try{await store.update(id,{status:sel.value,updatedAt:new Date().toISOString()});toast("Státusz frissítve")}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}}});
+    const id=sel.dataset.st;try{await store.update(id,{status:sel.value,updatedAt:new Date().toISOString()});toast("Státusz: "+STATUSES.find(x=>x.id===sel.value).hu)}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}}});
+  document.querySelectorAll("[data-fu]").forEach(b=>b.onclick=async e=>{e.stopPropagation();const l=S.leads.find(x=>x.id===b.dataset.fu);if(!l)return;b.disabled=true;
+    const f=[...(l.data.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];
+    try{await store.update(l.id,{followups:f,updatedAt:new Date().toISOString()});toast("Follow-up rögzítve, a következő "+dShort(addDays(todayISO(),FU_DAYS),"hu")+" esedékes")}catch(err){b.disabled=false;toast("Nem sikerült menteni: "+(err.message||err.code))}});
   $("#csv").onclick=exportXLSX;
 }
-
 async function exportXLSX(){
   if(!window.XLSX){toast("Az Excel-készítő nem töltődött be. Frissítsd az oldalt.");return}
   if(!S.leads.length){toast("Még nincs exportálható lead.");return}
   const st=id=>STATUSES.find(s=>s.id===id)?.hu||id;
   const dt=v=>{const p=parseD(v);return p?new Date(p.y,p.m-1,p.d):(v==="egyeztetes"?"Egyeztetés szerint":"")};
-  const head=["Dátum","Név","Cég","Telefon","E-mail","Nyelv","Forrás","Irodák","Legalacsonyabb havi díj (EUR)","Beköltözés","Státusz","Következő lépés","Belső megjegyzés","Kiküldve"];
+  const head=["Kiküldve","Név","Cégnév","Telefon","E-mail","Nyelv","Forrás","Irodák","Legalacsonyabb havi díj (EUR)","Beköltözés","Státusz","Kiküldte","Follow-up esedékes","Follow-upok száma","Utolsó follow-up","Megjegyzés","Tájékoztató dátuma"];
   const rows=S.leads.map(l=>{const d=l.data;const opts=(d.options||[]).filter(o=>o.office||o.price);
-    return[dt(d.date),d.name||"",d.company||"",d.phone||"",d.email||"",(d.lang||"hu").toUpperCase(),d.source||"",
+    return[dt(sentDateOf(d)),d.name||"",d.company||"",d.phone||"",d.email||"",(d.lang||"hu").toUpperCase(),d.source||"",
       opts.map(o=>(o.office||"?")+(o.price?" (EUR "+numIn(o.price)+")":"")).join(", "),minPrice(d)||"",
-      opts.length&&opts[0].from?dt(opts[0].from):dt(d.moveIn),st(d.status||"uj"),dt(d.nextDate),d.internal||"",d.sentAt?dt(d.sentAt.slice(0,10)):""]});
+      opts.length&&opts[0].from?dt(opts[0].from):dt(d.moveIn),st(normSt(d.status)),sender(d),isFu(d)?"Most":dt(fuDue(d)),(d.followups||[]).length,lastFu(d)?dt(lastFu(d).at):"",d.internal||"",dt(d.date)]});
   const ws=XLSX.utils.aoa_to_sheet([head,...rows],{cellDates:true,dateNF:"yyyy-mm-dd"});
   const range=XLSX.utils.decode_range(ws["!ref"]);
-  for(let R=1;R<=range.e.r;R++){for(const C of [0,9,11,13]){const ref=XLSX.utils.encode_cell({r:R,c:C});if(ws[ref]&&ws[ref].t==="d")ws[ref].z="yyyy-mm-dd"}
+  for(let R=1;R<=range.e.r;R++){for(const C of [0,9,12,14,16]){const ref=XLSX.utils.encode_cell({r:R,c:C});if(ws[ref]&&ws[ref].t==="d")ws[ref].z="yyyy-mm-dd"}
     const p=ws[XLSX.utils.encode_cell({r:R,c:8})];if(p&&p.t==="n")p.z="#,##0"}
-  ws["!cols"]=[12,24,26,16,28,7,14,30,14,16,12,14,40,12].map(w=>({wch:w}));
+  ws["!cols"]=[12,24,26,16,28,7,14,30,14,16,12,12,14,10,14,40,14].map(w=>({wch:w}));
   ws["!autofilter"]={ref:ws["!ref"]};
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Leadek");
   const out=XLSX.write(wb,{bookType:"xlsx",type:"array",cellDates:true});
@@ -607,8 +644,14 @@ function renderEditor(){
       <div class="two">${field("c-phone","Telefon",ct.phone,"tel")}${field("c-email","E-mail",ct.email,"email")}</div>
     </div></details>
     <details class="sec" open><summary><span>Követés <small>nem kerül a tájékoztatóba</small></span></summary><div class="sec-body">
-      <div class="two"><div class="f"><label for="status">Státusz</label><select id="status">${STATUSES.map(s=>`<option value="${s.id}"${s.id===c.status?" selected":""}>${s.hu}</option>`).join("")}</select></div>${field("nextDate","Következő lépés dátuma",c.nextDate,"date")}</div>
-      <div class="f"><label for="internal">Belső megjegyzés</label><textarea id="internal" placeholder="pl. Csütörtökön visszahívni, a 2 fős iroda is érdekli">${esc(c.internal)}</textarea></div>
+      <div class="two"><div class="f"><label for="status">Státusz</label><select id="status">${STATUSES.map(s=>`<option value="${s.id}"${s.id===normSt(c.status)?" selected":""}>${s.hu}</option>`).join("")}</select></div>${field("sentDate","Kiküldés dátuma",c.sentDate,"date")}</div>
+      <div class="fubox${isFu(c)?" due":""}">
+        <div><b>Kiküldte:</b> ${esc(sender(c))||"–"}</div>
+        <div><b>Follow-up:</b> ${normSt(c.status)!=="kikuldve"?"nincs, a státusz nem „Kiküldve”":isFu(c)?"esedékes most":"esedékes "+esc(dShort(fuDue(c),"hu"))}</div>
+        ${(c.followups||[]).length?`<ul>${c.followups.map((f,i)=>`<li>${i+1}. follow-up: ${esc(dShort(f.at,"hu"))}${f.by?" · "+esc(acct(f.by)):""}</li>`).join("")}</ul>`:""}
+        ${normSt(c.status)==="kikuldve"?`<button class="btn" id="fudone" type="button">Follow-up megtörtént</button>`:""}
+      </div>
+      <div class="f"><label for="internal">Megjegyzés</label><textarea id="internal" placeholder="pl. Csütörtökön visszahívni, a 2 fős iroda is érdekli">${esc(c.internal)}</textarea></div>
       ${S.curId?(S.confirmDel?`<div class="confirm">Biztosan törlöd ezt a leadet? Nem vonható vissza.<button class="btn danger" id="delyes">Igen, törlés</button><button class="btn ghost" id="delno">Mégse</button></div>`:`<button class="btn danger" id="del">Lead törlése</button>`):""}
     </div></details>
     <datalist id="terms-hu"><option>6 hónap</option><option>1 év</option><option>2 év</option><option>3 év</option><option>Egyeztetés alatt</option></datalist>
@@ -622,12 +665,14 @@ function renderEditor(){
 }
 function bindEditor(){
   const c=S.cur;
-  const map={name:"name",salutation:"salutation",company:"company",phone:"phone",email:"email",date:"date",moveIn:"moveIn",source:"source",note:"note",status:"status",nextDate:"nextDate",internal:"internal"};
+  const map={name:"name",salutation:"salutation",company:"company",phone:"phone",email:"email",date:"date",moveIn:"moveIn",source:"source",note:"note",status:"status",sentDate:"sentDate",internal:"internal"};
   Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(!el)return;el.addEventListener("input",()=>{c[k]=el.value;
     if(k==="name"&&!c._salTouched){const parts=el.value.trim().replace(/^dr\.?\s+/i,"").split(/\s+/);if(parts.length>1){c.salutation=c.lang==="en"?parts[0]:parts[parts.length-1];$("#salutation").value=c.salutation}}
     if(k==="salutation")c._salTouched=true;changed()})});
   ["parking","energy","guestParking","coffee","deposit","install","mr6","mr10","mr12"].forEach(k=>{const el=document.getElementById("t-"+k);el.addEventListener("input",()=>{c.terms[k]=numOut(el.value);changed()})});
   ["name","title","phone","email"].forEach(k=>{const el=document.getElementById("c-"+k);el.addEventListener("input",()=>{c.contact[k]=el.value;changed()})});
+  const fd=$("#fudone");if(fd)fd.onclick=()=>{c.followups=[...(c.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];changed();renderEditor();toast("Follow-up rögzítve")};
+  const stSel=$("#status");stSel.addEventListener("change",()=>renderEditor());
   const tbd=$("#moveInTbd");tbd.onchange=()=>{const d=$("#moveIn");d.disabled=tbd.checked;c.moveIn=tbd.checked?"egyeztetes":d.value;changed()};
   document.querySelectorAll("[data-tbd]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.tbd,d=$("#o"+i+"-from");d.disabled=cb.checked;c.options[i].from=cb.checked?"egyeztetes":d.value;changed()});
   document.querySelectorAll("[data-o]").forEach(el=>{el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{const i=+el.dataset.o,k=el.dataset.k;
@@ -635,7 +680,7 @@ function bindEditor(){
     c.options[i][k]=k==="price"?numOut(el.value):el.value;if(el.tagName==="SELECT"&&!c.options[i].seats){/* keep */}changed()})});
   document.querySelectorAll("[data-delopt]").forEach(b=>b.onclick=()=>{c.options.splice(+b.dataset.delopt,1);changed();renderEditor()});
   const add=$("#addopt");if(add)add.onclick=()=>{c.options.push({office:"",seats:"4",term:c.lang==="en"?"1 year":"1 év",from:"",price:""});changed();renderEditor()};
-  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(c.lang===b.dataset.lang)return;c.lang=b.dataset.lang;if(!c._salTouched&&c.name){const parts=c.name.trim().replace(/^dr\.?\s+/i,"").split(/\s+/);if(parts.length>1)c.salutation=c.lang==="en"?parts[0]:parts[parts.length-1]}
+  document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{if(c.lang===b.dataset.lang)return;c.lang=b.dataset.lang;
     c.options.forEach(o=>{const m={"1 év":"1 year","2 év":"2 years","3 év":"3 years","6 hónap":"6 months","Egyeztetés alatt":"TBD"};const r=Object.fromEntries(Object.entries(m).map(([a,b])=>[b,a]));o.term=(c.lang==="en"?m:r)[o.term]||o.term});
     changed();renderEditor()});
   document.querySelectorAll("[data-pane]").forEach(b=>b.onclick=()=>{S.pane=b.dataset.pane;renderEditor();window.scrollTo(0,0)});
@@ -753,15 +798,15 @@ async function makePDF(){
     const fname=docFileName(c),blob=pdf.output("blob");let where="PDF letöltve";
     if(useDir){try{await saveToDir(fname,blob);where="Mentve: "+DIR.name+" / "+fname}catch(e){await saveFile(fname,blob);where="A mappába nem sikerült menteni, letöltöttem"}}
     else await saveFile(fname,blob);
-    if(c.status==="uj"){c.status="kikuldve";c.sentAt=new Date().toISOString();const s=$("#status");if(s)s.value="kikuldve";S.dirty=true;await save();toast(where+" · státusz: Kiküldve",4000)}
-    else{if(!c.sentAt){c.sentAt=new Date().toISOString();S.dirty=true;save()}toast(where,4000)}
+    if(!c.sentAt){c.sentAt=new Date().toISOString();if(!c.sentBy&&typeof ME!=="undefined"&&ME)c.sentBy=ME;S.dirty=true;await save()}
+    toast(where,4000)
   }catch(e){if(e&&e.code==="declined")toast("Letöltés megszakítva");else toast("A PDF nem készült el: "+(e.message||e.code||e))}
   finally{S.busy=false;btn.disabled=false;btn.innerHTML=ICON.pdf+" PDF"}
 }
 function mailText(c){const en=c.lang==="en";const n=c.salutation||c.name||"";const ct=c.contact||{};
   const sig=[ct.name,ct.title,"Vista Plus Offices",ct.phone,ct.email,"www.vpo.hu"].filter(Boolean).join("\n");
   return en?{subject:"Office information – Vista Plus Offices",body:`Dear ${n},\n\nThank you for your interest in our serviced offices.\n\nPlease find attached our information pack, which gives you detailed information about the available offices, our additional services and the rental terms. Together with it, I am also sending our General Terms and Conditions.\n\nShould the options presented be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nWe would also be delighted to arrange a personal office viewing, during which you can see our offices and get to know our services more closely.\n\nLooking forward to hearing from you.\n\nKind regards,\n${sig}`}
-  :{subject:"Irodai tájékoztató – Vista Plus Offices",body:`Tisztelt ${n}!\n\nKöszönjük megtisztelő érdeklődését szolgáltatott irodáink iránt!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál az elérhető irodákról, a kiegészítő szolgáltatásokról, valamint a bérleti feltételekről. A tájékoztató mellett csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nIgény esetén személyes irodabejárásra is szívesen biztosítunk lehetőséget, amelynek során megtekintheti irodáinkat és közelebbről is megismerheti szolgáltatásainkat.\n\nVárva mielőbbi visszajelzését, üdvözlettel:\n${sig}`}}
+  :{subject:"Irodai tájékoztató – Vista Plus Offices",body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését szolgáltatott irodáink iránt!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál az elérhető irodákról, a kiegészítő szolgáltatásokról, valamint a bérleti feltételekről. A tájékoztató mellett csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nIgény esetén személyes irodabejárásra is szívesen biztosítunk lehetőséget, amelynek során megtekintheti irodáinkat és közelebbről is megismerheti szolgáltatásainkat.\n\nVárva mielőbbi visszajelzését, üdvözlettel:\n${sig}`}}
 async function copyMail(){
   const c=S.cur;const m=mailText(c);let copied=false;
   try{await navigator.clipboard.writeText(m.body);copied=true}catch(e){}
