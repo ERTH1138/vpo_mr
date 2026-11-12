@@ -82,8 +82,9 @@ h1.view-title{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,
 .toolbar{display:flex;gap:8px;margin-bottom:12px}
 .search{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-size:16px}
 .table-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
-table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:1380px}
-.leads td:nth-child(4),.leads td:nth-child(5){min-width:140px}
+table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:1480px}
+.leads td:nth-child(5),.leads td:nth-child(6){min-width:140px}
+.leads td.src{font-size:13px;white-space:nowrap}
 .leads td.offer{min-width:150px;max-width:220px;font-size:13px}
 .leads th{background:var(--surface);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 .leads td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -241,11 +242,11 @@ details.sec>summary>span{flex:1}
 .cv-hero .tag{display:inline-block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;padding:6px 12px;background:var(--doc-flame);color:#fff;margin-bottom:16px}
 .cv-hero h1{font-family:var(--f-display);font-weight:400;font-size:50px;line-height:1.05;margin:0 0 12px;letter-spacing:.005em;max-width:560px}
 .cv-hero p{font-size:19px;margin:0;opacity:.95}
-.cv-info{display:grid;grid-template-columns:repeat(4,1fr);margin:0 56px;border-bottom:1px solid var(--doc-line)}
+.cv-info{display:grid;grid-template-columns:0.75fr 1.05fr 1.55fr 1fr;margin:0 56px;border-bottom:1px solid var(--doc-line)}
 .cv-info div{padding:22px 16px 20px 0}
 .cv-info div+div{padding-left:16px;border-left:1px solid var(--doc-line)}
 .cv-info dt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--doc-muted);margin-bottom:6px}
-.cv-info dd{margin:0;font-weight:600;font-size:13px;line-height:1.4;word-break:break-word}
+.cv-info dd{margin:0;font-weight:600;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
 .cv-sum{margin:20px 56px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--doc-muted)}
 .cv-sum .o{border:1px solid var(--doc-line);padding:6px 12px;color:var(--doc-ink)}
 .cv-sum .o b{color:var(--doc-flame)}
@@ -293,6 +294,16 @@ details.sec>summary>span{flex:1}
 .room .rb{padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:12px}
 .room .rb b{font-family:var(--f-display);font-weight:400;font-size:17px}
 .room .rp{font-weight:700;color:var(--doc-ink)}
+.optH{font-family:var(--f-display);font-weight:400;font-size:17px;margin:4px 0 8px}
+.terms{border:1.5px solid var(--doc-flame);padding:10px 16px;margin-top:10px}
+.xbox{padding:12px 18px}
+.xbox h3{margin-bottom:4px}
+.xgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}
+.xgrid .kv{border-top:1px solid var(--doc-line)!important;padding:6px 0;font-size:11.5px}
+.xgrid .kv span:last-child{white-space:normal}
+.xnote{margin:6px 0 0!important;font-size:11px!important;color:var(--doc-muted)}
+.terms h3{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0 0 6px}
+.terms p{margin:0;font-size:12px;text-align:justify}
 .mrt td,.mrt th{padding:8px 7px;font-size:12px}
 .mrt tr.sub td{background:var(--doc-tint);font-weight:700}
 .grand{display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:var(--doc-graphite);color:#fff;padding:10px 14px;margin-top:10px;font-size:12.5px}
@@ -300,6 +311,8 @@ details.sec>summary>span{flex:1}
 .incbox{background:var(--doc-tint);padding:10px 14px;margin-top:14px;font-size:11.5px;text-align:justify}
 .catrow{display:grid;grid-template-columns:1fr 80px 120px 40px;gap:8px;align-items:end}
 @media (max-width:480px){.catrow{grid-template-columns:1fr 70px 100px 36px}}
+.slotgrid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.5fr;gap:10px}
+@media (max-width:600px){.slotgrid{grid-template-columns:1fr 1fr}}
 .cattot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .legal{display:flex;flex-direction:column;gap:3px;border-left:4px solid var(--doc-flame);background:var(--accent-doc-soft,#fdf0ea);padding:10px 14px;margin-top:12px;font-size:12px;color:var(--doc-ink);text-align:justify}
 .legal b{font-size:12.5px}
@@ -340,7 +353,9 @@ details.sec>summary>span{flex:1}
 .mt svg{width:13px;height:13px}
 .mtwrap{display:grid;grid-template-columns:1fr 1.6fr;gap:24px;align-items:start}
 .mtwrap p{margin:0;font-size:12px;color:#33363d;text-align:justify}
-.contact.flow{margin-top:18px!important}
+.contact.flow{margin-top:14px!important;padding:16px 24px}
+.contact.flow .q{font-size:22px}
+.vat td,.vat th{padding:7px 8px}
 .contact .wa{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10.5px;text-align:center;line-height:1.3;color:#fff}
 .contact .wa img{width:74px;height:74px;background:#fff;padding:4px;display:block}
 .contact .wa b{font-size:11.5px}
@@ -634,9 +649,9 @@ function renderLeads(){LANG_FMT="hu";S.pendingRender=false;
   else if(!S.leads.length){body=`<div class="empty"><b>Még nincs egy lead sem</b>Az első kitöltött tájékoztató automatikusan ide kerül.<br><br><button class="btn primary" onclick="go('home')">${ICON.plus} Új tájékoztató</button></div>`}
   else if(!rows.length){body=`<div class="empty"><b>Nincs találat</b>Próbálj másik keresést vagy szűrőt.</div>`}
   else{
-    body=`<div class="table-box"><table class="leads"><thead><tr><th></th><th>Kiküldve</th><th>Típus</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Ajánlat</th><th>Díj</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
+    body=`<div class="table-box"><table class="leads"><thead><tr><th></th><th>Kiküldve</th><th>Típus</th><th>Forrás</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Ajánlat</th><th>Díj</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
     rows.map(l=>{const d=l.data,mp=minPrice(d),st=effSt(d);
-      return `<tr class="${rowCls(d)}"><td class="acts">${acts(l)}</td><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span></td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
+      return `<tr class="${rowCls(d)}"><td class="acts">${acts(l)}</td><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span></td><td class="src">${esc(d.source||"–")}</td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
       <td><div>${esc(d.phone||"")}</div><small>${esc(d.email||"")}</small></td><td class="offer">${esc(offerSummary(d))}</td><td class="num">${esc(priceInfo(d).t)}</td>
       <td><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></td>
       <td>${esc(sender(d))||"–"}</td><td class="num">${fuCell(l,d)}</td><td class="notecell">${noteBox(l)}</td></tr>`}).join("")+
@@ -645,7 +660,7 @@ function renderLeads(){LANG_FMT="hu";S.pendingRender=false;
       return `<div class="card ${rowCls(d)}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></div>
       ${isFu(d)?`<div class="furow"><span class="futag">Follow-up esedékes</span><button class="fubtn" data-fu="${l.id}">Follow-up kész</button></div>`:""}
       <div class="meta"><span>Kiküldve: ${esc(dShort(sentDateOf(d),"hu"))||"–"}</span><span>${sender(d)?"Kiküldte: "+esc(sender(d)):""}</span>${due&&!isFu(d)?`<span>Follow-up: ${esc(dShort(due,"hu"))}</span>`:""}${(d.followups||[]).length?`<span>${d.followups.length}× follow-up</span>`:""}</div>
-      <div class="meta"><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span><span>${esc(offerSummary(d))}</span><span>${esc(priceInfo(d).t)}</span></div>
+      <div class="meta"><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span><span>${d.source?"Forrás: "+esc(d.source):""}</span><span>${esc(offerSummary(d))}</span><span>${esc(priceInfo(d).t)}</span></div>
       <div class="meta"><span>${esc(d.phone||"")}</span><span>${esc(d.email||"")}</span></div>
       <div class="cardnote">${noteBox(l)}</div>
       <div class="cardacts">${acts(l)}</div></div>`}).join("")+`</div>`;
@@ -794,7 +809,7 @@ function bindEditor(){
   const dy=$("#delyes");if(dy)dy.onclick=async()=>{try{await store.remove(S.curId);toast("Lead törölve");go("leads")}catch(e){toast("Nem sikerült törölni: "+(e.message||e.code))}};
   document.querySelectorAll("[data-path]").forEach(el=>{const p=el.dataset.path,ty=el.dataset.type;
     if(ty==="bool")el.onchange=()=>{setPath(c,p,el.checked);changed();renderEditor()};
-    else el.addEventListener("input",()=>{setPath(c,p,ty==="num"?numOut(el.value):el.value);changed();if(p.startsWith("mr.cat")){const t=$(".cattot b");if(t)t.textContent=fmtN(catTotal(c))+" Ft"}})});
+    else el.addEventListener("input",()=>{setPath(c,p,ty==="num"?numOut(el.value):el.value);changed();if(/^mr\.slots\.\d+\.room$/.test(p)&&el.value){c.mr.rooms[el.value].on=true;renderEditor();return}if(p.startsWith("mr.cat")){const t=$(".cattot b");if(t)t.textContent=fmtN(catTotal(c))+" Ft"}})});
   const as=$("#addslot");if(as)as.onclick=()=>{const last=c.mr.slots[c.mr.slots.length-1]||{};c.mr.slots.push({date:"",start:last.start||"09:00",end:last.end||"12:00"});changed();renderEditor()};
   document.querySelectorAll("[data-delslot]").forEach(b=>b.onclick=()=>{c.mr.slots.splice(+b.dataset.delslot,1);changed();renderEditor()});
   const ac=$("#addcat");if(ac)ac.onclick=()=>{c.mr.cat.push({name:"",qty:"",price:""});changed();renderEditor()};
@@ -905,8 +920,8 @@ const VO_FEAT=[ // [hu,en,szekhely,telefon,vi]
  ["Hívásfogadás a cég nevében","Calls answered in your company's name",0,1,1],
  ["Üzenet- és hívástovábbítás","Message and call forwarding",0,1,1],
  ["Hangposta","Voicemail",0,1,1]];
-const MR_INC={hu:["Ásványvíz bekészítés","Szélessávú WiFi","Jegyzetfüzet, toll, ceruza","BenQ interaktív kijelző, whiteboard","HD videokonferencia lehetősége","Közös területek használata (business lounge, mosdók, irodaeszköz-sarok)"],
- en:["Mineral water","Broadband WiFi","Notepad, pen, pencil","BenQ interactive display, whiteboard","HD video conferencing","Use of common areas (business lounge, restrooms, office equipment corner)"]};
+const MR_INC={hu:["Ásványvíz bekészítés","Szélessávú WiFi","Jegyzetfüzet, toll, ceruza","4K felbontású LG kijelző HDMI-csatlakozási lehetőséggel","Whiteboard","HD videokonferencia lehetősége","Közös területek használata (business lounge, mosdók, irodaeszköz-sarok)"],
+ en:["Mineral water","Broadband WiFi","Notepad, pen, pencil","4K LG display with HDMI connection","Whiteboard","HD video conferencing","Use of common areas (business lounge, restrooms, office equipment corner)"]};
 function voPrices(){const d=(S.defaults&&S.defaults.vo)||{};return{szekhely:80,telefon:80,vi:100,r6:6000,r10:10000,r12:15000,pkgHours:10,pkgPrice:80000,pkgExtra:6000,coffee:490,...d}}
 function mrPrices(){const d=(S.defaults&&S.defaults.mr)||{};return{r6:8000,r10:12000,r12:15000,pkgHours:10,pkgPrice:80000,pkgExtra:6000,coffee:490,...d}}
 function blankVo(){const p=voPrices();return{start:"",packages:{szekhely:{on:false,price:p.szekhely},telefon:{on:false,price:p.telefon},vi:{on:true,price:p.vi}},adhoc:{on:true,r6:p.r6,r10:p.r10,r12:p.r12},pkg:{on:false,hours:p.pkgHours,price:p.pkgPrice,extra:p.pkgExtra},coffee:p.coffee}}
@@ -923,17 +938,20 @@ const hm=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||"");return m?+m[1]*60+ +m[2]:
 const slotH=sl=>{const a=hm(sl&&sl.start),b=hm(sl&&sl.end);return a!=null&&b!=null&&b>a?(b-a)/60:0};
 function mrSlots(c){const m=c.mr||{};return m.slots&&m.slots.length?m.slots:[{date:m.date||"",start:m.start||"",end:m.end||""}]}
 function mrHours(c){return mrSlots(c).reduce((a,sl)=>a+slotH(sl),0)}
+function mrRows(c){const m=c.mr||{},sel=mrSel(c),sl0=mrSlots(c),filled=sl0.filter(x=>x.date||(x.start&&x.end)),use=filled.length?filled:sl0.slice(0,1);const rows=[];
+  use.forEach(sl=>{const fixed=sl.room&&ROOMS.find(r=>r.k===sl.room);(fixed?[fixed]:sel).forEach(r=>rows.push({sl,r,h:slotH(sl),p:Number(m.rooms&&m.rooms[r.k]&&m.rooms[r.k].price)||0}))});
+  return{rows,alt:use.some(x=>!x.room)&&sel.length>1,use}}
 const catItems=c=>(c.mr&&c.mr.catering&&Array.isArray(c.mr.cat)?c.mr.cat:[]).filter(i=>i.name||i.price);
 const catTotal=c=>catItems(c).reduce((a,i)=>a+(Number(i.price)||0)*(Number(i.qty)||1),0);
 const voSel=c=>VO_PK.filter(p=>c.vo&&c.vo.packages[p.k]&&c.vo.packages[p.k].on);
 const mrSel=c=>ROOMS.filter(r=>c.mr&&c.mr.rooms[r.k]&&c.mr.rooms[r.k].on);
 function offerSummary(d){const k=kindOf(d);
   if(k==="vo"){const s=voSel(d).map(p=>p.hu);if(d.vo&&d.vo.adhoc&&d.vo.adhoc.on)s.push("alkalmi tárgyaló");if(d.vo&&d.vo.pkg&&d.vo.pkg.on)s.push(d.vo.pkg.hours+" órás csomag");return s.join(", ")||"–"}
-  if(k==="targyalo"){const s=mrSel(d).map(r=>r.hu.replace(" tárgyaló",""));const sl=mrSlots(d).filter(x=>x.date);return (s.join(", ")||"–")+(sl.length?" · "+dShort(sl[0].date,"hu")+(sl.length>1?" +"+(sl.length-1):""):"")+(catItems(d).length?" · catering":"")}
+  if(k==="targyalo"){const ks=new Set(mrSel(d).map(r=>r.k));mrSlots(d).forEach(x=>{if(x.room)ks.add(x.room)});const s=ROOMS.filter(r=>ks.has(r.k)).map(r=>r.hu.replace(" tárgyaló",""));const sl=mrSlots(d).filter(x=>x.date);return (s.join(", ")||"–")+(sl.length?" · "+dShort(sl[0].date,"hu")+(sl.length>1?" +"+(sl.length-1):""):"")+(catItems(d).length?" · catering":"")}
   return (d.options||[]).map(o=>o.office).filter(Boolean).join(", ")||"–"}
 function priceInfo(d){const k=kindOf(d);
   if(k==="vo"){const ps=voSel(d).map(p=>Number(d.vo.packages[p.k].price)).filter(n=>n>0);return ps.length?{n:Math.min(...ps),t:"EUR "+fmtN(Math.min(...ps))+"/hó"}:{n:"",t:"–"}}
-  if(k==="targyalo"){const h=mrHours(d),ct=catTotal(d),rs=mrSel(d).map(r=>Number(d.mr.rooms[r.k].price)*h+ct).filter(n=>n>0);return rs.length?{n:Math.min(...rs),t:fmtN(Math.min(...rs))+" Ft"}:{n:"",t:"–"}}
+  if(k==="targyalo"){const {use}=mrRows(d),sel=mrSel(d);let tot=0;use.forEach(sl=>{const h=slotH(sl);if(sl.room)tot+=(Number(d.mr.rooms[sl.room]&&d.mr.rooms[sl.room].price)||0)*h;else if(sel.length)tot+=Math.min(...sel.map(r=>Number(d.mr.rooms[r.k].price)||0))*h});tot+=catTotal(d);return tot>0?{n:tot,t:fmtN(tot)+" Ft"}:{n:"",t:"–"}}
   const m=minPrice(d);return m?{n:m,t:"EUR "+fmtN(m)}:{n:"",t:"–"}}
 
 /* ---------- home: choose which tájékoztató ---------- */
@@ -964,7 +982,8 @@ function voSections(c){const v=c.vo;
 function mrSections(c){const m=c.mr;
   return `<details class="sec" open><summary><span>Időpontok <small>${m.slots.length} időpont</small></span></summary><div class="sec-body">
     ${m.slots.map((sl,i)=>`<div class="opt"><div class="opt-h"><span>${i+1}. időpont</span>${m.slots.length>1?`<button data-delslot="${i}">Törlés</button>`:""}</div>
-      <div class="three">${pf("mr.slots."+i+".date","Dátum","date")}${pf("mr.slots."+i+".start","Kezdés","time",'step="900"')}${pf("mr.slots."+i+".end","Befejezés","time",'step="900"')}</div></div>`).join("")}
+      <div class="slotgrid">${pf("mr.slots."+i+".date","Dátum","date")}${pf("mr.slots."+i+".start","Kezdés","time",'step="900"')}${pf("mr.slots."+i+".end","Befejezés","time",'step="900"')}
+      <div class="f"><label for="p-mr-slots-${i}-room">Terem</label><select id="p-mr-slots-${i}-room" data-path="mr.slots.${i}.room" data-type="text"><option value="">Minden kiválasztott terem</option>${ROOMS.map(r=>`<option value="${r.k}"${sl.room===r.k?" selected":""}>${r.hu}</option>`).join("")}</select></div></div></div>`).join("")}
     ${m.slots.length<10?`<button class="btn ghost" id="addslot" type="button">${ICON.plus} Újabb időpont</button>`:""}
     ${pf("mr.people","Létszám","num")}
   </div></details>
@@ -1012,7 +1031,7 @@ function pagesVO(c){const en=c.lang==="en";LANG_FMT=c.lang;const v=c.vo,t=c.term
   const phoneBox=hasPhone?`<div class="box"><h3>${en?"Phone handling":"Telefonkezelés"}</h3><p>${en?"We provide you with your own direct Budapest number. On working days between 8:30 and 17:00 our colleagues answer calls in your company's name; outside these hours and on public holidays calls are handled by voicemail, as you prefer.":"Saját, közvetlen budapesti telefonszámot biztosítunk, amelyen munkanapokon 8:30 és 17:00 között kollégáink az Ön cége nevében fogadják a hívásokat. Munkaidőn kívül és munkaszüneti napokon a hívásokat igény szerint hangposta kezeli."}</p></div>`:"";
   const legal=sel.some(p=>p.k!=="telefon")?`<div class="legal"><b>${en?"Registered office service provider":"Nyilvántartásba vett székhelyszolgáltató"}</b><span>${en?"Our registered office service complies with IM Decree 7/2017 (VI.1.) and Act LIII of 2017 on the prevention of money laundering; as a registered office service provider we are accepted by the Hungarian Tax Authority (NAV).":"Székhelyszolgáltatásunk megfelel a 7/2017. (VI. 1.) IM rendeletnek és a pénzmosás megelőzéséről szóló 2017. évi LIII. törvénynek; nyilvántartásba vett székhelyszolgáltatóként a NAV által is elfogadott."}</span></div>`:"";
   const N=3;
-  const p1=`<section class="page" lang="${c.lang}">${H.cover(title+(en?" Information":" tájékoztató"),"vophone",[[en?"Date":"Dátum",esc(dShort(c.date,c.lang))||"–"],[en?"Prepared for":"Érdeklődő",clientCell(c)],[en?"Contact details":"Elérhetőség",contactCell(c)],[en?"Service start":"Szolgáltatás kezdete",esc(dLong(v.start,c.lang))||(en?"To be agreed":"Egyeztetés szerint")]],"22% center")}<div style="flex:1"></div>${H.foot(1,N)}</section>`;
+  const p1=`<section class="page" lang="${c.lang}">${H.cover(title+(en?" Information":" tájékoztató"),"szekhely_02",[[en?"Date":"Dátum",esc(dShort(c.date,c.lang))||"–"],[en?"Prepared for":"Érdeklődő",clientCell(c)],[en?"Contact details":"Elérhetőség",contactCell(c)],[en?"Service start":"Szolgáltatás kezdete",esc(dLong(v.start,c.lang))||(en?"To be agreed":"Egyeztetés szerint")]],"35% center")}<div style="flex:1"></div>${H.foot(1,N)}</section>`;
   const p2=`<section class="page" lang="${c.lang}">${H.head}<div class="pg-body">
     <div class="salut">${esc(en?"Dear "+(c.salutation||c.name||"…")+",":"Kedves "+(c.salutation||c.name||"…")+"!")}</div>
     <div class="letter">${intro.map(p=>`<p>${esc(p)}</p>`).join("")}</div>
@@ -1020,21 +1039,23 @@ function pagesVO(c){const en=c.lang==="en";LANG_FMT=c.lang;const v=c.vo,t=c.term
     ${tbl}${legal}
     <div class="boxes" style="margin-top:16px">${mailBox}${phoneBox}</div>
     <div style="height:18px"></div></div>${H.foot(2,N)}</section>`;
-  const adhoc=v.adhoc.on?`<table class="ot"><thead><tr><th style="text-align:left">${en?"Meeting room":"Tárgyaló"}</th><th>${en?"Capacity":"Létszám"}</th><th>${en?"Discounted hourly rate":"Kedvezményes óradíj"}</th></tr></thead><tbody>
+  const both=v.adhoc.on&&v.pkg.on;
+  const adhoc=v.adhoc.on?`<h3 class="optH">${both?(en?"Option 1 – ":"1. opció – "):""}${en?"Occasional meeting room rental (hourly)":"Alkalmi, óradíjas tárgyalóbérlés"}</h3><table class="ot vat"><thead><tr><th style="text-align:left">${en?"Meeting room":"Tárgyaló"}</th><th>${en?"Capacity":"Létszám"}</th><th>${en?"Discounted hourly rate":"Kedvezményes óradíj"}</th></tr></thead><tbody>
     ${ROOMS.map(r=>`<tr><td style="text-align:left" class="b">${en?r.en:r.hu}</td><td>${en?"max. "+r.cap+" people":"maximum "+r.cap+" fő"}</td><td class="b">${huf(v.adhoc[r.k],en)} ${en?"+ VAT / hour":"+ Áfa / óra"}</td></tr>`).join("")}</tbody></table>
     <p class="otnote">${en?"Net prices; they do not include the fees of additional services used.":"Az óradíjak nettó árak, és nem tartalmazzák a felhasznált kiegészítő szolgáltatások díját."}</p>
     <p class="incl"><b>${en?"The hourly rate includes:":"Az óradíj tartalmazza:"}</b> ${MR_INC[en?"en":"hu"].join(" · ")}</p>`:"";
-  const pkg=v.pkg.on?`<div class="pkg"><div class="pkg-h"><b>${en?v.pkg.hours+"-hour meeting room package":v.pkg.hours+" órás tárgyalócsomag"}</b><span>${huf(v.pkg.price,en)} ${en?"+ VAT / month":"+ Áfa / hó"}</span></div>
+  const pkg=v.pkg.on?`<div class="pkg"><div class="pkg-h"><b>${both?(en?"Option 2 – ":"2. opció – "):""}${en?v.pkg.hours+"-hour meeting room package":v.pkg.hours+" órás tárgyalócsomag"}</b><span>${huf(v.pkg.price,en)} ${en?"+ VAT / month":"+ Áfa / hó"}</span></div>
     <p>${en?`The package fee is invoiced monthly in addition to the virtual office fee, and the hours can be used in any of our meeting rooms. Unused hours cannot be carried over to the next month. Bookings above the ${v.pkg.hours} hours are available at a discounted rate of ${huf(v.pkg.extra,en)} + VAT per hour.`:`A tárgyalócsomag díját havonta, a virtuális iroda havidíján felül számlázzuk, az órák bármelyik tárgyalónkban felhasználhatók. A fel nem használt órák nem vihetők át a következő hónapra. A ${v.pkg.hours} órán felüli foglalásokat kedvezményes, ${huf(v.pkg.extra,en)} + Áfa óradíjon veheti igénybe.`}</p></div>`:"";
   const lead=v.adhoc.on||v.pkg.on?(en?"Your virtual office service can be complemented with occasional meeting room rental or a monthly meeting room package, as you prefer.":"Virtuális iroda szolgáltatásunkat igény szerint alkalmi tárgyalóbérléssel vagy havi tárgyalócsomaggal is kiegészíthetjük."):(en?"As our client you can rent our meeting rooms at discounted rates whenever you need them.":"Ügyfeleinkként tárgyalóinkat bármikor kedvezményes áron bérelheti.");
   const extras=en?[["Nespresso coffee and tea",huf(v.coffee,true)+" + VAT / pc"],["Catering","tailored to your needs"],["Printing, scanning, etc.","invoiced at the end of the month"],["Guest parking (plate registered in advance)",huf(t.guestParking,true)+" + VAT / hour"]]
    :[["Nespresso kávé és tea",huf(v.coffee)+" + Áfa / db"],["Catering","egyedi igények szerint"],["Nyomtatás, szkennelés stb.","a hónap végén számlázva"],["Vendégparkoló (előre leadott rendszámmal)",huf(t.guestParking)+" + Áfa / óra"]];
   const p3=`<section class="page" lang="${c.lang}">${H.head}<div class="pg-body">
     <p class="eyebrow">${en?"Meetings":"Tárgyalás"}</p><h2 class="h2">${en?"Meeting rooms and additional services":"Tárgyalók és további szolgáltatások"}</h2>
-    <p class="lead">${lead}</p>${adhoc}${pkg}
-    <div class="photos3" style="height:170px;margin:16px 0"><div class="ph" style="background-image:url(${IMG.targyalo6})"></div><div class="ph" style="background-image:url(${IMG.panorama})"></div><div class="ph" style="background-image:url(${IMG.targyalo12})"></div></div>
-    <div class="box"><h3>${en?"Additional services":"Kiegészítő szolgáltatások"}</h3>${extras.map(([a,b])=>`<div class="kv"><span>${a}</span><span>${b}</span></div>`).join("")}
-      <p style="margin-top:8px">${en?"Please always check the availability of the meeting room for the requested time in writing or by phone.":"Kérjük, foglalás előtt minden esetben írásban vagy telefonon érdeklődjön, hogy a kért időpontban elérhető-e a tárgyaló."}</p></div>
+    ${both?"":`<p class="lead">${lead}</p>`}${adhoc}${pkg}
+    ${both?'<div style="height:10px"></div>':`<div class="photos3" style="height:150px;margin:16px 0"><div class="ph" style="background-image:url(${IMG.targyalo6})"></div><div class="ph" style="background-image:url(${IMG.panorama})"></div><div class="ph" style="background-image:url(${IMG.targyalo12})"></div></div>`}
+    <div class="box xbox"><h3>${en?"Additional services":"Kiegészítő szolgáltatások"}</h3><div class="xgrid">${extras.map(([a,b])=>`<div class="kv"><span>${a}</span><span>${b}</span></div>`).join("")}</div>
+      <p class="xnote">${en?"Please always check the availability of the meeting room for the requested time in writing or by phone.":"Kérjük, foglalás előtt minden esetben írásban vagy telefonon érdeklődjön, hogy a kért időpontban elérhető-e a tárgyaló."}</p></div>
+    <div class="terms"><h3>${en?"Contract terms":"Szerződési feltételek"}</h3><p>${en?"In line with the applicable legal requirements, we always carry out a customer due diligence check before the service starts, which is a mandatory part of the contracting process.":"A vonatkozó jogszabályi előírásoknak megfelelően a szolgáltatás igénybevételét megelőzően minden esetben ügyfél-átvilágítást végzünk, amely a szerződéskötési folyamat kötelező részét képezi."}${sel.some(p=>p.k!=="telefon")?(en?` The registered office consent is issued after payment of a ${t.deposit}-month deposit.`:` A székhelyhasználati engedély kiadásának a feltétele a ${t.deposit} havi kaució megfizetése.`):""}</p></div>
     <p class="fine">${en?"Prices exclude VAT. EUR fees are invoiced in HUF at the official MNB mid-rate of the day.":"A fenti árak nem tartalmazzák az ÁFA-t. Az euróban megadott díjakat az adott napi MNB középárfolyamon, forintban számlázzuk."}</p>
     ${H.contact()}</div>${H.foot(3,N)}</section>`;
   return [p1,p2,p3]}
@@ -1045,18 +1066,21 @@ function pagesMR(c){const en=c.lang==="en";LANG_FMT=c.lang;const m=c.mr,t=c.term
   const filled=slots.filter(sl=>sl.date||(sl.start&&sl.end));
   const when=filled.length>1?(en?filled.length+" dates":filled.length+" időpont")+(filled[0].date?(en?", from "+dLong(filled[0].date,"en"):", "+parseD(filled[0].date).y+". "+huFrom(filled[0].date)):""):filled.length?slotTxt(filled[0]):"";
   const intro=en?["Thank you for your interest in the meeting rooms of Vista Plus Offices. Please find below our offer prepared according to your request.",
-    "Our premium meeting rooms with Danube panorama can be rented even for a single hour in the Duna Tower office building in District XIII. Every room is fully equipped, with super-fast WiFi and HD video conferencing; presentations can be shown wirelessly on the Smart TV."]
+    "Our exclusive, fully equipped meeting rooms can be rented even for a single hour in the Duna Tower office building in District XIII. Every room is fully equipped, with super-fast WiFi and HD video conferencing; presentations can be shown wirelessly on the Smart TV."]
    :["Köszönjük megtisztelő érdeklődését a Vista Plus Offices tárgyalói iránt! Az alábbiakban összefoglaltuk az Ön megkeresésére készített ajánlatunkat.",
-    "Dunai panorámás, prémium kialakítású tárgyalóinkat akár egy órára is bérelheti a XIII. kerületi Duna Tower irodaházban. Minden terem teljes felszereltséggel, szupergyors WiFi-vel és HD videokonferencia-lehetőséggel várja Önt és partnereit; a prezentáció vezeték nélkül, a Smart TV-n is kivetíthető."];
-  const useSlots=filled.length?filled:slots.slice(0,1);let rowsN=0;
-  const body=sel.map(r=>{const p=Number(m.rooms[r.k].price)||0;const lines=useSlots.map(sl=>{rowsN++;const h=slotH(sl);return `<tr><td style="text-align:left">${esc(slotTxt(sl))||"–"}</td><td style="text-align:left" class="b">${en?r.en:r.hu}</td><td>max. ${r.cap} ${en?"people":"fő"}</td><td>${huf(p,en)}</td><td>${h?fmtN(h)+(en?" h":" óra"):"–"}</td><td class="b">${h?huf(p*h,en):"–"}</td></tr>`}).join("");
-    const sub=useSlots.length>1&&H_?(rowsN++,`<tr class="sub"><td colspan="4" style="text-align:left">${en?"Total":"Összesen"} – ${en?r.en:r.hu}</td><td>${fmtN(H_)+(en?" h":" óra")}</td><td class="b">${huf(p*H_,en)}</td></tr>`):"";return lines+sub}).join("");
-  const tbl=sel.length?`<table class="ot mrt"><thead><tr><th style="text-align:left">${en?"Date and time":"Időpont"}</th><th style="text-align:left">${en?"Meeting room":"Tárgyaló"}</th><th>${en?"Capacity":"Létszám"}</th><th>${en?"Hourly rate":"Óradíj"}</th><th>${en?"Duration":"Időtartam"}</th><th>${en?"Estimated fee":"Becsült díj"}</th></tr></thead><tbody>${body}</tbody></table>
+    "Exkluzív, teljesen felszerelt tárgyalóinkat akár egy órára is bérelheti a XIII. kerületi Duna Tower irodaházban. Minden terem teljes felszereltséggel, szupergyors WiFi-vel és HD videokonferencia-lehetőséggel várja Önt és partnereit; a prezentáció vezeték nélkül, a Smart TV-n is kivetíthető."];
+  const {rows:RW,alt}=mrRows(c);let rowsN=RW.length;
+  let body=RW.map(x=>`<tr><td style="text-align:left">${esc(slotTxt(x.sl))||"–"}</td><td style="text-align:left" class="b">${en?x.r.en:x.r.hu}</td><td>max. ${x.r.cap} ${en?"people":"fő"}</td><td>${huf(x.p,en)}</td><td>${x.h?fmtN(x.h)+(en?" h":" óra"):"–"}</td><td class="b">${x.h?huf(x.p*x.h,en):"–"}</td></tr>`).join("");
+  let roomTotal=0;
+  if(!alt&&RW.length>1){roomTotal=RW.reduce((a,x)=>a+x.p*x.h,0);const hs=RW.reduce((a,x)=>a+x.h,0);rowsN++;body+=`<tr class="sub"><td colspan="4" style="text-align:left">${en?"Total":"Összesen"}</td><td>${fmtN(hs)+(en?" h":" óra")}</td><td class="b">${huf(roomTotal,en)}</td></tr>`}
+  else if(!alt){roomTotal=RW.reduce((a,x)=>a+x.p*x.h,0)}
+  else{ROOMS.forEach(r=>{const xs=RW.filter(x=>x.r.k===r.k);if(xs.length>1){rowsN++;body+=`<tr class="sub"><td colspan="4" style="text-align:left">${en?"Total":"Összesen"} – ${en?r.en:r.hu}</td><td>${fmtN(xs.reduce((a,x)=>a+x.h,0))+(en?" h":" óra")}</td><td class="b">${huf(xs.reduce((a,x)=>a+x.p*x.h,0),en)}</td></tr>`}})}
+  const tbl=RW.length?`<table class="ot mrt"><thead><tr><th style="text-align:left">${en?"Date and time":"Időpont"}</th><th style="text-align:left">${en?"Meeting room":"Tárgyaló"}</th><th>${en?"Capacity":"Létszám"}</th><th>${en?"Hourly rate":"Óradíj"}</th><th>${en?"Duration":"Időtartam"}</th><th>${en?"Estimated fee":"Becsült díj"}</th></tr></thead><tbody>${body}</tbody></table>
     <p class="otnote">${en?"All prices are net (+ VAT) and do not include the fees of additional services used. Meeting rooms can be used after advance payment.":"Az árak nettó árak (+ Áfa), és nem tartalmazzák a felhasznált kiegészítő szolgáltatások díját. A tárgyalók előzetes fizetés ellenében vehetők igénybe."}</p>`:`<p class="fine" style="text-align:left">${en?"Please select a meeting room.":"Válassz tárgyalót a szerkesztőben."}</p>`;
   const catTbl=cats.length?`<table class="ot mrt" style="margin-top:12px"><thead><tr><th style="text-align:left">Catering</th><th>${en?"Quantity":"Mennyiség"}</th><th>${en?"Unit price":"Egységár"}</th><th>${en?"Amount":"Összeg"}</th></tr></thead><tbody>
     ${cats.map(i=>{const q=Number(i.qty)||1,p=Number(i.price)||0;return `<tr><td style="text-align:left">${esc(i.name||"–")}</td><td>${fmtN(q)}</td><td>${huf(p,en)}</td><td class="b">${huf(p*q,en)}</td></tr>`}).join("")}
     <tr class="sub"><td colspan="3" style="text-align:left">${en?"Catering total":"Catering összesen"}</td><td class="b">${huf(ct,en)}</td></tr></tbody></table>`:"";
-  const grand=sel.length===1&&H_&&cats.length?`<div class="grand"><span>${en?"Estimated total (meeting room + catering)":"Becsült végösszeg (tárgyaló + catering)"}</span><b>${huf((Number(m.rooms[sel[0].k].price)||0)*H_+ct,en)} ${en?"+ VAT":"+ Áfa"}</b></div>`:"";
+  const grand=!alt&&roomTotal>0&&cats.length?`<div class="grand"><span>${en?"Estimated total (meeting room + catering)":"Becsült végösszeg (tárgyaló + catering)"}</span><b>${huf(roomTotal+ct,en)} ${en?"+ VAT":"+ Áfa"}</b></div>`:"";
   const pkg=m.pkg.on?`<div class="pkg" style="margin-top:12px"><div class="pkg-h"><b>${en?m.pkg.hours+"-hour monthly meeting room package":m.pkg.hours+" órás havi tárgyalócsomag"}</b><span>${huf(m.pkg.price,en)} ${en?"+ VAT / month":"+ Áfa / hó"}</span></div>
     <p>${en?`If you need meeting rooms regularly, our monthly package is the better choice: the hours can be used in any of our rooms; unused hours cannot be carried over. Bookings above the package are ${huf(m.pkg.extra,en)} + VAT per hour.`:`Rendszeres tárgyalóhasználat esetén kedvezőbb a havi csomag: az órák bármelyik tárgyalónkban felhasználhatók, a fel nem használt órák nem vihetők át a következő hónapra. A kereten felüli foglalások óradíja ${huf(m.pkg.extra,en)} + Áfa.`}</p></div>`:"";
   const used=rowsN*34+(cats.length?90+cats.length*30:0)+(grand?50:0)+(m.pkg.on?110:0);const strip=used<330;
@@ -1072,8 +1096,8 @@ function pagesMR(c){const en=c.lang==="en";LANG_FMT=c.lang;const m=c.mr,t=c.term
     ${strip?`<div class="strip" style="height:220px"><div class="ph" style="background-image:url(${IMG.panorama})"></div><div class="ph" style="background-image:url(${IMG.opt0014})"></div><div class="ph" style="background-image:url(${IMG.targyalo12})"></div></div>`:""}
     </div>${H.foot(2,N)}</section>`;
   const p3=`<section class="page" lang="${c.lang}">${H.head}<div class="pg-body">
-    <p class="eyebrow">${en?"Our rooms":"Tárgyalóink"}</p><h2 class="h2">${en?"Meeting rooms with Danube panorama":"Dunai panorámás tárgyalók"}</h2>
-    <div class="rooms">${ROOMS.map(r=>`<div class="room${m.rooms[r.k].on?" on":""}"><div class="ph" style="background-image:url(${IMG[r.img]})"></div><div class="rb"><b>${en?r.en:r.hu}</b><span>max. ${r.cap} ${en?"people":"fő"}</span><span class="rp">${huf(m.rooms[r.k].price,en)} ${en?"+ VAT / hour":"+ Áfa / óra"}</span></div></div>`).join("")}</div>
+    <p class="eyebrow">${en?"Our rooms":"Tárgyalóink"}</p><h2 class="h2">${en?"Exclusive, fully equipped meeting rooms":"Exkluzív, teljesen felszerelt tárgyalók"}</h2>
+    <div class="rooms">${ROOMS.map(r=>`<div class="room${m.rooms[r.k].on||RW.some(x=>x.r.k===r.k)?" on":""}"><div class="ph" style="background-image:url(${IMG[r.img]})"></div><div class="rb"><b>${en?r.en:r.hu}</b><span>max. ${r.cap} ${en?"people":"fő"}</span><span class="rp">${huf(m.rooms[r.k].price,en)} ${en?"+ VAT / hour":"+ Áfa / óra"}</span></div></div>`).join("")}</div>
     <div class="incbox"><b>${en?"The hourly rate includes:":"Az óradíj tartalmazza:"}</b> ${MR_INC[en?"en":"hu"].join(" · ")}</div>
     <div class="boxes" style="margin-top:14px"><div class="box"><h3>${en?"Additional services":"Kiegészítő szolgáltatások"}</h3>${extras.map(([a,b])=>`<div class="kv"><span>${a}</span><span>${b}</span></div>`).join("")}</div>
       <div class="box"><h3>${en?"Booking":"Foglalás"}</h3><p>${en?"Our colleagues are available on weekdays from 8:00 to 17:00; the centre is closed at weekends. Meeting rooms can be used after advance payment. For full-day bookings we prepare a custom offer.":"Kollégáink hétköznap 8 és 17 óra között érhetők el, hétvégén a központ zárva tart. A tárgyalók előzetes fizetés ellenében vehetők igénybe. Egész napos bérlés esetén egyedi ajánlatot készítünk."}</p></div></div>
@@ -1121,16 +1145,16 @@ function mailText(c){const en=c.lang==="en";const n=c.salutation||c.name||"";con
        en:{s:"Virtual office information – Vista Plus Offices",i:"our virtual office services",d:"the selected service, the meeting room options and the terms of the service",aszf:true,v:"We would also be delighted to welcome you for a personal visit, during which you can see our business centre and get to know our services more closely."}},
    targyalo:{hu:{s:"Tárgyalóbérlési tájékoztató – Vista Plus Offices",i:"tárgyalóink iránt",d:"tárgyalóinkról, az óradíjakról, valamint a kiegészítő szolgáltatásokról",aszf:false,v:"Igény esetén a foglalás előtt személyesen is szívesen megmutatjuk tárgyalóinkat."},
        en:{s:"Meeting room information – Vista Plus Offices",i:"our meeting rooms",d:"our meeting rooms, the hourly rates and our additional services",aszf:false,v:"If you wish, we will be happy to show you our meeting rooms in person before booking."}}}[k][en?"en":"hu"];
-  if(k==="vo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our virtual office services.\n\nPlease find attached our offer, which gives you detailed information about the content of the virtual office service, the additional services available and the contract terms. I am also attaching our General Terms and Conditions.\n\nPlease note that our company operates as a registered office service provider registered with the Hungarian Tax Authority (NAV). In line with the applicable legal requirements, we always carry out a customer due diligence check before the service starts, which is a mandatory part of the contracting process.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nI trust that you will be satisfied with our service, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.\n\nKind regards,`}
-   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését virtuális iroda szolgáltatásunk iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál a virtuális iroda szolgáltatás tartalmáról, az elérhető kiegészítő szolgáltatásokról, valamint a szerződési feltételekről. Csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.\n\nSzeretnénk felhívni figyelmét, hogy társaságunk a NAV-nál nyilvántartásba vett székhelyszolgáltatóként végzi tevékenységét. A vonatkozó jogszabályi előírásoknak megfelelően a szolgáltatás igénybevételét megelőzően minden esetben ügyfél-átvilágítást végzünk, amely a szerződéskötési folyamat kötelező részét képezi.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nBízom benne, hogy szolgáltatásunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését, üdvözlettel:`};
-  if(k==="targyalo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our meeting rooms.\n\nPlease find attached our offer, which gives you detailed information about our meeting rooms, the additional services available and the rental terms.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nIf you wish, we would also be glad to arrange a personal viewing so that you can get to know our meeting rooms and the services available.\n\nI trust that you will be satisfied with our offer, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.\n\nKind regards,`}
-   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését tárgyalóink iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál tárgyalóinkról, az igénybe vehető kiegészítő szolgáltatásokról, valamint a bérleti feltételekről.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nIgény esetén személyes megtekintésre is szívesen biztosítunk lehetőséget, hogy megismerhesse tárgyalóinkat és a rendelkezésre álló szolgáltatásokat.\n\nBízom benne, hogy ajánlatunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését, üdvözlettel:`};
-  return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in ${M.i}.\n\nPlease find attached our information pack, which gives you detailed information about ${M.d}.${M.aszf?" Together with it, I am also sending our General Terms and Conditions.":""}\n\nShould the options presented be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\n${M.v}\n\nLooking forward to hearing from you.\n\nKind regards,`}
-   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését ${M.i}!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál ${M.d}.${M.aszf?" A tájékoztató mellett csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.":""}\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\n${M.v}\n\nVárva mielőbbi visszajelzését, üdvözlettel:`}}
+  if(k==="vo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our virtual office services.\n\nPlease find attached our offer, which gives you detailed information about the content of the virtual office service, the additional services available and the contract terms. I am also attaching our General Terms and Conditions.\n\nPlease note that our company operates as a registered office service provider registered with the Hungarian Tax Authority (NAV). In line with the applicable legal requirements, we always carry out a customer due diligence check before the service starts, which is a mandatory part of the contracting process.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nI trust that you will be satisfied with our service, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.`}
+   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését virtuális iroda szolgáltatásunk iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál a virtuális iroda szolgáltatás tartalmáról, az elérhető kiegészítő szolgáltatásokról, valamint a szerződési feltételekről. Csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.\n\nSzeretnénk felhívni figyelmét, hogy társaságunk a NAV-nál nyilvántartásba vett székhelyszolgáltatóként végzi tevékenységét. A vonatkozó jogszabályi előírásoknak megfelelően a szolgáltatás igénybevételét megelőzően minden esetben ügyfél-átvilágítást végzünk, amely a szerződéskötési folyamat kötelező részét képezi.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nBízom benne, hogy szolgáltatásunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését.`};
+  if(k==="targyalo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our meeting rooms.\n\nPlease find attached our offer, which gives you detailed information about our meeting rooms, the additional services available and the rental terms.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nIf you wish, we would also be glad to arrange a personal viewing so that you can get to know our meeting rooms and the services available.\n\nI trust that you will be satisfied with our offer, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.`}
+   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését tárgyalóink iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál tárgyalóinkról, az igénybe vehető kiegészítő szolgáltatásokról, valamint a bérleti feltételekről.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nIgény esetén személyes megtekintésre is szívesen biztosítunk lehetőséget, hogy megismerhesse tárgyalóinkat és a rendelkezésre álló szolgáltatásokat.\n\nBízom benne, hogy ajánlatunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését.`};
+  return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in ${M.i}.\n\nPlease find attached our information pack, which gives you detailed information about ${M.d}.${M.aszf?" Together with it, I am also sending our General Terms and Conditions.":""}\n\nShould the options presented be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\n${M.v}\n\nLooking forward to hearing from you.`}
+   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését ${M.i}!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál ${M.d}.${M.aszf?" A tájékoztató mellett csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.":""}\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\n${M.v}\n\nVárva mielőbbi visszajelzését.`}}
 async function copyMail(){
   const c=S.cur;const m=mailText(c);let copied=false;
   try{await navigator.clipboard.writeText(m.body);copied=true}catch(e){}
-  if(window.VPO_SITE&&c.email){const to=c.name?`"${c.name.replace(/["<>]/g,"")}" <${c.email}>`:c.email;location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(m.subject)+"&body="+encodeURIComponent(m.body);toast(copied?"Levél megnyitva, a szöveg a vágólapon is":"Levél megnyitva");return}
+  if(window.VPO_SITE){const nm=(c.name||"").replace(/["<>,;]/g,"").trim();const to=c.email?(nm?`"${nm}" <${c.email.trim()}>`:c.email.trim()):"";location.href="mailto:"+(to?encodeURIComponent(to):"")+"?subject="+encodeURIComponent(m.subject)+"&body="+encodeURIComponent(m.body);toast(copied?"Levél megnyitva, a szöveg a vágólapon is":"Levél megnyitva");return}
   toast(copied?"E-mail szöveg a vágólapon":"A másolás itt nem működik");
 }
 async function downloadTerms(){const en=S.cur&&S.cur.lang==="en";
