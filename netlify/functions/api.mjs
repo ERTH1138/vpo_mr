@@ -628,8 +628,9 @@ export default async (req) => {
       const norm = (s) => String(s || "").trim().toLowerCase();
       let cl = cfg.clients.find((x) => norm(x.n) === norm(n));
       const created = !cl;
-      if (cl) { cl.eur = !!c.eur; cl.free = free; }
-      else { cl = { n, eur: !!c.eur, free, note: "", prices: [] }; cfg.clients.push(cl); if (Array.isArray(cfg.quick) && !cfg.quick.some((q) => norm(q) === norm(n))) cfg.quick.push(n); }
+      const prices = Array.isArray(c.prices) ? c.prices.slice(0, 200).map((p) => ({ i: String(p && p.i || "").trim().slice(0, 200), u: Number(p && p.u), cur: p && p.cur === "EUR" ? "EUR" : "HUF" })).filter((p) => p.i && isFinite(p.u) && p.u >= 0) : null;
+      if (cl) { cl.eur = !!c.eur; cl.free = free; if (prices) cl.prices = prices; }
+      else { cl = { n, eur: !!c.eur, free, note: "", prices: prices || [] }; cfg.clients.push(cl); if (Array.isArray(cfg.quick) && !cfg.quick.some((q) => norm(q) === norm(n))) cfg.quick.push(n); }
       await store.setJSON("config", cfg);
       const data = { ...k, status: "aktiv", activatedAt: new Date().toISOString(), activatedBy: user, clientName: cl.n, upd: user };
       await store.setJSON(key, data);
