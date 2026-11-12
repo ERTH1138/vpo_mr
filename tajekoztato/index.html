@@ -87,16 +87,16 @@ table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:1080px}
 .leads td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 .leads tr:last-child td{border-bottom:0}
 .leads tbody tr{cursor:pointer}
-.leads tbody tr:hover{background:var(--surface-2)}
 .leads .num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .leads .who b{display:block}
 .leads small,.card small{color:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
 select.pill{border:0;appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:12px}
 .st-uj{background:var(--info-soft);color:var(--info)}
-.st-kikuldve{background:var(--accent-soft);color:var(--accent)}
+.st-kikuldve{background:var(--info-soft);color:var(--info)}
+.st-followup{background:var(--fu);color:#fff}
 .st-targyalas{background:var(--warn-soft);color:var(--warn)}
-.st-megnyert{background:var(--ok-soft);color:var(--ok)}
+.st-megnyert{background:var(--ok);color:#fff}
 .st-elveszett{background:var(--bad-soft);color:var(--bad)}
 .due{color:var(--accent);font-weight:600}
 .muted{color:var(--muted)}
@@ -104,6 +104,21 @@ select.pill{border:0;appearance:none;-webkit-appearance:none;cursor:pointer;padd
 .leads tr.fu td:first-child{box-shadow:inset 4px 0 0 var(--fu)}
 .leads tr.lost td,.leads tr.lost td b{color:var(--muted)}
 .leads tr.lost td{background:var(--surface-2)}
+.leads tr.won td{background:var(--ok-soft)}
+.leads tr.won td:first-child{box-shadow:inset 4px 0 0 var(--ok)}
+.leads tbody tr{cursor:default}
+.leads td.acts{white-space:nowrap;width:1%;padding-right:4px}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--fg);width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:4px;vertical-align:middle}
+.iconbtn svg{width:17px;height:17px}
+.iconbtn:hover{border-color:var(--fg)}
+.iconbtn.del{color:var(--muted)}
+.iconbtn.del:hover{color:#c0392b;border-color:#c0392b}
+.delask{font-size:13px;white-space:nowrap}
+.linkbtn{border:0;background:none;font:inherit;font-weight:700;cursor:pointer;color:var(--fg);padding:2px 4px}
+.linkbtn.danger{color:#c0392b}
+.card{cursor:default}
+.card.won{border-color:var(--ok);background:var(--ok-soft)}
+.cardacts{display:flex;justify-content:flex-end;gap:4px}
 .leads .notecell{max-width:240px;font-size:13px;color:var(--muted)}
 .futag{display:inline-block;background:var(--fu);color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em;border-radius:999px;padding:2px 8px;margin-bottom:4px;white-space:nowrap}
 .fubtn{border:0;background:var(--fu);color:#fff;border-radius:999px;padding:6px 11px;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
@@ -363,7 +378,8 @@ const LBL={"504":[178,226],"503":[356,226],"502":[512,226],"501":[668,226],"520"
  "506":[180,1029],"507":[422,1029],"508":[546,1029],"509":[677,1029],"510":[814,1029],"512":[1347,1029],"513":[1485,1029],"514":[1636,1029],"515":[1793,1029]};
 
 const STATUSES=[
- {id:"kikuldve",hu:"Kiküldve",dot:"var(--accent)"},
+ {id:"kikuldve",hu:"Kiküldve",dot:"var(--info)"},
+ {id:"followup",hu:"Follow-up",dot:"var(--fu)"},
  {id:"folyamatban",hu:"Folyamatban",dot:"var(--warn)"},
  {id:"megnyert",hu:"Megnyert",dot:"var(--ok)"},
  {id:"elveszett",hu:"Elveszett",dot:"var(--bad)"}];
@@ -373,7 +389,9 @@ const sentDateOf=d=>d.sentDate||(d.sentAt||"").slice(0,10)||d.date||"";
 function addDays(iso,n){const p=parseD(iso);if(!p)return "";const t=new Date(p.y,p.m-1,p.d+n);return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
 const lastFu=d=>{const f=d.followups||[];return f.length?f[f.length-1]:null};
 const fuDue=d=>{if(normSt(d.status)!=="kikuldve")return "";const base=lastFu(d)?lastFu(d).at:sentDateOf(d);return base?addDays(base,FU_DAYS):""};
-const isFu=d=>{const x=fuDue(d);return !!x&&x<=todayISO()};
+const isFu=d=>{if(normSt(d.status)==="followup")return true;const x=fuDue(d);return !!x&&x<=todayISO()};
+const effSt=d=>isFu(d)?"followup":normSt(d.status);
+const ST_ORDER={followup:0,kikuldve:1,folyamatban:1,megnyert:2,elveszett:3};
 const acct=e=>e?String(e).split("@")[0]:"";
 const sender=d=>acct(d.sentBy||d.by);
 const SOURCES=["Weboldal","Telefon","E-mail","Ajánlás","Ingatlanközvetítő","Bejárás","Egyéb"];
@@ -525,53 +543,63 @@ function render(){
 
 /* ---------- leads view ---------- */
 function minPrice(l){const ps=(l.options||[]).map(o=>Number(o.price)).filter(n=>n>0);return ps.length?Math.min(...ps):null}
+const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
 function renderLeads(){LANG_FMT="hu";
   $("#actionbar").innerHTML="";
-  const counts={fu:0};STATUSES.forEach(s=>counts[s.id]=0);S.leads.forEach(l=>{counts[normSt(l.data.status)]++;if(isFu(l.data))counts.fu++});
+  const counts={};STATUSES.forEach(s=>counts[s.id]=0);S.leads.forEach(l=>counts[effSt(l.data)]++);
   const q=S.q.trim().toLowerCase();
-  const rows=S.leads.filter(l=>(S.filter==="all"||(S.filter==="fu"?isFu(l.data):normSt(l.data.status)===S.filter))&&(!q||[l.data.name,l.data.company,l.data.email,l.data.phone,l.data.internal,sender(l.data),(l.data.options||[]).map(o=>o.office).join(" ")].join(" ").toLowerCase().includes(q)))
-    .sort((x,y)=>(isFu(y.data)-isFu(x.data))||(sentDateOf(y.data)||"").localeCompare(sentDateOf(x.data)||"")||(y.data.updatedAt||"").localeCompare(x.data.updatedAt||""));
+  const rows=S.leads.filter(l=>(S.filter==="all"||effSt(l.data)===S.filter)&&(!q||[l.data.name,l.data.company,l.data.email,l.data.phone,l.data.internal,sender(l.data),(l.data.options||[]).map(o=>o.office).join(" ")].join(" ").toLowerCase().includes(q)))
+    .sort((x,y)=>(ST_ORDER[effSt(x.data)]-ST_ORDER[effSt(y.data)])||(sentDateOf(y.data)||"").localeCompare(sentDateOf(x.data)||"")||(y.data.updatedAt||"").localeCompare(x.data.updatedAt||""));
   const stOpts=cur=>STATUSES.map(s=>`<option value="${s.id}"${s.id===cur?" selected":""}>${s.hu}</option>`).join("");
   const offices=l=>(l.options||[]).map(o=>o.office).filter(Boolean).join(", ")||"–";
   const note=(d,n)=>d.internal?esc(d.internal.slice(0,n))+(d.internal.length>n?"…":""):"";
   const fuCell=(l,d)=>{const nf=(d.followups||[]).length,cnt=nf?`<small>${nf}× follow-up</small>`:"";
     if(isFu(d))return `<button class="fubtn" data-fu="${l.id}">Follow-up kész</button>${cnt?"<br>"+cnt:""}`;
     const due=fuDue(d);return due?`<span class="muted">${esc(dShort(due,"hu"))}</span>${cnt?"<br>"+cnt:""}`:(cnt||"–")};
-  const rowCls=d=>isFu(d)?"fu":normSt(d.status)==="elveszett"?"lost":"";
+  const rowCls=d=>({followup:"fu",megnyert:"won",elveszett:"lost"}[effSt(d)]||"");
+  const acts=l=>S.delAsk===l.id?`<span class="delask">Törlöd? <button class="linkbtn danger" data-delyes="${l.id}">Igen</button> <button class="linkbtn" data-delno="1">Mégse</button></span>`
+    :`<button class="iconbtn" data-open="${l.id}" title="Megtekintés" aria-label="Megtekintés">${EYE}</button><button class="iconbtn del" data-del="${l.id}" title="Törlés" aria-label="Törlés">${TRASH}</button>`;
   let body;
   if(!S.loaded&&!S.dbErr){body=`<div class="empty"><b>Leadek betöltése…</b>Pillanat, az adatok érkeznek.</div>`}
   else if(S.dbErr){body=`<div class="empty"><b>Az adatbázis nem érhető el</b>${esc(S.dbErr)}</div>`}
   else if(!S.leads.length){body=`<div class="empty"><b>Még nincs egy lead sem</b>Az első kitöltött tájékoztató automatikusan ide kerül.<br><br><button class="btn primary" onclick="go('new')">${ICON.plus} Új tájékoztató</button></div>`}
   else if(!rows.length){body=`<div class="empty"><b>Nincs találat</b>Próbálj másik keresést vagy szűrőt.</div>`}
   else{
-    body=`<div class="table-box"><table class="leads"><thead><tr><th>Kiküldve</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Iroda</th><th>Havi díjtól</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
-    rows.map(l=>{const d=l.data,mp=minPrice(d),st=normSt(d.status);
-      return `<tr data-id="${l.id}" class="${rowCls(d)}"><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
+    body=`<div class="table-box"><table class="leads"><thead><tr><th></th><th>Kiküldve</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Iroda</th><th>Havi díjtól</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
+    rows.map(l=>{const d=l.data,mp=minPrice(d),st=effSt(d);
+      return `<tr class="${rowCls(d)}"><td class="acts">${acts(l)}</td><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
       <td><div>${esc(d.phone||"")}</div><small>${esc(d.email||"")}</small></td><td class="num">${esc(offices(d))}</td><td class="num">${mp?"EUR "+fmtN(mp):"–"}</td>
-      <td>${isFu(d)?'<span class="futag">Follow-up</span><br>':""}<select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></td>
+      <td><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></td>
       <td>${esc(sender(d))||"–"}</td><td class="num">${fuCell(l,d)}</td><td class="notecell">${note(d,80)||"–"}</td></tr>`}).join("")+
     `</tbody></table></div><div class="cards">`+
-    rows.map(l=>{const d=l.data,mp=minPrice(d),st=normSt(d.status),due=fuDue(d);
-      return `<div class="card ${rowCls(d)}" data-id="${l.id}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></div>
+    rows.map(l=>{const d=l.data,mp=minPrice(d),st=effSt(d),due=fuDue(d);
+      return `<div class="card ${rowCls(d)}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></div>
       ${isFu(d)?`<div class="furow"><span class="futag">Follow-up esedékes</span><button class="fubtn" data-fu="${l.id}">Follow-up kész</button></div>`:""}
       <div class="meta"><span>Kiküldve: ${esc(dShort(sentDateOf(d),"hu"))||"–"}</span><span>${sender(d)?"Kiküldte: "+esc(sender(d)):""}</span>${due&&!isFu(d)?`<span>Follow-up: ${esc(dShort(due,"hu"))}</span>`:""}${(d.followups||[]).length?`<span>${d.followups.length}× follow-up</span>`:""}</div>
       <div class="meta"><span>Iroda: ${esc(offices(d))}</span><span>${mp?"EUR "+fmtN(mp)+"-tól":""}</span></div>
       <div class="meta"><span>${esc(d.phone||"")}</span><span>${esc(d.email||"")}</span></div>
-      ${d.internal?`<div class="meta"><span>${note(d,90)}</span></div>`:""}</div>`}).join("")+`</div>`;
+      ${d.internal?`<div class="meta"><span>${note(d,90)}</span></div>`:""}
+      <div class="cardacts">${acts(l)}</div></div>`}).join("")+`</div>`;
   }
-  const chips=[{id:"fu",hu:"Follow-up",dot:"var(--fu)"},...STATUSES];
-  $("#main").innerHTML=`<div class="lead-head"><div><h1 class="view-title">Leadek</h1><p class="sub">Minden kitöltött tájékoztató automatikusan ide kerül. Ha a kiküldés (vagy az utolsó follow-up) után ${FU_DAYS} nap eltelt és még „Kiküldve” a státusz, a sor pirosra vált.</p></div>
+  $("#main").innerHTML=`<div class="lead-head"><div><h1 class="view-title">Leadek</h1><p class="sub">Minden kitöltött tájékoztató automatikusan ide kerül. Ha a kiküldés (vagy az utolsó follow-up) után ${FU_DAYS} nap eltelt és még „Kiküldve” a státusz, magától „Follow-up” lesz. A megnyert és az elveszett leadek a lista végére kerülnek.</p></div>
    <div class="actions"><button class="btn" id="csv">Export (Excel)</button><button class="btn primary" onclick="go('new')">${ICON.plus} Új tájékoztató</button></div></div>
-   <div class="pipeline">${chips.map(s=>`<button class="stage${s.id==="fu"&&counts.fu?" hot":""}" data-f="${s.id}" aria-pressed="${S.filter===s.id}"><span class="n">${counts[s.id]||0}</span><span class="l"><i class="dot" style="background:${s.dot}"></i>${s.hu}</span></button>`).join("")}</div>
+   <div class="pipeline">${STATUSES.map(s=>`<button class="stage${s.id==="followup"&&counts.followup?" hot":""}" data-f="${s.id}" aria-pressed="${S.filter===s.id}"><span class="n">${counts[s.id]||0}</span><span class="l"><i class="dot" style="background:${s.dot}"></i>${s.hu}</span></button>`).join("")}</div>
    <div class="toolbar"><input id="q" class="search" type="search" placeholder="Keresés név, cég, e-mail, iroda, megjegyzés szerint" value="${esc(S.q)}" aria-label="Keresés"></div>${body}`;
   document.querySelectorAll(".stage").forEach(b=>b.onclick=()=>{S.filter=S.filter===b.dataset.f?"all":b.dataset.f;renderLeads()});
   const qi=$("#q");qi.oninput=()=>{S.q=qi.value;const pos=qi.selectionStart;renderLeads();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)};
-  document.querySelectorAll("[data-id]").forEach(r=>r.onclick=e=>{if(e.target.closest("select,button"))return;go("edit",r.dataset.id)});
-  document.querySelectorAll("[data-st]").forEach(sel=>{sel.onclick=e=>e.stopPropagation();sel.onchange=async()=>{
-    const id=sel.dataset.st;try{await store.update(id,{status:sel.value,updatedAt:new Date().toISOString()});toast("Státusz: "+STATUSES.find(x=>x.id===sel.value).hu)}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}}});
-  document.querySelectorAll("[data-fu]").forEach(b=>b.onclick=async e=>{e.stopPropagation();const l=S.leads.find(x=>x.id===b.dataset.fu);if(!l)return;b.disabled=true;
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{S.delAsk=null;go("edit",b.dataset.open)});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{S.delAsk=b.dataset.del;renderLeads()});
+  document.querySelectorAll("[data-delno]").forEach(b=>b.onclick=()=>{S.delAsk=null;renderLeads()});
+  document.querySelectorAll("[data-delyes]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await store.remove(b.dataset.delyes);S.delAsk=null;toast("Lead törölve")}catch(e){b.disabled=false;toast("Nem sikerült törölni: "+(e.message||e.code))}});
+  document.querySelectorAll("[data-st]").forEach(sel=>sel.onchange=async()=>{
+    const id=sel.dataset.st,prev=sel.dataset.prev,v=sel.value,l=S.leads.find(x=>x.id===id);if(!l)return;
+    const patch={status:v,updatedAt:new Date().toISOString()};
+    if(prev==="followup"&&v==="kikuldve")patch.followups=[...(l.data.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];
+    try{await store.update(id,patch);toast(patch.followups?"Follow-up rögzítve, vissza „Kiküldve”-re":"Státusz: "+STATUSES.find(x=>x.id===v).hu)}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}});
+  document.querySelectorAll("[data-fu]").forEach(b=>b.onclick=async()=>{const l=S.leads.find(x=>x.id===b.dataset.fu);if(!l)return;b.disabled=true;
     const f=[...(l.data.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];
-    try{await store.update(l.id,{followups:f,updatedAt:new Date().toISOString()});toast("Follow-up rögzítve, a következő "+dShort(addDays(todayISO(),FU_DAYS),"hu")+" esedékes")}catch(err){b.disabled=false;toast("Nem sikerült menteni: "+(err.message||err.code))}});
+    try{await store.update(l.id,{followups:f,status:"kikuldve",updatedAt:new Date().toISOString()});toast("Follow-up rögzítve, a következő "+dShort(addDays(todayISO(),FU_DAYS),"hu")+" esedékes")}catch(err){b.disabled=false;toast("Nem sikerült menteni: "+(err.message||err.code))}});
   $("#csv").onclick=exportXLSX;
 }
 async function exportXLSX(){
@@ -583,7 +611,7 @@ async function exportXLSX(){
   const rows=S.leads.map(l=>{const d=l.data;const opts=(d.options||[]).filter(o=>o.office||o.price);
     return[dt(sentDateOf(d)),d.name||"",d.company||"",d.phone||"",d.email||"",(d.lang||"hu").toUpperCase(),d.source||"",
       opts.map(o=>(o.office||"?")+(o.price?" (EUR "+numIn(o.price)+")":"")).join(", "),minPrice(d)||"",
-      opts.length&&opts[0].from?dt(opts[0].from):dt(d.moveIn),st(normSt(d.status)),sender(d),isFu(d)?"Most":dt(fuDue(d)),(d.followups||[]).length,lastFu(d)?dt(lastFu(d).at):"",d.internal||"",dt(d.date)]});
+      opts.length&&opts[0].from?dt(opts[0].from):dt(d.moveIn),st(effSt(d)),sender(d),isFu(d)?"Most":dt(fuDue(d)),(d.followups||[]).length,lastFu(d)?dt(lastFu(d).at):"",d.internal||"",dt(d.date)]});
   const ws=XLSX.utils.aoa_to_sheet([head,...rows],{cellDates:true,dateNF:"yyyy-mm-dd"});
   const range=XLSX.utils.decode_range(ws["!ref"]);
   for(let R=1;R<=range.e.r;R++){for(const C of [0,9,12,14,16]){const ref=XLSX.utils.encode_cell({r:R,c:C});if(ws[ref]&&ws[ref].t==="d")ws[ref].z="yyyy-mm-dd"}
@@ -644,12 +672,12 @@ function renderEditor(){
       <div class="two">${field("c-phone","Telefon",ct.phone,"tel")}${field("c-email","E-mail",ct.email,"email")}</div>
     </div></details>
     <details class="sec" open><summary><span>Követés <small>nem kerül a tájékoztatóba</small></span></summary><div class="sec-body">
-      <div class="two"><div class="f"><label for="status">Státusz</label><select id="status">${STATUSES.map(s=>`<option value="${s.id}"${s.id===normSt(c.status)?" selected":""}>${s.hu}</option>`).join("")}</select></div>${field("sentDate","Kiküldés dátuma",c.sentDate,"date")}</div>
+      <div class="two"><div class="f"><label for="status">Státusz</label><select id="status">${STATUSES.map(s=>`<option value="${s.id}"${s.id===effSt(c)?" selected":""}>${s.hu}</option>`).join("")}</select></div>${field("sentDate","Kiküldés dátuma",c.sentDate,"date")}</div>
       <div class="fubox${isFu(c)?" due":""}">
         <div><b>Kiküldte:</b> ${esc(sender(c))||"–"}</div>
-        <div><b>Follow-up:</b> ${normSt(c.status)!=="kikuldve"?"nincs, a státusz nem „Kiküldve”":isFu(c)?"esedékes most":"esedékes "+esc(dShort(fuDue(c),"hu"))}</div>
+        <div><b>Follow-up:</b> ${isFu(c)?"esedékes most":normSt(c.status)!=="kikuldve"?"nincs, a státusz nem „Kiküldve”":"esedékes "+esc(dShort(fuDue(c),"hu"))}</div>
         ${(c.followups||[]).length?`<ul>${c.followups.map((f,i)=>`<li>${i+1}. follow-up: ${esc(dShort(f.at,"hu"))}${f.by?" · "+esc(acct(f.by)):""}</li>`).join("")}</ul>`:""}
-        ${normSt(c.status)==="kikuldve"?`<button class="btn" id="fudone" type="button">Follow-up megtörtént</button>`:""}
+        ${["kikuldve","followup"].includes(normSt(c.status))?`<button class="btn" id="fudone" type="button">Follow-up megtörtént</button>`:""}
       </div>
       <div class="f"><label for="internal">Megjegyzés</label><textarea id="internal" placeholder="pl. Csütörtökön visszahívni, a 2 fős iroda is érdekli">${esc(c.internal)}</textarea></div>
       ${S.curId?(S.confirmDel?`<div class="confirm">Biztosan törlöd ezt a leadet? Nem vonható vissza.<button class="btn danger" id="delyes">Igen, törlés</button><button class="btn ghost" id="delno">Mégse</button></div>`:`<button class="btn danger" id="del">Lead törlése</button>`):""}
@@ -671,7 +699,7 @@ function bindEditor(){
     if(k==="salutation")c._salTouched=true;changed()})});
   ["parking","energy","guestParking","coffee","deposit","install","mr6","mr10","mr12"].forEach(k=>{const el=document.getElementById("t-"+k);el.addEventListener("input",()=>{c.terms[k]=numOut(el.value);changed()})});
   ["name","title","phone","email"].forEach(k=>{const el=document.getElementById("c-"+k);el.addEventListener("input",()=>{c.contact[k]=el.value;changed()})});
-  const fd=$("#fudone");if(fd)fd.onclick=()=>{c.followups=[...(c.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];changed();renderEditor();toast("Follow-up rögzítve")};
+  const fd=$("#fudone");if(fd)fd.onclick=()=>{c.followups=[...(c.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];c.status="kikuldve";changed();renderEditor();toast("Follow-up rögzítve")};
   const stSel=$("#status");stSel.addEventListener("change",()=>renderEditor());
   const tbd=$("#moveInTbd");tbd.onchange=()=>{const d=$("#moveIn");d.disabled=tbd.checked;c.moveIn=tbd.checked?"egyeztetes":d.value;changed()};
   document.querySelectorAll("[data-tbd]").forEach(cb=>cb.onchange=()=>{const i=+cb.dataset.tbd,d=$("#o"+i+"-from");d.disabled=cb.checked;c.options[i].from=cb.checked?"egyeztetes":d.value;changed()});
