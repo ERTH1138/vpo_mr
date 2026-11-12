@@ -611,6 +611,35 @@ export default async (req) => {
     }
     if (m === "DELETE" && parts[1] && ID.test(parts[1])) { await store.delete("l/" + parts[1]); return json({ ok: true }); }
   }
+  // Szerződések: k/<id> = {...szerződésadatok}; beállítások: contractconfig
+  if (parts[0] === "contracts") {
+    if (m === "GET") {
+      const { blobs } = await store.list({ prefix: "k/" });
+      const items = await Promise.all(blobs.map(async (b) => { const v = await store.get(b.key, { type: "json" }); return v ? { id: b.key.slice(2), data: v } : null; }));
+      return json(items.filter(Boolean));
+    }
+    if (m === "POST" || (m === "PUT" && parts[1] && ID.test(parts[1]))) {
+      const body = await req.json().catch(() => null);
+      const d = body && body.data;
+      if (!d || typeof d !== "object" || Array.isArray(d)) return json({ error: "Hibás adat." }, 400);
+      if (JSON.stringify(d).length > 100000) return json({ error: "Túl sok adat." }, 413);
+      const id = m === "PUT" ? parts[1] : `K${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+      const prev = m === "PUT" ? await store.get("k/" + id, { type: "json" }) : null;
+      const data = { ...d, by: (prev && prev.by) || user, upd: user };
+      await store.setJSON("k/" + id, data);
+      return json({ id, data });
+    }
+    if (m === "DELETE" && parts[1] && ID.test(parts[1])) { await store.delete("k/" + parts[1]); return json({ ok: true }); }
+  }
+  if (parts[0] === "contractconfig") {
+    if (m === "GET") return json((await store.get("contractconfig", { type: "json" })) || {});
+    if (m === "PUT") {
+      const body = await req.json().catch(() => null);
+      if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "Hibás adat." }, 400);
+      await store.setJSON("contractconfig", body);
+      return json({ ok: true });
+    }
+  }
   if (parts[0] === "leadconfig") {
     if (m === "GET") return json((await store.get("leadconfig", { type: "json" })) || {});
     if (m === "PUT") {
