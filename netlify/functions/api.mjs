@@ -613,6 +613,28 @@ export default async (req) => {
   }
   // Szerződések: k/<id> = {...szerződésadatok}; beállítások: contractconfig
   if (parts[0] === "contracts") {
+    // Aktiválás: a szerződés "aktiv" lesz, az ügyfél felkerül / frissül a Kiegészítő szolgáltatások ügyféllistáján (config.clients)
+    if (m === "POST" && parts[1] && ID.test(parts[1]) && parts[2] === "activate") {
+      const key = "k/" + parts[1];
+      const k = await store.get(key, { type: "json" });
+      if (!k) return json({ error: "A szerződés nem található." }, 404);
+      const body = await req.json().catch(() => ({}));
+      const c = body && body.client || {};
+      const n = String(c.n || "").trim().slice(0, 200);
+      if (!n) return json({ error: "Add meg az ügyfél nevét." }, 400);
+      const free = Math.max(0, Number(c.free) || 0);
+      const cfg = (await store.get("config", { type: "json" })) || {};
+      if (!Array.isArray(cfg.clients)) return json({ error: "Előbb nyisd meg egyszer a Kiegészítő szolgáltatások oldalt, hogy az ügyféllista létrejöjjön." }, 409);
+      const norm = (s) => String(s || "").trim().toLowerCase();
+      let cl = cfg.clients.find((x) => norm(x.n) === norm(n));
+      const created = !cl;
+      if (cl) { cl.eur = !!c.eur; cl.free = free; }
+      else { cl = { n, eur: !!c.eur, free, note: "", prices: [] }; cfg.clients.push(cl); if (Array.isArray(cfg.quick) && !cfg.quick.some((q) => norm(q) === norm(n))) cfg.quick.push(n); }
+      await store.setJSON("config", cfg);
+      const data = { ...k, status: "aktiv", activatedAt: new Date().toISOString(), activatedBy: user, clientName: cl.n, upd: user };
+      await store.setJSON(key, data);
+      return json({ id: parts[1], data, client: cl, created });
+    }
     if (m === "GET") {
       const { blobs } = await store.list({ prefix: "k/" });
       const items = await Promise.all(blobs.map(async (b) => { const v = await store.get(b.key, { type: "json" }); return v ? { id: b.key.slice(2), data: v } : null; }));

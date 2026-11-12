@@ -644,7 +644,7 @@ function renderLeads(){LANG_FMT="hu";S.pendingRender=false;
     const due=fuDue(d);return due?`<span class="muted">${esc(dShort(due,"hu"))}</span>${cnt?"<br>"+cnt:""}`:(cnt||"–")};
   const rowCls=d=>({followup:"fu",megnyert:"won",elveszett:"lost"}[effSt(d)]||"");
   const acts=l=>S.delAsk===l.id?`<span class="delask">Törlöd? <button class="linkbtn danger" data-delyes="${l.id}">Igen</button> <button class="linkbtn" data-delno="1">Mégse</button></span>`
-    :`<button class="iconbtn" data-open="${l.id}" title="Megtekintés" aria-label="Megtekintés">${EYE}</button><button class="iconbtn del" data-del="${l.id}" title="Törlés" aria-label="Törlés">${TRASH}</button>`;
+    :`<button class="iconbtn" data-open="${l.id}" title="Megtekintés" aria-label="Megtekintés">${EYE}</button>${window.VPO_SITE?`<a class="iconbtn" href="/szerzodesek/?lead=${encodeURIComponent(l.id)}" title="Szerződés készítése" aria-label="Szerződés készítése"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></a>`:""}<button class="iconbtn del" data-del="${l.id}" title="Törlés" aria-label="Törlés">${TRASH}</button>`;
   let body;
   if(!S.loaded&&!S.dbErr){body=`<div class="empty"><b>Leadek betöltése…</b>Pillanat, az adatok érkeznek.</div>`}
   else if(S.dbErr){body=`<div class="empty"><b>Az adatbázis nem érhető el</b>${esc(S.dbErr)}</div>`}

@@ -7,7 +7,7 @@
 <title>Szerződések · Vista Plus Offices</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -67,7 +67,16 @@ table.list{width:100%;border-collapse:collapse;font-size:14px;min-width:980px}
 .kchip{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap}
 .k-iroda{background:var(--peach);color:var(--accent)}.k-vo{background:#ece6f7;color:#5b3fa0}.k-targyalo{background:#e3f1f1;color:#1d6b6b}
 .pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;border:0;cursor:pointer;appearance:none;-webkit-appearance:none}
-.s-tervezet{background:var(--soft);color:var(--muted)}.s-kikuldve{background:var(--infobg);color:var(--info)}.s-alairva{background:var(--ok);color:#fff}
+.s-tervezet{background:var(--soft);color:var(--muted)}.s-kikuldve{background:var(--infobg);color:var(--info)}.s-alairva{background:var(--okbg);color:var(--ok)}.s-aktiv{background:var(--ok);color:#fff;cursor:default}
+.btn.sm{min-height:32px;padding:5px 12px;font-size:13px}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(20,22,26,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .box{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:22px;display:grid;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:calc(100vh - 32px);overflow:auto}
+.modal h3{margin:0;font-size:19px}
+.leads{display:grid;gap:8px;margin-top:10px}
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:#fff;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
+.lrow:hover{border-color:var(--accent)}
+.lrow .m{font-size:13px;color:var(--muted)}
+.lopts{display:flex;flex-wrap:wrap;gap:6px;padding:4px 2px 6px}
 .iconbtn{border:1px solid var(--line);background:#fff;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:4px;vertical-align:middle;color:var(--fg)}
 .iconbtn svg{width:17px;height:17px}.iconbtn:hover{border-color:var(--fg)}.iconbtn.del{color:var(--muted)}.iconbtn.del:hover{color:#c0392b;border-color:#c0392b}
 .linkbtn{border:0;background:none;font-weight:700;cursor:pointer;padding:2px 4px}.linkbtn.danger{color:#c0392b}
@@ -144,90 +153,87 @@ details.sec>summary small{font-weight:500;color:var(--muted);margin-left:8px}
 .login input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:16px}
 .login .err{color:#9B2418;font-weight:600;font-size:13.5px;min-height:20px}
 
-/* ===== Contract page (A4 @ 96dpi = 794 x 1123). Verdana = the ÁSZF font, so front page and terms match. ===== */
-.page{--ink:#1f1f1f;--mut:#6b6b6b;--ln:#e4e1de;--tint:#f7f4f1;--fl:#ef4130;--or:#f5975a;--dk:#262626;
-  width:794px;height:1123px;background:#fff;color:var(--ink);font-family:Verdana,"DejaVu Sans",Geneva,Tahoma,sans-serif;font-size:10.2px;line-height:1.5;position:relative;overflow:hidden;display:flex;flex-direction:column}
+/* ===== Contract page (A4 @ 96dpi = 794 x 1123) – same type and look as the tájékoztatók: Inter text, Manrope headings ===== */
+.page{--ink:#1b1d22;--mut:#626875;--ln:#e3e5e9;--tint:#f4f5f7;--fl:#dc4b1c;--fl2:#f08a2c;--dk:#22252b;--fd:Manrope,"Inter",system-ui,sans-serif;
+  width:794px;height:1123px;background:#fff;color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;line-height:1.5;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .page *{box-sizing:border-box}
-.ch{display:flex;justify-content:space-between;align-items:flex-end;padding:36px 52px 0}
-.ch .eb{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--fl);font-weight:700;margin-bottom:7px}
-.ch .ttl{font-size:19px;font-weight:700;line-height:1.2;margin:0;letter-spacing:-.01em}
-.ch img{height:60px;width:auto;display:block;margin-bottom:-2px}
-.chbar{margin:16px 52px 0;display:flex;border-top:2px solid var(--dk);border-bottom:1px solid var(--ln)}
-.chbar div{padding:6px 18px 6px 0;margin-right:18px;font-size:8.6px;color:var(--mut);border-right:1px solid var(--ln);white-space:nowrap}
-.chbar div:last-child{border-right:0}
-.chbar b{color:var(--ink);margin-left:4px}
-.cb{flex:1;padding:18px 52px 0;display:flex;flex-direction:column;gap:14px;min-height:0}
-.sh{display:flex;align-items:baseline;gap:8px;font-size:8.4px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid var(--ln)}
-.sh i{font-style:normal;color:var(--fl);letter-spacing:.04em}
+.pg-head{display:flex;justify-content:space-between;align-items:center;padding:30px 56px 0}
+.pg-head img{height:34px;width:auto}
+.pg-head span{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+.cb{flex:1;padding:22px 56px 0;display:flex;flex-direction:column;gap:14px;min-height:0}
+.tblock .eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--fl);font-weight:600;margin:0 0 6px}
+.tblock h1{font-family:var(--fd);font-weight:400;font-size:28px;line-height:1.15;margin:0}
+.tblock{margin-bottom:6px}.page.dense .tblock{margin-bottom:2px}
+.tblock .meta{margin-top:6px;font-size:10px;color:var(--mut)}
+.tblock .meta b{color:var(--ink);font-weight:600}
+.sh{font-family:var(--fd);font-weight:500;font-size:15.5px;line-height:1.2;margin:0 0 8px;display:flex;align-items:baseline;gap:8px}
+.sh i{font-style:normal;font-family:"Inter",sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.14em;color:var(--fl)}
 .parties{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.party{background:var(--tint);padding:11px 14px 10px;border-top:3px solid var(--fl)}
-.party.v{border-top-color:var(--dk)}
-.party h4{margin:0 0 3px;font-size:7.8px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);font-weight:700}
-.party .nm{font-size:11.6px;font-weight:700;margin:0 0 6px;line-height:1.3;min-height:15px}
-.pr{display:grid;grid-template-columns:104px 1fr;gap:8px;padding:1px 0;font-size:9.2px}
+.party{background:var(--tint);padding:13px 16px 10px}
+.party h4{margin:0 0 2px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--fl);font-weight:600}
+.party .nm{font-family:var(--fd);font-size:15px;font-weight:500;margin:0 0 6px;line-height:1.25;min-height:19px}
+.pr{display:grid;grid-template-columns:106px 1fr;gap:8px;padding:3px 0;border-top:1px solid #e3e5e9;font-size:10px}
 .pr span{color:var(--mut)}
-.pr b{font-weight:400;overflow-wrap:anywhere}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--ln)}
-.tile{padding:8px 12px;border-right:1px solid var(--ln)}
-.tile:last-child{border-right:0}
-.tile span{display:block;font-size:7.6px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-.tile b{display:block;font-size:12.6px;margin-top:2px;white-space:nowrap}
-.tile small{display:block;font-size:8.4px;color:var(--mut);white-space:nowrap}
-.fee{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;padding:9px 14px;background:var(--tint)}
-.fee span{font-size:9px;color:var(--mut)}
-.fee b{font-size:13.5px}
-.fee em{font-style:normal;font-size:9px;color:var(--mut);margin-left:8px}
+.pr b{font-weight:600;overflow-wrap:anywhere}
+table.dt{width:100%;border-collapse:collapse;font-size:11px}
+.dt th{background:var(--dk);color:#fff;font-weight:600;font-size:9.5px;letter-spacing:.02em;padding:8px 8px;text-align:center}
+.dt td{border-bottom:1px solid var(--ln);padding:8px;text-align:center;font-weight:700;font-size:12px}
+.dt td small{display:block;font-weight:500;color:var(--mut);font-size:9px}
+.fees{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.feebox{background:var(--tint);padding:10px 14px}
+.feebox span{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.feebox b{font-size:15px;display:block;margin-top:2px}
+.feebox small{color:var(--mut);font-size:9.5px}
+.freeh{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 14px;border:1px solid var(--ln);border-left:3px solid var(--fl)}
+.freeh b{font-size:12px}
+.freeh small{color:var(--mut);font-size:9.5px}
 table.ft{width:100%;border-collapse:collapse}
-.ft td{padding:5px 0;border-bottom:1px solid var(--ln);vertical-align:top}
-.ft td small{display:block;color:var(--mut);font-size:8.4px}
-.ft td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;padding-left:12px}
-.ft tr.total td{background:var(--dk);color:#fff;font-weight:700;padding:8px 12px;border:0;font-size:11px}
-.ft tr.total td:last-child{color:var(--or)}
-.note{font-size:8.6px;color:var(--mut);margin:5px 0 0}
-.two-c{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.checks{display:grid;gap:5px}
-.cbx{display:flex;gap:8px;align-items:flex-start}
-.cbx i{flex:none;width:11px;height:11px;border:1.2px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
-.cbx i.on{background:var(--fl);border-color:var(--fl)}
-.cbx i.on svg{width:8px;height:8px}
-.cbx .x{display:block;color:var(--mut);font-size:9px}
-.subh{font-size:9px;font-weight:700;margin:2px 0 0}
-.addl{border-left:3px solid var(--fl);background:var(--tint);padding:8px 12px;white-space:pre-line;text-align:justify}
-.pkgbox{border:1px solid var(--ln);border-left:3px solid var(--fl);padding:9px 14px;display:flex;justify-content:space-between;gap:16px;align-items:center}
-.pkgbox b{font-size:11.4px}
-.pkgbox .pr2{text-align:right;white-space:nowrap}
-.pkgbox .pr2 b{display:block}
-.pkgbox p{margin:3px 0 0;font-size:8.8px;color:var(--mut)}
-.stmt{font-size:9px;text-align:justify;color:#3a3a3a;margin:0}
+.ft td{padding:6px 0;border-bottom:1px solid var(--ln);vertical-align:top}
+.ft td small{display:block;color:var(--mut);font-size:9px}
+.ft td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600;padding-left:12px}
+.ft tr.total td{background:var(--dk);color:#fff;font-weight:700;padding:9px 14px;border:0;font-size:12px}
+.note{font-size:9.5px;color:var(--mut);margin:6px 0 0}
+.two-c{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.checks{display:grid;gap:6px}
+.ck{display:flex;gap:9px;align-items:flex-start}
+.ck i{flex:none;width:15px;height:15px;border-radius:50%;border:1.3px solid #b9bdc5;display:inline-flex;align-items:center;justify-content:center;margin-top:0}
+.ck i.on{background:var(--fl);border-color:var(--fl)}
+.ck i.on svg{width:9px;height:9px}
+.ck.off span{color:var(--mut)}
+.ck .x{display:block;color:var(--mut);font-size:9.5px}
+.subh{font-size:10px;font-weight:700;margin:0}
+.addl{background:var(--tint);padding:10px 14px;white-space:pre-line;text-align:justify}
+.pkgbox{border:1.5px solid var(--fl);padding:10px 16px;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.pkgbox b{font-family:var(--fd);font-weight:500;font-size:15px}
+.pkgbox .pr2{text-align:right;white-space:nowrap;color:var(--fl);font-weight:700}
+.pkgbox p{margin:3px 0 0;font-size:9.5px;color:var(--mut)}
+.stmt{font-size:9.8px;text-align:justify;color:#3a3d44;margin:0}
 .sigs{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:auto;padding-top:6px}
-.sig .t{font-size:7.8px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:700}
-.sig .sp{height:46px;border-bottom:1px solid var(--ink);display:flex;align-items:flex-end;justify-content:flex-end;padding-bottom:3px;font-size:8px;color:#b5b0ab}
-.sig .n{font-weight:700;margin-top:5px;min-height:15px}
-.sig .p{color:var(--mut);font-size:9px;min-height:14px}
-.sig .d{color:var(--mut);font-size:8.6px;margin-top:2px}
-.cf{margin-top:20px;height:24px;background:var(--dk);display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;text-align:center;color:#f04e30;font-size:9.4px}
-table.bk{width:100%;border-collapse:collapse;font-size:9.2px}
-.bk th{text-align:left;font-size:7.6px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:700;padding:0 6px 5px 0;border-bottom:1.5px solid var(--dk)}
-.bk td{padding:6px 6px 6px 0;border-bottom:1px solid var(--ln);vertical-align:top}
-.page.dense .cb{gap:9px;padding-top:12px}.page.dense .party{padding:8px 12px}.page.dense .pr{padding:0}.page.dense .sh{margin-bottom:5px;padding-bottom:3px}.page.dense .sig .sp{height:34px}.page.dense .checks{gap:3px}.page.dense .ft td{padding:3px 0}.page.dense .ft tr.total td{padding:6px 12px}.page.dense .tile{padding:6px 10px}.page.dense .fee{padding:6px 12px}.page.dense .ch{padding-top:28px}
-.page.denser{font-size:9.6px}.page.denser .pr{font-size:8.7px}.page.denser .stmt{font-size:8.5px}.page.denser .ch img{height:50px}
+.sig .t{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--fl);font-weight:600}
+.sig .sp{height:48px;border-bottom:1px solid var(--ink);display:flex;align-items:flex-end;justify-content:flex-end;padding-bottom:3px;font-size:8.5px;color:#b5b9c0}
+.sig .n{font-family:var(--fd);font-weight:600;font-size:12px;margin-top:6px;min-height:16px}
+.sig .p{color:var(--mut);font-size:9.5px;min-height:14px}
+.pg-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 0 24px;font-size:9.5px;color:var(--mut);letter-spacing:.04em;border-top:1px solid var(--ln);margin:18px 56px 0}
+.pg-foot b{color:var(--ink);font-weight:600}
+table.bk{width:100%;border-collapse:collapse;font-size:10px}
+.bk th{background:var(--fl);color:#fff;font-weight:600;font-size:9.5px;padding:7px 6px;text-align:left}
+.bk td{padding:7px 6px;border-bottom:1px solid var(--ln);vertical-align:top}
+.page.dense .cb{gap:9px;padding-top:14px}.page.dense .party{padding:9px 13px 7px}.page.dense .pr{padding:1.5px 0}.page.dense .sh{margin-bottom:5px;font-size:14px}.page.dense .sig .sp{height:36px}.page.dense .checks{gap:3px}.page.dense .ft td{padding:3.5px 0}.page.dense .ft tr.total td{padding:7px 14px}.page.dense .dt td{padding:6px}.page.dense .feebox{padding:7px 12px}.page.dense .tblock h1{font-size:24px}.page.dense .pg-head{padding-top:24px}
+.page.denser{font-size:10.3px}.page.denser .pr{font-size:9.4px}.page.denser .stmt{font-size:9.2px}.page.denser .party .nm{font-size:13.5px}
 /* teljesítési igazolás */
-.cert .cb{padding:30px 72px 0;gap:0;font-size:11px;line-height:1.75}
-.cert .logo{display:block;height:74px;margin:44px auto 0}
-.cert h1{text-align:center;font-size:15px;letter-spacing:.14em;margin:22px 0 4px}
-.cert .rule{width:56px;height:3px;background:var(--fl);margin:0 auto 38px}
+.cert .cb{padding:40px 72px 0;gap:0;font-size:12px;line-height:1.8}
+.cert .tblock{margin-bottom:34px}
 .cert p{margin:0 0 16px;text-align:justify}
-.fill{font-weight:700;border-bottom:1px dotted #9a948e;padding:0 3px}
-.blank{display:inline-block;border-bottom:1px dotted #9a948e;min-width:180px}
-.mtw{margin:6px 0 26px;display:grid;gap:6px}.mt{border:1px solid var(--ln);background:var(--tint);display:grid;grid-template-columns:1fr 1fr 1.6fr .8fr}
-.mt div{padding:8px 12px;border-right:1px solid var(--ln);line-height:1.4}
-.mt div:last-child{border-right:0}
-.mt span{display:block;font-size:7.6px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-.mt b{font-size:10.4px}
+.fill{font-weight:700;border-bottom:1px dotted #9a9ea6;padding:0 3px}
+.blank{display:inline-block;border-bottom:1px dotted #9a9ea6;min-width:180px}
+.mtw{margin:6px 0 26px;display:grid;gap:0}
+.mtw table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.4}
+.mtw th{background:var(--dk);color:#fff;font-weight:600;font-size:9.5px;padding:7px 10px;text-align:left}
+.mtw td{padding:8px 10px;border-bottom:1px solid var(--ln);font-weight:600}
 .csig{margin:70px 0 0 auto;width:280px;text-align:center}
 .csig .sp{border-bottom:1px solid var(--ink);height:40px}
-.csig .n{font-weight:700;margin-top:6px;line-height:1.4}
-.csig .p{color:var(--mut);font-size:9.6px;line-height:1.4}
+.csig .n{font-family:var(--fd);font-weight:600;margin-top:6px;line-height:1.4}
+.csig .p{color:var(--mut);font-size:10px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -257,7 +263,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const KINDS={iroda:{hu:"Iroda",title:{hu:"Irodaszolgáltatási szerződés",en:"Office Service Agreement"},file:{hu:"Irodaszerződés",en:"Office_Service_Agreement"}},
  vo:{hu:"Virtuális iroda",title:{hu:"Virtuális iroda szolgáltatási szerződés",en:"Virtual Office Service Agreement"},file:{hu:"Virtuális_Iroda_Szerződés",en:"Virtual_Office_Agreement"}},
  targyalo:{hu:"Tárgyaló",title:{hu:"Tárgyaló foglalási adatlap",en:"Meeting Room Booking Form"},file:{hu:"Tárgyaló_Foglalási_Adatlap",en:"Meeting_Room_Booking_Form"}}};
-const STATUSES=[{id:"tervezet",hu:"Tervezet"},{id:"kikuldve",hu:"Aláírásra kiküldve"},{id:"alairva",hu:"Aláírva"}];
+const STATUSES=[{id:"tervezet",hu:"Tervezet"},{id:"kikuldve",hu:"Aláírásra kiküldve"},{id:"alairva",hu:"Aláírva"},{id:"aktiv",hu:"Aktív"}];
 const ROOMS=[{k:"r6",hu:"Kis tárgyaló (max. 6 fő)",en:"Small meeting room (max. 6)"},{k:"r10",hu:"Panoráma tárgyaló (max. 10 fő)",en:"Panorama meeting room (max. 10)"},{k:"r12",hu:"Nagy tárgyaló (max. 12 fő)",en:"Large meeting room (max. 12)"}];
 /* tárgyalóárak és csomag: a Tájékoztatók alapértékeiből (leadconfig.mr), ugyanúgy mint a tájékoztatóban */
 let MRP={r6:8000,r10:12000,r12:15000,pkgHours:10,pkgPrice:80000,pkgExtra:6000};
@@ -305,9 +311,9 @@ const DEF={vista:{name:"Vista Plus Offices Kft.",address:"Népfürdő utca 22. B
 const S={view:"list",list:[],loaded:false,cfg:null,cur:null,curId:null,dirty:false,saving:false,again:false,lastSaved:null,pane:"form",q:"",kindF:"all",delAsk:null,confirmDel:false,busy:false};
 function cfg(){const c=S.cfg||{};const vs={...DEF.vista,...(c.vista||{})};if(/^HU64\s?1176/.test(vs.bankEur||"")||/raiffeisen|UBRT/i.test(vs.bankEur||"")){vs.bankEur=DEF.vista.bankEur}if(vs.swift==="OTPVHUHB"||!vs.swift)vs.swift=DEF.vista.swift;return{vista:vs,signers:(c.signers&&c.signers.length?c.signers:DEF.signers),iroda:{...DEF.iroda,...(c.iroda||{})},vo:{...DEF.vo,...(c.vo||{})}}}
 function defSigner(){const s=cfg().signers;const a=acct(ME).toLowerCase();if(a.startsWith("sales")){const i=s.findIndex(x=>/Puskádi/i.test(x.name));if(i>=0)return i}return 0}
-function blank(kind){const c=cfg(),t=todayISO();return{kind,lang:"hu",date:t,no:"",status:"tervezet",signer:defSigner(),
+function blank(kind){const c=cfg(),t=todayISO();return{kind,lang:"hu",date:t,no:"",status:"tervezet",signer:defSigner(),billing:"eur",leadId:"",
   client:{company:"",address:"",city:"",zip:"",tax:"",reg:"",contact:"",position:"",phone:"",email:"",bank:"",bankName:"",signName:"",signPos:""},
-  iroda:{term:c.iroda.termMonths,start:t,end:endFrom(t,c.iroda.termMonths),office:"",seats:"",fee:"",installPer:c.iroda.installPer,install:"",first:"",prorate:true,parkingN:0,parkingFee:c.iroda.parkingFee,depositMonths:c.iroda.depositMonths,deposit:"",vat:c.iroda.vat},
+  iroda:{term:c.iroda.termMonths,start:t,end:endFrom(t,c.iroda.termMonths),office:"",seats:"",fee:"",installPer:c.iroda.installPer,install:"",first:"",prorate:true,freeHours:"",parkingN:0,parkingFee:c.iroda.parkingFee,depositMonths:c.iroda.depositMonths,deposit:"",vat:c.iroda.vat},
   vo:{pkg:{szekhely:false,telefon:false,vi:true,viplus:false},term:c.vo.termMonths,start:t,end:endFrom(t,c.vo.termMonths),install:c.vo.install,fee:c.vo.fee,schedule:"havi",depositMonths:c.vo.depositMonths,deposit:"",vat:c.vo.vat,
     mail:{forward:false,fwdCompany:"",fwdAddress:"",pickup:false,scan:true,scanEmail:""},phone:{transfer:false,transferNo:"",msg:false,msgEmail:""}},
   mr:{rows:[{date:t,arrive:"09:00",leave:"12:00",people:"",room:"r10",setup:"",equipment:"",rate:rateTxt("r10","hu")}],cater:{},pkg:{on:false,hours:MRP.pkgHours,price:MRP.pkgPrice,extra:MRP.pkgExtra}},
@@ -343,7 +349,9 @@ function money(d){LANG="hu";if(d.kind==="vo")return "EUR "+fmtN(d.vo&&d.vo.fee)+
 function renderList(){LANG="hu";$("#actionbar").innerHTML="";
   const q=S.q.trim().toLowerCase();
   const rows=S.list.filter(l=>(S.kindF==="all"||l.data.kind===S.kindF)&&(!q||[l.data.client&&l.data.client.company,l.data.client&&l.data.client.contact,l.data.no,summary(l.data)].join(" ").toLowerCase().includes(q)));
-  const stOpts=cur=>STATUSES.map(s=>`<option value="${s.id}"${s.id===cur?" selected":""}>${s.hu}</option>`).join("");
+  const stOpts=cur=>STATUSES.filter(s=>s.id!=="aktiv").map(s=>`<option value="${s.id}"${s.id===cur?" selected":""}>${s.hu}</option>`).join("");
+  const stCell=l=>{const d=l.data,st=d.status||"tervezet";if(st==="aktiv")return `<span class="pill s-aktiv" title="Aktiválta: ${esc(acct(d.activatedBy))}, ${esc(d.activatedAt?new Date(d.activatedAt).toLocaleDateString("hu-HU"):"")}">Aktív</span>${d.clientName?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Ügyfélként: ${esc(d.clientName)}</div>`:""}`;
+    return `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><select class="pill s-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select>${st==="alairva"?`<button class="btn sm primary" data-act="${l.id}">Aktiválás</button>`:""}</div>`};
   const acts=l=>S.delAsk===l.id?`<span style="white-space:nowrap;font-size:13px">Törlöd? <button class="linkbtn danger" data-delyes="${l.id}">Igen</button> <button class="linkbtn" data-delno="1">Mégse</button></span>`
     :`<button class="iconbtn" data-open="${l.id}" title="Megnyitás" aria-label="Megnyitás">${ICO.eye}</button><button class="iconbtn" data-dup="${l.id}" title="Másolat" aria-label="Másolat">${ICO.copy}</button><button class="iconbtn del" data-del="${l.id}" title="Törlés" aria-label="Törlés">${ICO.trash}</button>`;
   let body;
@@ -352,8 +360,8 @@ function renderList(){LANG="hu";$("#actionbar").innerHTML="";
   else if(!rows.length)body=`<div class="empty"><b>Nincs találat</b>Próbálj másik keresést vagy szűrőt.</div>`;
   else body=`<div class="tbox"><table class="list"><thead><tr><th></th><th>Dátum</th><th>Típus</th><th>Cégnév</th><th>Kapcsolattartó</th><th>Tárgy</th><th>Díj</th><th>Kezdés</th><th>Státusz</th><th>Készítette</th></tr></thead><tbody>`+
     rows.map(l=>{const d=l.data,st=d.status||"tervezet",start=d.kind==="vo"?d.vo&&d.vo.start:d.kind==="iroda"?d.iroda&&d.iroda.start:"";
-      return `<tr><td style="white-space:nowrap;width:1%">${acts(l)}</td><td class="num">${esc(dFmt(d.date,"hu"))}</td><td><span class="kchip k-${d.kind}">${KINDS[d.kind].hu}</span></td><td><b>${esc(d.client&&d.client.company||"–")}</b></td><td>${esc(d.client&&d.client.contact||"")}</td><td style="white-space:nowrap">${esc(summary(d))}</td><td class="num">${esc(money(d))}</td><td class="num">${esc(dFmt(start,"hu"))||"–"}</td><td><select class="pill s-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></td><td>${esc(acct(d.by))||"–"}</td></tr>`}).join("")+
-    `</tbody></table></div><div class="cards">`+rows.map(l=>{const d=l.data,st=d.status||"tervezet";return `<div class="card"><div class="r1"><div><b>${esc(d.client&&d.client.company||"–")}</b><br><span class="kchip k-${d.kind}">${KINDS[d.kind].hu}</span></div><select class="pill s-${st}" data-st="${l.id}" aria-label="Státusz">${stOpts(st)}</select></div><div class="meta"><span>${esc(dFmt(d.date,"hu"))}</span><span>${esc(summary(d))}</span><span>${esc(money(d))}</span></div><div style="text-align:right">${acts(l)}</div></div>`}).join("")+`</div>`;
+      return `<tr><td style="white-space:nowrap;width:1%">${acts(l)}</td><td class="num">${esc(dFmt(d.date,"hu"))}</td><td><span class="kchip k-${d.kind}">${KINDS[d.kind].hu}</span></td><td><b>${esc(d.client&&d.client.company||"–")}</b></td><td>${esc(d.client&&d.client.contact||"")}</td><td style="white-space:nowrap">${esc(summary(d))}</td><td class="num">${esc(money(d))}</td><td class="num">${esc(dFmt(start,"hu"))||"–"}</td><td>${stCell(l)}</td><td>${esc(acct(d.by))||"–"}</td></tr>`}).join("")+
+    `</tbody></table></div><div class="cards">`+rows.map(l=>{const d=l.data,st=d.status||"tervezet";return `<div class="card"><div class="r1"><div><b>${esc(d.client&&d.client.company||"–")}</b><br><span class="kchip k-${d.kind}">${KINDS[d.kind].hu}</span></div><div>${stCell(l)}</div></div><div class="meta"><span>${esc(dFmt(d.date,"hu"))}</span><span>${esc(summary(d))}</span><span>${esc(money(d))}</span></div><div style="text-align:right">${acts(l)}</div></div>`}).join("")+`</div>`;
   $("#main").innerHTML=`<div class="head"><div><h2>Szerződések</h2><p class="sub">Irodaszolgáltatási és virtuális iroda szerződések, tárgyaló foglalási adatlapok. A PDF végére automatikusan bekerül a megfelelő ÁSZF.</p></div><button class="btn primary" onclick="go('choose')">${ICO.plus} Új szerződés</button></div>
    <div class="toolbar"><input id="q" class="search" type="search" placeholder="Keresés cégnév, kapcsolattartó szerint" value="${esc(S.q)}" aria-label="Keresés"><select id="kf" class="selectpill" aria-label="Típus"><option value="all">Minden típus</option>${Object.keys(KINDS).map(k=>`<option value="${k}"${S.kindF===k?" selected":""}>${KINDS[k].hu}</option>`).join("")}</select></div>${body}`;
   const qi=$("#q");qi.oninput=()=>{S.q=qi.value;const p=qi.selectionStart;renderList();const n=$("#q");n.focus();n.setSelectionRange(p,p)};
@@ -363,15 +371,21 @@ function renderList(){LANG="hu";$("#actionbar").innerHTML="";
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{S.delAsk=b.dataset.del;renderList()});
   document.querySelectorAll("[data-delno]").forEach(b=>b.onclick=()=>{S.delAsk=null;renderList()});
   document.querySelectorAll("[data-delyes]").forEach(b=>b.onclick=async()=>{try{await api("contracts/"+b.dataset.delyes,{method:"DELETE"});S.list=S.list.filter(x=>x.id!==b.dataset.delyes);S.delAsk=null;renderList();toast("Törölve")}catch(e){toast("Nem sikerült törölni: "+e.message)}});
+  document.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>openActivate(b.dataset.act));
   document.querySelectorAll("[data-st]").forEach(s=>s.onchange=async()=>{const l=S.list.find(x=>x.id===s.dataset.st);if(!l)return;const d={...l.data,status:s.value,updatedAt:new Date().toISOString()};try{const r=await api("contracts/"+l.id,{method:"PUT",body:JSON.stringify({data:d})});l.data=r.data;renderList();toast("Státusz: "+STATUSES.find(x=>x.id===s.value).hu)}catch(e){toast("Nem sikerült menteni: "+e.message)}});
 }
 
 /* ---------- choose ---------- */
 function renderChoose(){$("#actionbar").innerHTML="";
-  const k=(id,ico,d)=>`<button class="kind" data-kind="${id}"><span class="ico">${ICO[ico]}</span><b>${KINDS[id].title.hu}</b><span>${d}</span><span class="go">+ Új ${KINDS[id].hu.toLowerCase()} ${id==="targyalo"?"adatlap":"szerződés"}</span></button>`;
-  $("#main").innerHTML=`<div class="head"><div><h2>Új szerződés</h2><p class="sub">Válaszd ki a típust. Magyar és angol nyelven is elkészíthető.</p></div></div>
-   <div class="kinds">${k("iroda","office","Iroda, munkaállomások, havidíj, kezdeti befizetések és óvadék, kiegészítő megállapodások.")}${k("vo","mail","Székhely, levél- és telefonkezelés, díjak és fizetési ütemezés, kezelési instrukciók.")}${k("targyalo","meet","Időpontok, érkezés és távozás, létszám, tárgyaló, catering, számlázási adatok.")}</div>`;
+  const k=(id,ico,d)=>`<button class="kind" data-kind="${id}"><span class="ico">${ICO[ico]}</span><b>${KINDS[id].title.hu}</b><span>${d}</span><span class="go">+ Üres ${id==="targyalo"?"adatlap":"szerződés"}</span></button>`;
+  $("#main").innerHTML=`<div class="head"><div><h2>Új szerződés leadből</h2><p class="sub">Válaszd ki a leadet: az adatok és árak a tájékoztatóból töltődnek ki, utána minden átírható.</p></div></div>
+   <input id="lq" class="search" type="search" placeholder="Keresés cégnév, név, e-mail szerint" value="${esc(S.lq||"")}" aria-label="Lead keresése" style="width:100%">
+   <div class="leads" id="leadlist">${leadsBlock()}</div>
+   <div class="head" style="margin-top:28px"><div><h2>Vagy üres szerződés</h2><p class="sub">Magyar és angol nyelven is elkészíthető.</p></div></div>
+   <div class="kinds">${k("iroda","office","Iroda, munkaállomások, havidíj, kezdeti befizetések és óvadék, ingyenes tárgyalóórák.")}${k("vo","mail","Székhely, levél- és telefonkezelés, díjak és fizetési ütemezés, kezelési instrukciók.")}${k("targyalo","meet","Időpontok, létszám, tárgyaló, tárgyalócsomag, catering, teljesítési igazolás.")}</div>`;
   document.querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>go("new",null,b.dataset.kind));
+  const lq=$("#lq");lq.oninput=()=>{S.lq=lq.value;$("#leadlist").innerHTML=leadsBlock();bindLeads()};bindLeads();
+  if(!S.leads)ensureLeads().then(()=>{if(S.view==="choose"){$("#leadlist").innerHTML=leadsBlock();bindLeads()}});
 }
 
 /* ---------- editor ---------- */
@@ -400,6 +414,7 @@ function irodaSecs(c){const x=c.iroda,k=calcIroda(c);LANG="hu";return `<details 
   <div class="f"><span class="hint" id="prhint"></span></div>
   ${F("iroda.first","Első havi alapdíj (üres = automatikus)","num",'placeholder="'+numIn(k.firstAuto)+'"')}
   <div class="two">${F("iroda.parkingN","Parkolóhelyek száma","num")}${F("iroda.parkingFee","Parkolóhely díja (EUR/hó)","num")}</div>
+  <div class="two">${F("iroda.freeHours","Ingyenes tárgyalóórák / hó (üres = nem jelenik meg)","num")}${sel("billing","Számlázás pénzneme",[["eur","EUR"],["huf","HUF, napi MNB középárfolyamon"]])}</div>
   <div class="two">${F("iroda.depositMonths","Óvadék (hónap)","num")}${F("iroda.deposit","Óvadék összege (üres = automatikus)","num",'placeholder="'+numIn(Math.round(k.grossMonthly*(Number(x.depositMonths)||0)*100)/100)+'"')}</div>
   <div class="calc" id="calc"></div>
   </div></details>`}
@@ -410,6 +425,7 @@ function voSecs(c){return `<details class="sec" open><summary><span>Szolgáltat�
   <details class="sec" open><summary><span>Díjak és fizetés</span></summary><div class="sb">
   <div class="two">${F("vo.fee","Nettó havidíj (EUR)","num")}${sel("vo.schedule","Fizetési ütemezés",[["havi","Havonta előre"],["negyedeves","Negyedévente előre"],["eves","Évente előre"]])}</div>
   <div class="two">${F("vo.install","Regisztrációs és installációs díj (EUR)","num")}${F("vo.vat","ÁFA (%)","num")}</div>
+  ${sel("billing","Számlázás pénzneme",[["eur","EUR"],["huf","HUF, napi MNB középárfolyamon"]])}
   <div class="two">${F("vo.depositMonths","Kaució (hónap)","num")}${F("vo.deposit","Kaució összege (üres = automatikus)","num")}</div>
   <div class="calc" id="calc"></div></div></details>
   <details class="sec"><summary><span>Instrukciók</span></summary><div class="sb">
@@ -524,71 +540,76 @@ Object.assign(TX.en,{eb:{iroda:"Agreement",vo:"Agreement",targyalo:"Order"},part
   mrPkg:"Meeting room package",pkgT:h=>`${h}-hour monthly meeting room package`,pkgP:"HUF + VAT / month",pkgX:(x)=>`The hours can be used in any of our meeting rooms; unused hours cannot be carried over to the next month. Above the package: ${x} HUF + VAT / hour.`,
   cert:"Certificate of Performance",certSeat:"Company name / registered seat",certI1:"I, the undersigned",certPos:"position",certI2:"hereby certify with my signature",certHogy:"that on behalf of",certMint:"as <i>Principal</i>, I held a meeting today in the office building at Népfürdő utca 22., 1138 Budapest in accordance with the agreement, which the Contractor – <b>Vista Plus Offices Kft.</b> – fully performed.",
   certAcc:"I accept the performance; the Contractor may submit its invoice.",certSig:"Principal's signature",certData:"Meeting details",certTime:"Time",place:d=>"Budapest, "+d,booked:"Booking"});
-const cbx=(on,label,extra)=>`<div class="cbx"><i class="${on?"on":""}">${on?CHECK:""}</i><span>${label}${extra?`<span class="x">${extra}</span>`:""}</span></div>`;
+Object.assign(TX.hu,{billH:"Számlázás",billEur:"Euróban (EUR)",billHuf:"Forintban (HUF), a számla kiállításának napján érvényes MNB középárfolyamon",freeH:h=>`${h} óra ingyenes tárgyalóhasználat havonta`,freeN:"A fel nem használt órák nem vihetők át a következő hónapra.",contractShort:"Szerződés"});
+Object.assign(TX.en,{billH:"Invoicing",billEur:"In euros (EUR)",billHuf:"In Hungarian forints (HUF), at the official MNB mid-rate valid on the invoice date",freeH:h=>`${h} hours of free meeting room use per month`,freeN:"Unused hours cannot be carried over to the next month.",contractShort:"Agreement"});
+const ck=(on,label,extra)=>`<div class="ck${on?"":" off"}"><i class="${on?"on":""}">${on?CHECK:""}</i><span>${label}${extra?`<span class="x">${extra}</span>`:""}</span></div>`;
+const cbx=ck;
 const pr=(k,v)=>`<div class="pr"><span>${k}</span><b>${v||"&nbsp;"}</b></div>`;
-function head(c,L,meta){return `<div class="ch"><div><div class="eb">${L.eb[c.kind]}</div><h1 class="ttl">${KINDS[c.kind].title[c.lang]}</h1></div><img src="${LOGO}" alt="Vista Plus Offices"></div>
-  <div class="chbar"><div>${L.date}<b>${esc(dFmt(c.date,c.lang))||"–"}</b></div>${c.no?`<div>${L.no}<b>${esc(c.no)}</b></div>`:""}${(meta||[]).filter(m=>m[1]).map(([k,v])=>`<div>${k}<b>${v}</b></div>`).join("")}</div>`}
-function foot(){const v=cfg().vista;return `<div class="cf"><span>${esc(v.name)}</span><span>${esc(v.email)}</span><span>www.vpo.hu</span></div>`}
+function head(c,L){return `<div class="pg-head"><img src="${LOGO}" alt="Vista Plus Offices"><span>${KINDS[c.kind].title[c.lang]}</span></div>`}
+function tblock(c,L,extra){return `<div class="tblock"><p class="eyebrow">${L.eb[c.kind]} · ${esc(dFmt(c.date,c.lang))||"–"}</p><h1>${KINDS[c.kind].title[c.lang]}</h1>${c.no||extra?`<div class="meta">${c.no?`${L.no}: <b>${esc(c.no)}</b>`:""}${c.no&&extra?" &nbsp;·&nbsp; ":""}${extra||""}</div>`:""}</div>`}
+function foot(){const v=cfg().vista;return `<div class="pg-foot"><span><b>Vista Plus Offices</b> · Duna Tower · ${esc(v.zip)} ${esc(v.city)}, ${esc(v.address)}</span><span>${esc(v.email)}</span><span>www.vpo.hu</span></div>`}
 const sh=(n,t)=>`<h3 class="sh"><i>${String(n).padStart(2,"0")}</i>${t}</h3>`;
 function signerOf(c){const s=cfg().signers;return s[c.signer]||s[0]||{name:"",title:""}}
 function sigs(c,L){const s=signerOf(c),cn=c.client.signName||c.client.contact,cp=c.client.signPos||c.client.position;
-  const blk=(t,co,n,p)=>`<div class="sig"><div class="t">${t}</div><div class="sp">${L.ph}</div><div class="n">${esc(n)||"&nbsp;"}</div><div class="p">${esc(p)||"&nbsp;"}${co?" · "+esc(co):""}</div><div class="d">${L.date}: ${esc(dFmt(c.date,c.lang))}</div></div>`;
+  const blk=(t,co,n,p)=>`<div class="sig"><div class="t">${t}</div><div class="sp">${L.ph}</div><div class="n">${esc(n)||"&nbsp;"}</div><div class="p">${[p,co].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div></div>`;
   return `<div class="sigs">${blk(L.cl,c.client.company,cn,cp)}${blk(L.pv,cfg().vista.name,s.name,s.title)}</div>`}
 const addr=x=>[x.zip,x.city].filter(Boolean).join(" ")+(x.address?((x.zip||x.city)?", ":"")+x.address:"");
-function parties(c,L){const x=c.client,v=cfg().vista,s=signerOf(c);
+function parties(c,L,n){const x=c.client,v=cfg().vista,s=signerOf(c);
   const cl=`<div class="party"><h4>${L.cl}</h4><div class="nm">${esc(x.company)||"&nbsp;"}</div>${pr(L.address,esc(addr(x)))}${pr(L.tax,esc(x.tax))}${c.kind!=="targyalo"?pr(L.reg,esc(x.reg)):""}${pr(L.contact,esc(x.contact)+(x.position?", "+esc(x.position):""))}${pr(L.phone,esc(x.phone))}${pr(L.email,esc(x.email))}${c.kind==="iroda"&&(x.bank||x.bankName)?pr(L.bank,esc([x.bank,x.bankName].filter(Boolean).join(" · "))):""}</div>`;
-  const pv=`<div class="party v"><h4>${L.pv}</h4><div class="nm">${esc(v.name)}</div>${pr(L.address,esc(v.zip+" "+v.city+", "+v.address))}${pr(L.tax,esc(v.tax))}${pr(L.reg,esc(v.reg))}${pr(L.contact,esc(s.name))}${pr(L.phone+" / "+L.email,esc(v.phone)+" · "+esc(v.email))}${pr(L.bankHuf,esc(v.bankHuf))}${pr(L.bankEur,esc(v.bankEur))}${pr(L.swift,esc(v.swift))}</div>`;
-  return `<div class="sect">${sh(1,L.parties)}<div class="parties">${cl}${pv}</div></div>`}
+  const pv=`<div class="party"><h4>${L.pv}</h4><div class="nm">${esc(v.name)}</div>${pr(L.address,esc(v.zip+" "+v.city+", "+v.address))}${pr(L.tax+" / "+L.reg,esc(v.tax)+" · "+esc(v.reg))}${pr(L.contact,esc(s.name))}${pr(L.phone,esc(v.phone)+" · "+esc(v.email))}${pr(L.bankHuf,esc(v.bankHuf))}${pr(L.bankEur,esc(v.bankEur))}${pr(L.swift,esc(v.swift))}</div>`;
+  return `<div class="sect">${sh(n,L.parties)}<div class="parties">${cl}${pv}</div></div>`}
 const eur=v=>"EUR "+fmtN(v,2);
+function billSec(c,L,n){const b=c.billing==="huf"?"huf":"eur";return `<div class="sect">${sh(n,L.billH)}<div class="checks">${ck(b==="eur",L.billEur)}${ck(b==="huf",L.billHuf)}</div></div>`}
 function pageIroda(c){const L=TX[c.lang];LANG=c.lang;const x=c.iroda,k=calcIroda(c),n=c.lang;
   const prN=k.pr?L.prorate(dFmt(k.pr.from,n),dFmt(k.pr.to,n),k.pr.days,k.pr.dim):"";
   const lines=[[L.install(x.installPer,fmtN(x.seats||0)),"",k.install],[L.firstM,prN,k.first],...(k.park?[[L.park(fmtN(x.parkingN),x.parkingFee),prN,k.parkFirst]]:[]),[L.vat(x.vat),"",k.vat],[x.deposit!==""&&x.deposit!=null?L.depositAmt:L.deposit(fmtN(x.depositMonths)),"",k.deposit]];
-  let s=2;
-  return `<section class="page" lang="${n}">${head(c,L,[[L.office2,esc(x.office)],[L.start,esc(dFmt(x.start,n))]])}<div class="cb">
-   ${parties(c,L)}
-   <div class="sect">${sh(s++,L.contract)}<div class="tiles"><div class="tile"><span>${L.office2}</span><b>${esc(x.office)||"–"}</b></div><div class="tile"><span>${L.seats2}</span><b>${esc(fmtN(x.seats))}</b></div><div class="tile"><span>${L.period2}</span><b>${esc(L.months(fmtN(x.term)))}</b></div><div class="tile"><span>${L.fromTo}</span><b>${esc(dFmt(x.start,n))||"–"}</b><small>${esc(dFmt(x.end,n))}</small></div></div>
-     <div class="fee"><span>${L.monthly}*</span><div><b>${eur(k.fee)}</b> ${L.plusVat}<em>${L.gross} ${eur(k.feeGross)}</em></div></div>${k.park?`<div class="fee" style="margin-top:4px"><span>${L.parkM} (${fmtN(x.parkingN)} ×)</span><div><b>${eur(k.park)}</b> ${L.plusVat}<em>${L.gross} ${eur(k.park*(1+k.v))}</em></div></div>`:""}
+  const fh=Number(x.freeHours)||0;let s=1;
+  return `<section class="page" lang="${n}">${head(c,L)}<div class="cb">${tblock(c,L)}
+   ${parties(c,L,s++)}
+   <div class="sect">${sh(s++,L.contract)}<table class="dt"><thead><tr><th>${L.office2}</th><th>${L.seats2}</th><th>${L.period2}</th><th>${L.start}</th><th>${L.end}</th></tr></thead><tbody><tr><td>${esc(x.office)||"–"}</td><td>${esc(fmtN(x.seats))}</td><td>${esc(L.months(fmtN(x.term)))}</td><td>${esc(dFmt(x.start,n))||"–"}</td><td>${esc(dFmt(x.end,n))||"–"}</td></tr></tbody></table>
+     <div class="fees"><div class="feebox"><span>${L.monthly}*</span><b>${eur(k.fee)} <small>${L.plusVat}</small></b><small>${L.gross} ${eur(k.feeGross)}</small></div>${k.park?`<div class="feebox"><span>${L.parkM} (${fmtN(x.parkingN)} ×)</span><b>${eur(k.park)} <small>${L.plusVat}</small></b><small>${L.gross} ${eur(k.park*(1+k.v))}</small></div>`:`<div></div>`}</div>
+     ${fh>0?`<div class="freeh"><b>${L.freeH(fmtN(fh))}</b><small>${L.freeN}</small></div>`:""}
      <p class="note">${L.noAdd}</p></div>
    <div class="sect">${sh(s++,L.initial)}<table class="ft">${lines.map(([a,sub,v])=>`<tr><td>${a}${sub?`<small>${sub}</small>`:""}</td><td>${eur(v)}</td></tr>`).join("")}<tr class="total"><td>${L.total}</td><td>${eur(k.total)}</td></tr></table></div>
+   ${billSec(c,L,s++)}
    ${c.notes?`<div class="sect">${sh(s++,L.addl)}<div class="addl">${esc(c.notes)}</div></div>`:""}
    <p class="stmt">${L.stmt}</p>${sigs(c,L)}</div>${foot()}</section>`}
-function pageVo(c){const L=TX[c.lang];LANG=c.lang;const x=c.vo,k=calcVo(c),n=c.lang;
+function pageVo(c){const L=TX[c.lang];LANG=c.lang;const x=c.vo,k=calcVo(c),n=c.lang;let s=1;
   const lines=[[L.reg2,k.install],[L.period[x.schedule]||L.period.havi,k.period],[L.vat(x.vat),k.vat],[x.deposit!==""&&x.deposit!=null?L.kaucioAmt:L.kaucio(fmtN(x.depositMonths)),k.deposit]];
-  const pk=["szekhely","telefon","vi","viplus"].filter(p=>x.pkg[p]).map(p=>L.pk[p]).join(", ");
-  return `<section class="page" lang="${n}">${head(c,L,[[L.start,esc(dFmt(x.start,n))]])}<div class="cb">
-   ${parties(c,L)}
-   <div class="two-c"><div class="sect">${sh(2,L.pkg)}<div class="checks">${["szekhely","telefon","vi","viplus"].map(p=>cbx(x.pkg[p],L.pk[p])).join("")}</div></div>
-     <div class="sect">${sh(3,L.duration)}${pr(L.term,esc(L.months(fmtN(x.term))))}${pr(L.vStart,esc(dFmt(x.start,n)))}${pr(L.vEnd,esc(dFmt(x.end,n)))}</div></div>
-   <div class="two-c"><div class="sect">${sh(4,L.svc)}<table class="ft">${lines.map(([a,v])=>`<tr><td>${a}</td><td>${eur(v)}</td></tr>`).join("")}<tr class="total"><td>${L.totalVo}</td><td>${eur(k.total)}</td></tr></table>
-       <div class="fee"><span>${L.gm}</span><b>${eur(k.grossMonthly)}</b></div></div>
-     <div class="sect">${sh(5,L.sched)}<div class="checks">${["havi","negyedeves","eves"].map(s=>cbx(x.schedule===s,L.sc[s])).join("")}</div></div></div>
-   <div class="sect">${sh(6,L.instr)}<div class="two-c"><div class="checks"><div class="subh">${L.mailH}</div>${cbx(x.mail.forward,L.fwd,x.mail.forward?esc([x.mail.fwdCompany,x.mail.fwdAddress].filter(Boolean).join(", ")):"")}${cbx(x.mail.pickup,L.pick)}${cbx(x.mail.scan,L.scan,x.mail.scan?esc(x.mail.scanEmail):"")}</div>
-     <div class="checks"><div class="subh">${L.phoneH}</div>${cbx(x.phone.transfer,L.tr,x.phone.transfer?esc(x.phone.transferNo):"")}${cbx(x.phone.msg,L.msg,x.phone.msg?esc(x.phone.msgEmail):"")}</div></div><p class="note">${L.fn1}</p></div>
-   ${c.notes?`<div class="sect">${sh(7,L.addl)}<div class="addl">${esc(c.notes)}</div></div>`:""}
+  return `<section class="page" lang="${n}">${head(c,L)}<div class="cb">${tblock(c,L)}
+   ${parties(c,L,s++)}
+   <div class="two-c"><div class="sect">${sh(s++,L.pkg)}<div class="checks">${["szekhely","telefon","vi","viplus"].map(p=>ck(x.pkg[p],L.pk[p])).join("")}</div></div>
+     <div class="sect">${sh(s++,L.duration)}${pr(L.term,esc(L.months(fmtN(x.term))))}${pr(L.vStart,esc(dFmt(x.start,n)))}${pr(L.vEnd,esc(dFmt(x.end,n)))}</div></div>
+   <div class="two-c"><div class="sect">${sh(s++,L.svc)}<table class="ft">${lines.map(([a,v])=>`<tr><td>${a}</td><td>${eur(v)}</td></tr>`).join("")}<tr class="total"><td>${L.totalVo}</td><td>${eur(k.total)}</td></tr></table>
+       <div class="feebox" style="margin-top:8px"><span>${L.gm}</span><b>${eur(k.grossMonthly)}</b></div></div>
+     <div><div class="sect">${sh(s++,L.sched)}<div class="checks">${["havi","negyedeves","eves"].map(z=>ck(x.schedule===z,L.sc[z])).join("")}</div></div>
+       <div class="sect" style="margin-top:12px">${sh(s++,L.billH)}<div class="checks">${ck(c.billing!=="huf",L.billEur)}${ck(c.billing==="huf",L.billHuf)}</div></div></div></div>
+   <div class="sect">${sh(s++,L.instr)}<div class="two-c"><div class="checks"><div class="subh">${L.mailH}</div>${ck(x.mail.forward,L.fwd,x.mail.forward?esc([x.mail.fwdCompany,x.mail.fwdAddress].filter(Boolean).join(", ")):"")}${ck(x.mail.pickup,L.pick)}${ck(x.mail.scan,L.scan,x.mail.scan?esc(x.mail.scanEmail):"")}</div>
+     <div class="checks"><div class="subh">${L.phoneH}</div>${ck(x.phone.transfer,L.tr,x.phone.transfer?esc(x.phone.transferNo):"")}${ck(x.phone.msg,L.msg,x.phone.msg?esc(x.phone.msgEmail):"")}</div></div><p class="note">${L.fn1}</p></div>
+   ${c.notes?`<div class="sect">${sh(s++,L.addl)}<div class="addl">${esc(c.notes)}</div></div>`:""}
    <p class="stmt">${L.stmtVo}</p>${sigs(c,L)}</div>${foot()}</section>`}
 const roomName=(k,lang)=>{const r=ROOMS.find(x=>x.k===k);return r?(lang==="en"?r.en:r.hu):""};
-function pageMr(c){const L=TX[c.lang];LANG=c.lang;const m=c.mr,n=c.lang;let s=2;
+function pageMr(c){const L=TX[c.lang];LANG=c.lang;const m=c.mr,n=c.lang;let s=1;
   const cat=CATER.map(it=>{const o=(m.cater||{})[it.k]||{};return {...it,on:!!o.on,qty:o.qty}});const half=Math.ceil(cat.length/2);
-  const cc=a=>`<div class="checks">${a.map(it=>cbx(it.on,n==="en"?it.en:it.hu,(it.price?fmtN(it.price)+" "+L.perPc:L.onReq)+(it.on&&it.qty?" · "+L.qty+": "+fmtN(it.qty):""))).join("")}</div>`;
-  const first=m.rows[0];
-  return `<section class="page" lang="${n}">${head(c,L,first?[[L.booked,esc(dFmt(first.date,n))+(m.rows.length>1?" +"+(m.rows.length-1):"")]]:[])}<div class="cb">
-   ${parties(c,L)}
+  const cc=a=>`<div class="checks">${a.map(it=>ck(it.on,n==="en"?it.en:it.hu,(it.price?fmtN(it.price)+" "+L.perPc:L.onReq)+(it.on&&it.qty?" · "+L.qty+": "+fmtN(it.qty):""))).join("")}</div>`;
+  return `<section class="page" lang="${n}">${head(c,L)}<div class="cb">${tblock(c,L)}
+   ${parties(c,L,s++)}
    ${m.rows.length?`<div class="sect">${sh(s++,L.booking)}<table class="bk"><thead><tr><th>${L.when}</th><th>${L.arr}</th><th>${L.lea}</th><th>${L.ppl}</th><th>${L.room}</th><th>${L.setup}</th><th>${L.equip}</th><th>${L.rate}</th></tr></thead><tbody>
      ${m.rows.map(r=>`<tr><td style="white-space:nowrap">${esc(dFmt(r.date,n))}</td><td>${esc(r.arrive)}</td><td>${esc(r.leave)}</td><td>${esc(fmtN(r.people))}</td><td><b>${esc(roomName(r.room,n))}</b></td><td>${esc(r.setup||"–")}</td><td>${esc(r.equipment||"–")}</td><td style="white-space:nowrap">${esc(r.rate)}</td></tr>`).join("")}</tbody></table></div>`:""}
-   ${m.pkg&&m.pkg.on?`<div class="sect">${sh(s++,L.mrPkg)}<div class="pkgbox"><div><b>${L.pkgT(fmtN(m.pkg.hours))}</b><p>${L.pkgX(fmtN(m.pkg.extra))}</p></div><div class="pr2"><b>${fmtN(m.pkg.price)}</b>${L.pkgP}</div></div></div>`:""}
+   ${m.pkg&&m.pkg.on?`<div class="sect">${sh(s++,L.mrPkg)}<div class="pkgbox"><div><b>${L.pkgT(fmtN(m.pkg.hours))}</b><p>${L.pkgX(fmtN(m.pkg.extra))}</p></div><div class="pr2">${fmtN(m.pkg.price)} ${L.pkgP}</div></div></div>`:""}
    <div class="sect">${sh(s++,L.cater)}<div class="two-c">${cc(cat.slice(0,half))}${cc(cat.slice(half))}</div></div>
    ${c.notes?`<div class="sect">${sh(s++,L.note)}<div class="addl">${esc(c.notes)}</div></div>`:""}
    <p class="stmt">${L.stmtMr}</p>${sigs(c,L)}</div>${foot()}</section>`}
 /* teljesítési igazolás: egy oldal tárgyalási naponként */
-function certRows(c){const seen=new Set(),out=[];(c.mr.rows||[]).forEach(r=>{const k=r.date||"";if(seen.has(k)){const o=out.find(x=>x.date===k);o.list.push(r);return}seen.add(k);out.push({date:k,list:[r]})});if(!out.length)out.push({date:c.date,list:[]});return out}
+function certRows(c){const out=[];(c.mr.rows||[]).forEach(r=>{const k=r.date||"";const o=out.find(x=>x.date===k);if(o)o.list.push(r);else out.push({date:k,list:[r]})});if(!out.length)out.push({date:c.date,list:[]});return out}
 function pageCert(c,g){const L=TX[c.lang];LANG=c.lang;const x=c.client,n=c.lang;const f=v=>v?`<span class="fill">${esc(v)}</span>`:`<span class="blank">&nbsp;</span>`;
   const name=x.signName||x.contact,pos=x.signPos||x.position,d=dFmt(g.date,n);
-
-  return `<section class="page cert" lang="${n}"><div class="cb"><img class="logo" src="${LOGO}" alt="Vista Plus Offices"><h1>${L.cert.toUpperCase()}</h1><div class="rule"></div>
+  return `<section class="page cert" lang="${n}"><div class="pg-head"><img src="${LOGO}" alt="Vista Plus Offices"><span>${L.cert}</span></div><div class="cb">
+   <div class="tblock"><p class="eyebrow">${L.certData} · ${esc(d)}</p><h1>${L.cert}</h1></div>
    <p>${L.certSeat}: ${f([x.company,addr(x)].filter(Boolean).join(", "))}</p>
    <p>${L.certI1} ${f(name)} (${L.certPos}: ${f(pos)}) ${L.certI2}</p>
    <p>${L.certHogy} ${f(x.company)} ${L.certMint}</p>
-   ${g.list.length?`<div class="mtw">${g.list.map((r,i)=>`<div class="mt"><div><span>${L.date}</span><b>${esc(d)}</b></div><div><span>${L.certTime}</span><b>${esc([r.arrive,r.leave].filter(Boolean).join("–"))||"–"}</b></div><div><span>${L.room}</span><b>${esc(roomName(r.room,n))||"–"}</b></div><div><span>${L.ppl}</span><b>${esc(fmtN(r.people))}</b></div></div>`).join("")}</div>`:""}
+   ${g.list.length?`<div class="mtw"><table><thead><tr><th>${L.date}</th><th>${L.certTime}</th><th>${L.room}</th><th>${L.ppl}</th></tr></thead><tbody>${g.list.map(r=>`<tr><td>${esc(d)}</td><td>${esc([r.arrive,r.leave].filter(Boolean).join("–"))||"–"}</td><td>${esc(roomName(r.room,n))||"–"}</td><td>${esc(fmtN(r.people))}</td></tr>`).join("")}</tbody></table></div>`:""}
    <p>${L.certAcc}</p><p>${L.place(esc(d))}</p>
    <div class="csig"><div class="sp"></div><div class="n">${L.certSig}</div><div class="p">${esc(name)}${pos?" · "+esc(pos):""}</div></div>
   </div>${foot()}</section>`}
@@ -667,7 +688,60 @@ function renderSettings(){$("#actionbar").innerHTML="";const c=cfg(),v=c.vista;
     try{await api("contractconfig",{method:"PUT",body:JSON.stringify(data)});S.cfg=data;toast("Beállítások mentve")}catch(e){toast("Mentés sikertelen: "+e.message)}};}
 
 /* ---------- boot ---------- */
-async function load(){try{const [l,c,lc]=await Promise.all([api("contracts"),api("contractconfig"),api("leadconfig").catch(()=>({}))]);if(lc&&lc.mr)MRP={...MRP,...Object.fromEntries(Object.entries(lc.mr).filter(([k,v])=>v!==""&&v!=null))};S.list=l.sort((a,b)=>(b.data.updatedAt||"").localeCompare(a.data.updatedAt||""));S.cfg=c&&Object.keys(c).length?c:null;S.loaded=true;if(S.view==="list"||S.view==="settings")render()}catch(e){if(e.status!==401)toast(e.message,4000)}}
+/* ---------- szerződés leadből ---------- */
+const isoD=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||""))?String(v):"";
+const toNum=v=>{const n=numOut(v);return n===""?"":n};
+function termMonths(t){const s=String(t||"").toLowerCase(),n=parseFloat(s.replace(",","."));if(!isFinite(n))return "";return /év|year/.test(s)?Math.round(n*12):Math.round(n)}
+function leadOpts(l){return ((l.data&&l.data.options)||[]).map((o,i)=>({...o,i})).filter(o=>o.office||o.price)}
+function fromLead(l,oi){const d=l.data||{},kind=d.kind&&KINDS[d.kind]?d.kind:"iroda",c=blank(kind);
+  c.lang=d.lang==="en"?"en":"hu";c.leadId=l.id;Object.assign(c.client,{company:d.company||"",contact:d.name||"",phone:d.phone||"",email:d.email||""});
+  if(kind==="iroda"){const t=d.terms||{},o=(d.options||[])[oi||0]||{};const x=c.iroda;
+    x.office=o.office||"";x.seats=toNum(o.seats);x.fee=toNum(o.price);const tm=termMonths(o.term);if(tm)x.term=tm;if(isoD(o.from))x.start=o.from;x.end=endFrom(x.start,x.term);
+    if(t.install!=null&&t.install!=="")x.installPer=toNum(t.install);if(t.deposit!=null&&t.deposit!=="")x.depositMonths=toNum(t.deposit);if(t.parking!=null&&t.parking!=="")x.parkingFee=toNum(t.parking)}
+  if(kind==="vo"){const v=d.vo||{},p=v.packages||{},x=c.vo;["szekhely","telefon","vi"].forEach(k=>x.pkg[k]=!!(p[k]&&p[k].on));
+    const fee=["szekhely","telefon","vi"].reduce((a,k)=>a+(p[k]&&p[k].on?Number(p[k].price)||0:0),0);if(fee)x.fee=fee;if(v.install!=null&&v.install!=="")x.install=toNum(v.install);if(isoD(v.start)){x.start=v.start;x.end=endFrom(x.start,x.term)}}
+  if(kind==="targyalo"){const m=d.mr||{},rooms=m.rooms||{},firstRoom=["r10","r6","r12"].find(k=>rooms[k]&&rooms[k].on)||"r10";
+    const rt=k=>{const pr=rooms[k]&&rooms[k].price;return pr?numIn(pr)+(c.lang==="en"?" HUF + VAT / hour":" Ft + Áfa / óra"):rateTxt(k,c.lang)};
+    const slots=(!m.general&&m.slots||[]).filter(s=>s.date||s.start);
+    if(m.pkg)c.mr.pkg={on:!!m.pkg.on,hours:toNum(m.pkg.hours)||MRP.pkgHours,price:toNum(m.pkg.price)||MRP.pkgPrice,extra:toNum(m.pkg.extra)||MRP.pkgExtra};
+    c.mr.rows=slots.map(s=>{const rk=s.room||firstRoom;return{date:isoD(s.date)||c.date,arrive:s.start||"",leave:s.end||"",people:toNum(m.people),room:rk,setup:"",equipment:"",rate:rt(rk)}});
+    if(!c.mr.rows.length&&!c.mr.pkg.on)c.mr.rows=[{date:c.date,arrive:"09:00",leave:"12:00",people:toNum(m.people),room:firstRoom,setup:"",equipment:"",rate:rt(firstRoom)}]}
+  return c}
+function startFromLead(l,oi){S.cur=fromLead(l,oi);S.curId=null;S.dirty=true;S.lastSaved=null;S.pane="form";S.confirmDel=false;S.view="edit";render();scrollTo(0,0);save();toast("Kitöltve a leadből – minden adat átírható")}
+async function ensureLeads(){if(S.leads)return S.leads;try{S.leads=(await api("leads")).sort((a,b)=>(b.data.updatedAt||b.data.date||"").localeCompare(a.data.updatedAt||a.data.date||""))}catch(e){S.leads=[]}return S.leads}
+function leadsBlock(){if(!S.leads)return `<div class="empty" style="padding:20px">Leadek betöltése…</div>`;
+  const q=(S.lq||"").trim().toLowerCase();const L=S.leads.filter(l=>{const d=l.data||{};return !q||[d.company,d.name,d.email].join(" ").toLowerCase().includes(q)}).slice(0,25);
+  if(!L.length)return `<div class="empty" style="padding:20px">${S.leads.length?"Nincs találat.":"Még nincs lead."}</div>`;
+  const used=new Set(S.list.map(x=>x.data.leadId).filter(Boolean));
+  return L.map(l=>{const d=l.data||{},k=d.kind&&KINDS[d.kind]?d.kind:"iroda",os=k==="iroda"?leadOpts(l):[];
+    const what=k==="iroda"?(os.map(o=>o.office).filter(Boolean).join(", ")||"–"):k==="vo"?"Virtuális iroda":"Tárgyaló";
+    return `<div><button class="lrow" data-lead="${l.id}"><div><b>${esc(d.company||d.name||"–")}</b> <span class="kchip k-${k}">${KINDS[k].hu}</span>${used.has(l.id)?` <span class="kchip" style="background:var(--okbg);color:var(--ok)">van már szerződés</span>`:""}<div class="m">${esc(d.name||"")}${d.name?" · ":""}${esc(dFmt(d.sentDate||d.date,"hu"))} · ${esc(what)}</div></div><span class="go" style="color:var(--accent);font-weight:700;white-space:nowrap">Szerződés →</span></button>
+      ${S.leadPick===l.id&&os.length>1?`<div class="lopts"><span class="m" style="align-self:center;font-size:13px;color:var(--muted)">Melyik opció?</span>${os.map(o=>`<button class="btn sm" data-lopt="${l.id}" data-oi="${o.i}">${esc(o.office||"–")}. iroda · ${o.price?"EUR "+esc(numIn(o.price)):"–"}</button>`).join("")}</div>`:""}</div>`}).join("")}
+function bindLeads(){document.querySelectorAll("[data-lead]").forEach(b=>b.onclick=()=>{const l=S.leads.find(x=>x.id===b.dataset.lead);if(!l)return;const os=(l.data.kind||"iroda")==="iroda"?leadOpts(l):[];
+    if(os.length>1){S.leadPick=S.leadPick===l.id?null:l.id;$("#leadlist").innerHTML=leadsBlock();bindLeads();return}startFromLead(l,os.length?os[0].i:0)});
+  document.querySelectorAll("[data-lopt]").forEach(b=>b.onclick=()=>{const l=S.leads.find(x=>x.id===b.dataset.lopt);if(l)startFromLead(l,+b.dataset.oi)})}
+
+/* ---------- aktiválás: az ügyfél felkerül a Kiegészítő szolgáltatások ügyféllistájába ---------- */
+const normN=s=>String(s||"").trim().toLowerCase();
+async function openActivate(id){const l=S.list.find(x=>x.id===id);if(!l)return;const d=l.data;let clients=[];try{const v=await api("config");clients=Array.isArray(v.clients)?v.clients:[]}catch(e){}
+  const co=normN(d.client&&d.client.company);const match=clients.find(c=>normN(c.n)===co)||clients.find(c=>normN(c.n).length>2&&co.startsWith(normN(c.n)));
+  const free=(d.kind==="iroda"?(Number(d.iroda&&d.iroda.freeHours)||0):0)||(match&&Number(match.free))||0;
+  const m=document.createElement("div");m.className="modal";m.innerHTML=`<form class="box" id="actf"><h3>Szerződés aktiválása</h3>
+   <p class="sub" style="margin:0">Az ügyfél felkerül a Kiegészítő szolgáltatások ügyféllistájába${free?", az ingyenes tárgyalóórákkal együtt":""}. Ha már szerepel a listában, az adatai frissülnek.</p>
+   <div class="f"><label for="an">Ügyfél neve a listában</label><input id="an" list="anl" required value="${esc(match?match.n:(d.client&&d.client.company)||"")}"><datalist id="anl">${clients.map(c=>`<option value="${esc(c.n)}">`).join("")}</datalist><span class="hint" id="anh"></span></div>
+   <div class="two"><div class="f"><label for="af">Ingyenes tárgyalóórák / hó</label><input id="af" inputmode="decimal" value="${free||""}" placeholder="0"></div>
+   <div class="f"><label for="ae">Számlázás</label><select id="ae"><option value="eur"${d.billing!=="huf"?" selected":""}>EUR</option><option value="huf"${d.billing==="huf"?" selected":""}>HUF</option></select></div></div>
+   <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" id="ax">Mégse</button><button class="btn primary" id="ago">Aktiválás</button></div></form>`;
+  document.body.appendChild(m);const an=$("#an"),hint=()=>{const ex=clients.find(c=>normN(c.n)===normN(an.value));$("#anh").textContent=ex?"Meglévő ügyfél – az adatai frissülnek.":"Új ügyfélként kerül fel a listára."};an.oninput=hint;hint();an.focus();
+  const close=()=>m.remove();$("#ax").onclick=close;m.onclick=e=>{if(e.target===m)close()};
+  $("#actf").onsubmit=async e=>{e.preventDefault();const btn=$("#ago");btn.disabled=true;
+    try{const r=await api("contracts/"+id+"/activate",{method:"POST",body:JSON.stringify({client:{n:an.value.trim(),free:numOut($("#af").value)||0,eur:$("#ae").value==="eur"}})});
+      l.data=r.data;close();renderList();toast((r.created?"Új ügyfél felvéve: ":"Ügyfél frissítve: ")+r.client.n,4000)}catch(err){btn.disabled=false;toast("Nem sikerült aktiválni: "+err.message,5000)}}}
+
+async function load(){try{const [l,c,lc]=await Promise.all([api("contracts"),api("contractconfig"),api("leadconfig").catch(()=>({}))]);if(lc&&lc.mr)MRP={...MRP,...Object.fromEntries(Object.entries(lc.mr).filter(([k,v])=>v!==""&&v!=null))};S.list=l.sort((a,b)=>(b.data.updatedAt||"").localeCompare(a.data.updatedAt||""));S.cfg=c&&Object.keys(c).length?c:null;S.loaded=true;
+  const qp=new URLSearchParams(location.search),lid=qp.get("lead");if(lid){history.replaceState(null,"",location.pathname);const ls=await ensureLeads(),l=ls.find(x=>x.id===lid);
+    if(l){const os=(l.data.kind||"iroda")==="iroda"?leadOpts(l):[];const oi=qp.get("opt");if(os.length>1&&oi==null){S.leadPick=l.id;S.lq=l.data.company||"";go("choose")}else startFromLead(l,oi!=null?+oi:(os.length?os[0].i:0));return}else toast("A lead nem található.")}
+  if(S.view==="list"||S.view==="settings")render()}catch(e){if(e.status!==401)toast(e.message,4000)}}
 $("#lform").onsubmit=async ev=>{ev.preventDefault();$("#lbtn").disabled=true;$("#lerr").textContent="";
   try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("#lem").value,password:$("#lpw").value})});const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");if(d.role==="client")throw new Error("Ez ügyfélfiók, ehhez az oldalhoz irodai belépés kell.");
