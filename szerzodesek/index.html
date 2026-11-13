@@ -739,13 +739,18 @@ async function makePDF(){if(S.busy)return;const c=S.cur;
     const terms=await PDFLib.PDFDocument.load(b64bytes(DOCS[c.kind+"_"+c.lang]));const pages=await out.copyPages(terms,terms.getPageIndices());pages.forEach(p=>out.addPage(p));
     out.setTitle(KINDS[c.kind].title[c.lang]+" – "+c.client.company);out.setAuthor("Vista Plus Offices Kft.");
     let where=await deliver(c,fileName(c),new Blob([await out.save()],{type:"application/pdf"}));
-    if(c.kind==="vo"){await makeConsent();where+=" · székhelyhasználati hozzájárulás is elkészült"}
+    if(c.kind==="vo")setTimeout(offerConsent,400);
     if(c.status==="tervezet"){c.status="kikuldve";S.dirty=true;save();const s=$("#p-status");if(s)s.value="kikuldve"}
     toast(where,4000)}
   catch(e){toast("A PDF nem készült el: "+(e.message||e))}finally{S.busy=false;btn.disabled=false;btn.innerHTML=ICO.pdf+" PDF + ÁSZF"}}
 async function makeConsent(){const c=S.cur;const pdf=await renderPages([pageConsent(c)]);pdf.setProperties({title:(c.lang==="en"?"Letter of Consent – ":"Székhelyhasználati hozzájárulás – ")+c.client.company,author:"Vista Plus Offices Kft."});
   const base=(c.client.company||"Ugyfel").replace(/[\\/:*?"<>|\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim();
   return deliver(c,base+"_"+(c.lang==="en"?"Seat_Consent_Letter":"Székhelyhasználati_hozzájárulás")+"_"+(c.date||todayISO())+".pdf",pdf.output("blob"))}
+/* a böngészők egy kattintásra csak egy letöltést engednek biztosan, ezért a hozzájárulás külön gombnyomásra töltődik le */
+function offerConsent(){const old=document.getElementById("consbox");if(old)old.remove();const m=document.createElement("div");m.className="modal";m.id="consbox";
+  m.innerHTML=`<div class="box"><h3>A szerződés elkészült</h3><p class="sub" style="margin:0">A virtuális iroda szerződés PDF-je (a végén az ÁSZF-fel) letöltődött. Most töltsd le a székhelyhasználati hozzájárulást is.</p><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn" id="consno">Most nem</button><button class="btn primary" id="consyes">${ICO.pdf} Székhelyhasználati hozzájárulás</button></div></div>`;
+  document.body.appendChild(m);const close=()=>m.remove();m.querySelector("#consno").onclick=close;m.onclick=e=>{if(e.target===m)close()};
+  m.querySelector("#consyes").onclick=async()=>{const b=m.querySelector("#consyes");b.disabled=true;b.textContent="PDF készül…";try{toast(await makeConsent(),4000)}catch(e){toast("A PDF nem készült el: "+(e.message||e))}close()};m.querySelector("#consyes").focus()}
 async function makeConsentBtn(){if(S.busy)return;const c=S.cur;if(!c.client.company){toast("Add meg az ügyfél cégnevét.");return}
   await dirReady(c.kind);S.busy=true;const b=$("#consbtn");b.disabled=true;try{toast(await makeConsent(),4000)}catch(e){toast("A PDF nem készült el: "+(e.message||e))}finally{S.busy=false;b.disabled=false}}
 async function makeCert(){if(S.busy)return;const c=S.cur;
