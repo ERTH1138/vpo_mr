@@ -187,11 +187,12 @@ details.sec>summary small{font-weight:500;color:var(--muted);margin-left:8px}
 .mcard small{display:block;color:#d4d7dc;font-size:9.2px}
 .mcard .sep{border-top:1px solid rgba(255,255,255,.14);padding-top:9px}
 .mcard .sep b{font-size:14px}
+.mcard .bankm{font-size:8.8px;line-height:1.6;color:#b9bec7}.mcard .bankm em{font-style:normal;color:#fff;font-weight:600}
 table.ft{width:100%;border-collapse:collapse}
 .feesg table.ft td{padding:6px 14px}
 .ft td{padding:6px 0;border-bottom:1px solid var(--ln);vertical-align:top}
 .ft td small{display:block;color:var(--mut);font-size:8.8px}
-.ft td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+.ft td:last-child{text-align:right;white-space:nowrap;font-weight:600}
 .ft tr.total td{background:var(--tint);font-weight:700;font-size:11.5px;border-bottom:0;border-top:2px solid var(--dk)}
 .ft tr.total td:last-child{color:var(--fl)}
 .note{font-size:9px;color:var(--mut);margin:5px 0 0}
@@ -205,6 +206,7 @@ table.ft{width:100%;border-collapse:collapse}
 .ck.off span{color:var(--mut)}
 .ck .x{display:block;color:var(--mut);font-size:9px}
 .ck.on2 span{font-weight:600}
+.exl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 18px}.exl div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted #cfd2d8;padding:2px 0}.exl span{color:var(--mut)}.exl b{font-weight:600;white-space:nowrap}
 .subh{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:600;margin:0 0 2px}
 ol.addl{margin:0;padding:0;list-style:none;border:1px solid var(--ln);border-top:0}
 ol.addl li{display:flex;gap:10px;padding:6px 12px;border-top:1px solid var(--ln);text-align:justify}
@@ -227,8 +229,9 @@ ol.addl li em{flex:none;font-style:normal;font-weight:700;color:var(--fl);min-wi
 .ft2 b{color:#fff;font-weight:600}
 table.bk{width:100%;border-collapse:collapse;font-size:9.8px;border:1px solid var(--ln);border-top:0}
 .bk th{background:var(--tint);color:var(--mut);font-weight:600;font-size:7.6px;letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;text-align:left;border-bottom:1px solid var(--ln)}
-.bk td{padding:7px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+.bk td{padding:5px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
 .page.dense .cb{gap:8px;padding-top:11px}.page.dense .fd{padding:3px 10px 4px}.page.dense .fd b{min-height:13px}.page.dense .hd{padding:18px 44px 16px}.page.dense .hd h1{font-size:23px}.page.dense .sig .sp{height:34px}.page.dense .checks{gap:3px}.page.dense .ft td,.page.dense .feesg table.ft td{padding-top:4px;padding-bottom:4px}.page.dense .mcard{padding:10px 14px;gap:6px}.page.dense .metas div{padding:6px 18px 6px 0}.page.dense ol.addl li{padding:4px 12px}
+.page.denser .sig .sp{height:28px}.page.denser .bar{padding:4px 10px}.page.denser .cb{gap:6px}.page.denser .bk td{padding:3px 8px}.page.denser .pkgbox>div:first-child{padding:6px 12px}.page.denser .box{padding:6px 12px}
 .page.denser{font-size:9.9px}.page.denser .fd b{font-size:9.8px}.page.denser .stmt{font-size:8.7px}.page.denser .hd img{height:46px}
 /* teljesítési igazolás */
 .cert .cb{padding:36px 64px 0;gap:0;font-size:12px;line-height:1.8}
@@ -248,7 +251,7 @@ table.bk{width:100%;border-collapse:collapse;font-size:9.8px;border:1px solid va
 <div class="sitewrap">
   <header class="sitehead">
     <img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170">
-    <nav class="tag"><a href="/">Tárgyaló órák</a> · <a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/">Kiegészítő szolgáltatások</a> · <a href="/foglalas/">Tárgyalófoglalás</a> · <a href="/tajekoztato/">Tájékoztatók</a> · <a href="/szerzodesek/" aria-current="page">Szerződések</a></nav>
+    <nav class="tag"><a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/">Kiegészítő szolgáltatások</a> · <a href="/foglalas/">Tárgyalófoglalás</a> · <a href="/tajekoztato/">Tájékoztatók</a> · <a href="/szerzodesek/" aria-current="page">Szerződések</a></nav>
   </header>
   <div class="titlebar"><h1>Szerződések</h1><div class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></div></div>
   <nav class="tabs" aria-label="Nézetek">
@@ -275,7 +278,15 @@ const ROOMS=[{k:"r6",hu:"Kis tárgyaló (max. 6 fő)",en:"Small meeting room (ma
 /* tárgyalóárak és csomag: a Tájékoztatók alapértékeiből (leadconfig.mr), ugyanúgy mint a tájékoztatóban */
 let MRP={r6:8000,r10:12000,r12:15000,pkgHours:10,pkgPrice:80000,pkgExtra:6000};
 const rateTxt=(k,lang)=>numIn(MRP[k]||0)+(lang==="en"?" HUF + VAT / hour":" Ft + Áfa / óra");
-const CATER=[{k:"coffee",hu:"Kávé, tea",en:"Coffee & tea",price:490},{k:"soda",hu:"Dobozos üdítő",en:"Soft drink",price:550},{k:"cake",hu:"Aprósütemény",en:"Biscuits",price:0},{k:"fruit",hu:"Gyümölcs",en:"Fruit",price:0},{k:"sandwich",hu:"Szendvicsek",en:"Sandwiches",price:0},{k:"lunch",hu:"Ebéd",en:"Lunch",price:0}];
+/* utólag számlázott kiegészítő szolgáltatások – alapárak a Kiegészítő szolgáltatások tétellistájából (config.base felülírja) */
+const EXTRAS=[{n:"Kávé / tea / forró csoki",hu:"Kávé, tea",en:"Coffee, tea",u:540,unit:"db"},{n:"Coca-Cola",hu:"Üdítő",en:"Soft drink",u:550,unit:"db"},{n:"_guest",hu:"Vendégparkolás",en:"Guest parking",u:750,unit:"óra"},
+  {n:"Fekete-fehér nyomtatás/másolás",hu:"FF másolás, nyomtatás",en:"B/W copy, print",u:50,unit:"oldal"},{n:"Színes nyomtatás/másolás",hu:"Színes másolás, nyomtatás",en:"Colour copy, print",u:100,unit:"oldal"},{n:"Szkennelés",hu:"Szkennelés",en:"Scanning",u:100,unit:"oldal"}];
+const UNIT_EN={db:"pc",óra:"hour",oldal:"page"};
+const hoursOf=r=>{const a=/^(\d{1,2}):(\d{2})/.exec(r.arrive||""),b=/^(\d{1,2}):(\d{2})/.exec(r.leave||"");if(!a||!b)return 0;const h=((+b[1]*60+ +b[2])-(+a[1]*60+ +a[2]))/60;return h>0?Math.round(h*100)/100:0};
+const rowRate=r=>{if(r.hourly!==""&&r.hourly!=null&&isFinite(Number(r.hourly)))return Number(r.hourly);const d=String(r.rate||"").replace(/[^\d]/g,"");return d?Number(d):(MRP[r.room]||0)};
+function calcMr(c){const m=c.mr,v=(Number(m.vat)||27)/100;const rows=m.rows.map(r=>{const h=hoursOf(r),u=rowRate(r);return{h,u,t:Math.round(h*u)}});const room=rows.reduce((a,x)=>a+x.t,0);
+  const items=(m.catering&&m.catering.on?m.catering.items||[]:[]).filter(it=>it.name||it.price).map(it=>({...it,t:Math.round((Number(it.qty)||0)*(Number(it.price)||0))}));const cat=items.reduce((a,x)=>a+x.t,0);
+  const net=room+cat,vat=Math.round(net*v);return{rows,room,items,cat,net,vat,gross:net+vat,v}}
 const CHECK='<svg viewBox="0 0 96 96"><path fill="#fff" d="M86.1 15.8 34.9 64.2 10.3 39 1.8 47.1 34.5 80.7 43.1 72.7 94.2 24.2Z"/></svg>';
 const ICO={pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>',
  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
@@ -288,7 +299,7 @@ const ICO={pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 
 /* ---------- helpers ---------- */
 let LANG="hu";
-function fmtN(v,dec){if(v===""||v==null||!isFinite(Number(v)))return "–";const n=Number(v);const d=dec??(Math.round(n*100)%100?2:0);const [i,f]=Math.abs(n).toFixed(d).split(".");return (n<0?"-":"")+i.replace(/\B(?=(\d{3})+(?!\d))/g,LANG==="hu"?" ":",")+(f?(LANG==="hu"?",":".")+f:"")}
+function fmtN(v,dec){if(v===""||v==null||!isFinite(Number(v)))return "–";const n=Number(v);const d=dec??(Math.round(n*100)%100?2:0);const [i,f]=Math.abs(n).toFixed(d).split(".");return (n<0?"-":"")+i.replace(/\B(?=(\d{3})+(?!\d))/g,LANG==="hu"?" ":",")+(f?(LANG==="hu"?",":".")+f:"")}
 const numOut=v=>{const s=String(v??"").replace(/\s/g,"").replace(",",".");if(s==="")return "";const n=Number(s.replace(/[^\d.-]/g,""));return isFinite(n)?n:""};
 const numIn=v=>v===""||v==null?"":String(v).replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g," ");
 const parseD=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?{y:+m[1],m:+m[2],d:+m[3]}:null};
@@ -323,7 +334,7 @@ function blank(kind){const c=cfg(),t=todayISO();return{kind,lang:"hu",date:t,no:
   iroda:{term:c.iroda.termMonths,start:t,end:endFrom(t,c.iroda.termMonths),office:"",seats:"",fee:"",installPer:c.iroda.installPer,install:"",first:"",prorate:true,freeHours:"",parkingN:0,parkingFee:c.iroda.parkingFee,depositMonths:c.iroda.depositMonths,deposit:"",vat:c.iroda.vat},
   vo:{pkg:{szekhely:false,telefon:false,vi:true,viplus:false},term:c.vo.termMonths,start:t,end:endFrom(t,c.vo.termMonths),install:c.vo.install,fee:c.vo.fee,schedule:"havi",depositMonths:c.vo.depositMonths,deposit:"",vat:c.vo.vat,
     mail:{forward:false,fwdCompany:"",fwdAddress:"",pickup:false,scan:true,scanEmail:""},phone:{transfer:false,transferNo:"",msg:false,msgEmail:""}},
-  mr:{rows:[{date:t,arrive:"09:00",leave:"12:00",people:"",room:"r10",setup:"",equipment:"",rate:rateTxt("r10","hu")}],cater:{},pkg:{on:false,hours:MRP.pkgHours,price:MRP.pkgPrice,extra:MRP.pkgExtra}},
+  mr:{rows:[{date:t,arrive:"09:00",leave:"12:00",people:"",room:"r10",hourly:MRP.r10}],catering:{on:false,items:[{name:"",qty:"",price:""}]},vat:27,pkg:{on:false,hours:MRP.pkgHours,price:MRP.pkgPrice,extra:MRP.pkgExtra}},
   notes:"",createdAt:null,updatedAt:null}}
 
 /* ---------- calculations ---------- */
@@ -352,7 +363,7 @@ function render(){document.querySelectorAll(".tabs button").forEach(b=>b.setAttr
 function summary(d){if(d.kind==="vo"){const p=d.vo&&d.vo.pkg||{};return [p.szekhely&&"Székhely",p.telefon&&"Telefon",p.vi&&"VI",p.viplus&&"VI Plus"].filter(Boolean).join(", ")||"–"}
   if(d.kind==="targyalo"){const r=(d.mr&&d.mr.rows)||[];const pk=d.mr&&d.mr.pkg&&d.mr.pkg.on?d.mr.pkg.hours+" órás csomag":"";return [r.length?dFmt(r[0].date,"hu")+(r.length>1?" +"+(r.length-1):""):"",pk].filter(Boolean).join(", ")||"–"}
   return d.iroda&&d.iroda.office?d.iroda.office+". iroda":"–"}
-function money(d){LANG="hu";if(d.kind==="vo")return "EUR "+fmtN(d.vo&&d.vo.fee)+"/hó";if(d.kind==="targyalo")return "–";return d.iroda&&d.iroda.fee?"EUR "+fmtN(d.iroda.fee)+"/hó":"–"}
+function money(d){LANG="hu";if(d.kind==="vo")return "EUR "+fmtN(d.vo&&d.vo.fee)+"/hó";if(d.kind==="targyalo"){try{const c=deepMerge(blank("targyalo"),d);const k=calcMr(c);return k.gross?fmtN(k.gross)+" Ft":"–"}catch(e){return "–"}}return d.iroda&&d.iroda.fee?"EUR "+fmtN(d.iroda.fee)+"/hó":"–"}
 function renderList(){LANG="hu";$("#actionbar").innerHTML="";
   const q=S.q.trim().toLowerCase();
   const rows=S.list.filter(l=>(S.kindF==="all"||l.data.kind===S.kindF)&&(!q||[l.data.client&&l.data.client.company,l.data.client&&l.data.client.contact,l.data.no,summary(l.data)].join(" ").toLowerCase().includes(q)));
@@ -448,18 +459,21 @@ function voSecs(c){return `<details class="sec" open><summary><span>Szolgáltat�
   ${F("vo.phone.msg","Üzenetek továbbítása a megadott e-mail címre","bool")}
   ${c.vo.phone.msg?F("vo.phone.msgEmail","E-mail az üzenetekhez","email"):""}
   </div></details>`}
-function mrSecs(c){const m=c.mr;return `<details class="sec" open><summary><span>Foglalás <small>${m.rows.length} időpont</small></span></summary><div class="sb">
+function mrSecs(c){const m=c.mr,k=calcMr(c);LANG="hu";return `<details class="sec" open><summary><span>Foglalás <small>${m.rows.length} időpont</small></span></summary><div class="sb">
   ${m.rows.map((r,i)=>`<div class="opt"><div class="opt-h"><span>${i+1}. időpont</span>${m.rows.length>1||(m.pkg&&m.pkg.on)?`<button data-delrow="${i}" type="button">Törlés</button>`:""}</div>
     <div class="three">${F("mr.rows."+i+".date","Dátum","date")}${F("mr.rows."+i+".arrive","Érkezés","time",'step="900"')}${F("mr.rows."+i+".leave","Távozás","time",'step="900"')}</div>
-    <div class="two">${sel("mr.rows."+i+".room","Tárgyaló",ROOMS.map(x=>[x.k,x.hu]))}${F("mr.rows."+i+".people","Létszám","num")}</div>
-    <div class="three">${F("mr.rows."+i+".setup","Berendezés","text",'placeholder="pl. tárgyalóasztal"')}${F("mr.rows."+i+".equipment","Eszközök","text",'placeholder="pl. kijelző, flipchart"')}${F("mr.rows."+i+".rate","Díjszabás")}</div></div>`).join("")}
+    <div class="three">${sel("mr.rows."+i+".room","Tárgyaló",ROOMS.map(x=>[x.k,x.hu]))}${F("mr.rows."+i+".people","Létszám","num")}${F("mr.rows."+i+".hourly","Óradíj (Ft + Áfa)","num")}</div>
+    <div class="hint" id="rowsum-${i}" style="font-size:13px;color:var(--muted)"></div></div>`).join("")}
   ${m.rows.length?"":`<p class="sub" style="margin:0">Nincs konkrét időpont, csak tárgyalócsomag.</p>`}
   ${m.rows.length<10?`<button class="btn" id="addrow" type="button">${ICO.plus} ${m.rows.length?"Újabb időpont":"Időpont hozzáadása"}</button>`:""}</div></details>
-  <details class="sec" open><summary><span>Tárgyalócsomag</span></summary><div class="sb">
-  ${F("mr.pkg.on","Havi tárgyalócsomag","bool")}
-  ${m.pkg.on?`<div class="three">${F("mr.pkg.hours","Órák száma / hó","num")}${F("mr.pkg.price","Csomag díja (Ft/hó)","num")}${F("mr.pkg.extra","Kereten felül (Ft/óra)","num")}</div><p class="sub" style="margin:0;font-size:12.5px">Az alapértékek a Tájékoztatók beállításaiból jönnek, itt szerződésenként átírhatók.</p>`:""}</div></details>
   <details class="sec" open><summary><span>Catering</span></summary><div class="sb">
-  ${CATER.map(it=>`<div class="two" style="align-items:center">${F("mr.cater."+it.k+".on",it.hu+(it.price?" ("+numIn(it.price)+" Ft/db)":" (ár kérésre)"),"bool")}${F("mr.cater."+it.k+".qty","Mennyiség","num")}</div>`).join("")}</div></details>
+  ${F("mr.catering.on","Catering-et kérnek","bool")}
+  ${m.catering.on?m.catering.items.map((it,i)=>`<div class="opt"><div class="opt-h"><span>${i+1}. tétel</span>${m.catering.items.length>1?`<button data-delcat="${i}" type="button">Törlés</button>`:""}</div>${F("mr.catering.items."+i+".name","Megnevezés","text",'placeholder="pl. szendvicstál"')}<div class="two">${F("mr.catering.items."+i+".qty","Mennyiség","num")}${F("mr.catering.items."+i+".price","Egységár (Ft + Áfa)","num")}</div></div>`).join("")+`<button class="btn" id="addcat" type="button">${ICO.plus} Újabb tétel</button>`:""}
+  </div></details>
+  <details class="sec" open><summary><span>Előre fizetendő</span></summary><div class="sb"><div class="calc" id="calc"></div>${F("mr.vat","ÁFA (%)","num")}</div></details>
+  <details class="sec"><summary><span>Tárgyalócsomag</span></summary><div class="sb">
+  ${F("mr.pkg.on","Havi tárgyalócsomag","bool")}
+  ${m.pkg.on?`<div class="three">${F("mr.pkg.hours","Órák száma / hó","num")}${F("mr.pkg.price","Csomag díja (Ft/hó)","num")}${F("mr.pkg.extra","Kereten felül (Ft/óra)","num")}</div><p class="sub" style="margin:0;font-size:12.5px">A csomag havidíja külön, havonta kerül számlázásra, nem része az előre fizetendő összegnek.</p>`:""}</div></details>
 `}
 function renderEditor(){const c=S.cur,kind=c.kind,sg=cfg().signers;
   const openSt={};document.querySelectorAll('#main details.sec').forEach(d=>{const k=d.querySelector('summary span');if(k)openSt[k.firstChild.textContent.trim()]=d.open});const y=scrollY;
@@ -482,6 +496,8 @@ function renderEditor(){const c=S.cur,kind=c.kind,sg=cfg().signers;
   bind();updateSS();renderCalc();renderPreview();}
 function renderCalc(){const el=$("#calc");if(!el)return;LANG="hu";const c=S.cur;
   if(c.kind==="iroda"){const k=calcIroda(c);const ph=$("#prhint");if(ph)ph.textContent=c.iroda.prorate===false?"Kikapcsolva: az első havi díj a teljes havidíj.":k.pr?`${dFmt(k.pr.from,"hu")} – ${dFmt(k.pr.to,"hu")}: ${k.pr.days}/${k.pr.dim} nap → EUR ${fmtN(k.firstAuto,2)}${k.park?" + parkolás EUR "+fmtN(k.parkFirst,2):""}`:"A kezdés hónap 1-je, nincs törthónap.";const fi=$("#p-iroda-first");if(fi)fi.placeholder=numIn(k.firstAuto);el.innerHTML=`<div><span>Havi alapdíj bruttó</span><b>EUR ${fmtN(k.feeGross)}</b></div><div><span>Installációs díj</span><b>EUR ${fmtN(k.install)}</b></div><div><span>Első havi díj${k.pr?" (törthónap)":""}${k.park?" + parkolás":""}</span><b>EUR ${fmtN(k.first+k.parkFirst)}</b></div><div><span>ÁFA</span><b>EUR ${fmtN(k.vat)}</b></div><div><span>Óvadék</span><b>EUR ${fmtN(k.deposit)}</b></div><div class="tot"><span>Kezdeti bruttó befizetés</span><b>EUR ${fmtN(k.total)}</b></div>`}
+  else if(c.kind==="targyalo"){const k=calcMr(c);k.rows.forEach((x,i)=>{const e=$("#rowsum-"+i);if(e)e.textContent=x.h?`${fmtN(x.h,x.h%1?(Math.round(x.h*10)===x.h*10?1:2):0)} óra × ${fmtN(x.u)} Ft = ${fmtN(x.t)} Ft + Áfa`:"Add meg az érkezést és a távozást."});
+    el.innerHTML=`<div><span>Terembérlés</span><b>${fmtN(k.room)} Ft</b></div>${c.mr.catering.on?`<div><span>Catering</span><b>${fmtN(k.cat)} Ft</b></div>`:""}<div><span>ÁFA</span><b>${fmtN(k.vat)} Ft</b></div><div class="tot"><span>Előre fizetendő összesen</span><b>${fmtN(k.gross)} Ft</b></div>`}
   else if(c.kind==="vo"){const k=calcVo(c);el.innerHTML=`<div><span>${{havi:"Havi",negyedeves:"Negyedéves",eves:"Éves"}[c.vo.schedule]} nettó díj</span><b>EUR ${fmtN(k.period)}</b></div><div><span>Installációs díj</span><b>EUR ${fmtN(k.install)}</b></div><div><span>ÁFA</span><b>EUR ${fmtN(k.vat)}</b></div><div><span>Kaució</span><b>EUR ${fmtN(k.deposit)}</b></div><div class="tot"><span>Kezdeti bruttó befizetés</span><b>EUR ${fmtN(k.total)}</b></div><div><span>Bruttó havidíj</span><b>EUR ${fmtN(k.grossMonthly)}</b></div>`}}
 function bind(){const c=S.cur;
   document.querySelectorAll("[data-path]").forEach(el=>{const p=el.dataset.path,ty=el.dataset.type;
@@ -489,12 +505,14 @@ function bind(){const c=S.cur;
     const ev=el.tagName==="SELECT"?"change":"input";
     el.addEventListener(ev,()=>{let v=ty==="num"?numOut(el.value):el.value;if(p==="signer")v=Number(v);setPath(c,p,v);
       if(/^(iroda|vo)\.(start|term)$/.test(p)){const k=p.split(".")[0];c[k].end=endFrom(c[k].start,c[k].term);const e=document.getElementById("p-"+k+"-end");if(e)e.value=c[k].end}
-      if(/^mr\.rows\.\d+\.room$/.test(p)){const i=+p.split(".")[2];const r=ROOMS.find(x=>x.k===v);if(r){c.mr.rows[i].rate=rateTxt(r.k,c.lang);const e=document.getElementById("p-mr-rows-"+i+"-rate");if(e)e.value=c.mr.rows[i].rate}}
+      if(/^mr\.rows\.\d+\.room$/.test(p)){const i=+p.split(".")[2];const r=ROOMS.find(x=>x.k===v);if(r){c.mr.rows[i].hourly=MRP[r.k]||0;const e=document.getElementById("p-mr-rows-"+i+"-hourly");if(e)e.value=numIn(c.mr.rows[i].hourly)}}
       changed();renderCalc()});
     if(ty==="num")el.addEventListener("blur",()=>{el.value=numIn(getPath(c,p))})});
   document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{c.lang=b.dataset.lang;changed();renderEditor()});
   document.querySelectorAll("[data-pane]").forEach(b=>b.onclick=()=>{S.pane=b.dataset.pane;renderEditor();scrollTo(0,0)});
-  const ar=$("#addrow");if(ar)ar.onclick=()=>{const l=c.mr.rows[c.mr.rows.length-1]||{date:todayISO(),arrive:"09:00",leave:"12:00",people:"",room:"r10",setup:"",equipment:"",rate:rateTxt("r10",c.lang)};c.mr.rows.push({...l});changed();renderEditor()};
+  const ar=$("#addrow");if(ar)ar.onclick=()=>{const l=c.mr.rows[c.mr.rows.length-1]||{date:todayISO(),arrive:"09:00",leave:"12:00",people:"",room:"r10",hourly:MRP.r10};c.mr.rows.push({...l});changed();renderEditor()};
+  const ac=$("#addcat");if(ac)ac.onclick=()=>{c.mr.catering.items.push({name:"",qty:"",price:""});changed();renderEditor()};
+  document.querySelectorAll("[data-delcat]").forEach(b=>b.onclick=()=>{c.mr.catering.items.splice(+b.dataset.delcat,1);changed();renderEditor()});
   const cb=$("#certbtn");if(cb)cb.onclick=makeCert;
   document.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{c.mr.rows.splice(+b.dataset.delrow,1);changed();renderEditor()});
   const d=$("#del");if(d)d.onclick=()=>{S.confirmDel=true;renderEditor()};const dn=$("#delno");if(dn)dn.onclick=()=>{S.confirmDel=false;renderEditor()};
@@ -522,6 +540,8 @@ const TX={hu:{date:"Dátum",no:"Szerződésszám",client:"Ügyfél adatai",provi
   fwd:"Levelek továbbítása postai úton hetente*",pick:"Személyes felvétel**",scan:"Szkennelés a megadott e-mail címre",tr:"Hívások átkapcsolása a megadott telefonszámra*",msg:"Üzenetek továbbítása a megadott e-mail címre",
   fn1:"*A szolgáltatás havidíja a felmerülő postaköltséget nem tartalmazza. **A levelek felvételéért az Ügyfél saját maga felel. Az átkapcsolt hívások költsége továbbszámlázásra kerül.",
   stmtVo:"Jelen megállapodás szerves részét képezik a csatolt Általános Szerződési Feltételek. Ügyfél aláírásával igazolja, hogy az ÁSZF-et elolvasta, megértette és elfogadja.",
+  hrs:"Időtartam",hourly:"Óradíj",rowTot:"Összesen",hShort:"óra",item:"Tétel",unitP:"Egységár",roomTot:"Terembérlés (nettó)",catTot:"Catering (nettó)",netTot:"Nettó összesen",prepay:"Előre fizetendő összeg összesen",prepayGross:"bruttó, átutalással előre",
+  extrasH:"Utólag számlázott szolgáltatások",extrasTxt:"A tárgyalás során igénybe vett további kiegészítő szolgáltatások (kávé, tea, üdítő, vendégparkolás, fénymásolás, szkennelés) utólag kerülnek kiszámlázásra, az alábbi nettó árakon (+ ÁFA):",extrasNote:"",per:u=>"Ft / "+u,
   booking:"Foglalás",when:"Időpont",arr:"Érkezés",lea:"Távozás",ppl:"Létszám",room:"Tárgyaló",setup:"Berendezés",equip:"Eszközök",rate:"Díjszabás",cater:"Catering szolgáltatás",qty:"Mennyiség",price:"Ár",onReq:"ár kérésre",perPc:"Ft / db",billing:"Számlázási cím, amennyiben eltér a fentitől",
   bankHuf:"Bankszámlaszám (HUF)",bankEur:"Bankszámlaszám (EUR)",swift:"SWIFT kód",stmtMr:"Ügyfél aláírásával megrendeli a fenti szolgáltatásokat, és igazolja, hogy a csatolt Általános Szerződési Feltételeket elolvasta és elfogadja. A tárgyalók előzetes fizetés ellenében vehetők igénybe.",note:"Megjegyzés"},
  en:{date:"Date",no:"Contract no.",client:"Client details",provider:"Service provider details",company:"Company name",address:"Address",city:"City",zip:"Postal code",tax:"VAT nr.",reg:"Registration nr.",contact:"Contact person",position:"Position",phone:"Telephone nr.",email:"E-mail",bank:"Bank account nr.",bankName:"Bank",
@@ -535,6 +555,8 @@ const TX={hu:{date:"Dátum",no:"Szerződésszám",client:"Ügyfél adatai",provi
   fwd:"Mail forwarding to other address once a week*",pick:"Personal pickup**",scan:"Scanning mail to the following e-mail address",tr:"Call forwarding to the following phone number*",msg:"Message forwarding to the following e-mail address",
   fn1:"*Additional postage costs are to be paid above the monthly fee. **Client is responsible for picking up the letters stored in the centre. Forwarded call costs will be invoiced to the Client.",
   stmtVo:"This Agreement incorporates the Terms & Conditions of Vista Plus Offices attached hereto, which the Client by its signature below confirms to have read and accepted.",
+  hrs:"Duration",hourly:"Hourly rate",rowTot:"Total",hShort:"h",item:"Item",unitP:"Unit price",roomTot:"Room rental (net)",catTot:"Catering (net)",netTot:"Net total",prepay:"Total amount payable in advance",prepayGross:"gross, by bank transfer in advance",
+  extrasH:"Services invoiced afterwards",extrasTxt:"Any further services used during the meeting (coffee, tea, soft drinks, guest parking, copying, scanning) are invoiced afterwards at the following net rates (+ VAT):",extrasNote:"",per:u=>"HUF / "+(UNIT_EN[u]||u),
   booking:"Booking",when:"Date",arr:"Arrival",lea:"Departure",ppl:"People",room:"Meeting room",setup:"Setup",equip:"Equipment",rate:"Rate",cater:"Catering",qty:"Quantity",price:"Price",onReq:"price upon request",perPc:"HUF / pc",billing:"Billing address if different from above",
   bankHuf:"Bank account (HUF)",bankEur:"Bank account (EUR)",swift:"SWIFT code",stmtMr:"By signing, the Client orders the above services and confirms to have read and accepted the attached Terms & Conditions. Meeting rooms can be used after advance payment.",note:"Note"}};
 Object.assign(TX.hu,{eb:{iroda:"Szerződés",vo:"Szerződés",targyalo:"Megrendelés"},parties:"Szerződő felek",cl:"Ügyfél",pv:"Szolgáltató",period2:"Időtartam",office2:"Iroda",seats2:"Munkaállomás",fromTo:"Kezdés – vége",
@@ -568,9 +590,11 @@ function sigs(c,L){const s=signerOf(c),cn=c.client.signName||c.client.contact,cp
   return `<div class="sigs">${blk(L.sigC,c.client.company,cn,cp)}${blk(L.sigV,cfg().vista.name,s.name,s.title)}</div>`}
 const addr=x=>[x.zip,x.city].filter(Boolean).join(" ")+(x.address?((x.zip||x.city)?", ":"")+x.address:"");
 function parties(c,L,n){const x=c.client,v=cfg().vista,s=signerOf(c),mr=c.kind==="targyalo";
-  const cl=[[L.company,esc(x.company),1],[L.address,esc(addr(x)),1],[L.tax,esc(x.tax)],[mr?L.position:L.reg,esc(mr?x.position:x.reg)],[L.contact,esc(x.contact)],[mr?L.phone:L.position,esc(mr?x.phone:x.position)],...(mr?[[L.email,esc(x.email),1]]:[[L.phone,esc(x.phone)],[L.email,esc(x.email)]])];
+  const cl=mr?[[L.company,esc(x.company),1],[L.address,esc(addr(x))],[L.tax,esc(x.tax)],[L.contact,esc(x.contact)],[L.position,esc(x.position)],[L.phone,esc(x.phone)],[L.email,esc(x.email)]]
+    :[[L.company,esc(x.company),1],[L.address,esc(addr(x)),1],[L.tax,esc(x.tax)],[L.reg,esc(x.reg)],[L.contact,esc(x.contact)],[L.position,esc(x.position)],[L.phone,esc(x.phone)],[L.email,esc(x.email)]];
   if(c.kind==="iroda"&&(x.bank||x.bankName))cl.push([L.bank,esc([x.bank,x.bankName].filter(Boolean).join(" · ")),1]);
-  const pv=[[L.company,esc(v.name),1],[L.address,esc(v.zip+" "+v.city+", "+v.address),1],[L.tax,esc(v.tax)],[mr?L.contact:L.reg,esc(mr?s.name:v.reg)],[mr?L.signer:L.contact,esc(mr?s.title:s.name)],[mr?L.phone:L.signer,esc(mr?v.phone:s.title)],...(mr?[[L.email,esc(v.email),1]]:[[L.phone,esc(v.phone)],[L.email,esc(v.email)]])];
+  const pv=mr?[[L.company,esc(v.name),1],[L.address,esc(v.zip+" "+v.city+", "+v.address)],[L.tax,esc(v.tax)],[L.contact,esc(s.name)],[L.phone,esc(v.phone)],[L.email,esc(v.email),1]]
+    :[[L.company,esc(v.name),1],[L.address,esc(v.zip+" "+v.city+", "+v.address),1],[L.tax,esc(v.tax)],[L.reg,esc(v.reg)],[L.contact,esc(s.name)],[L.signer,esc(s.title)],[L.phone,esc(v.phone)],[L.email,esc(v.email)]];
   if(cl.length>pv.length)pv.push(["","",1]);
   return `<div class="cols2"><div>${bar(n,L.cl)}${fields(cl)}</div><div>${bar(n+1,L.pv)}${fields(pv)}</div></div>`}
 const eur=v=>"EUR "+fmtN(v,2);
@@ -605,17 +629,19 @@ function pageVo(c){const L=TX[c.lang];LANG=c.lang;const x=c.vo,k=calcVo(c),n=c.l
    ${nl?`<div>${bar(s++,L.addl)}${nl}</div>`:""}
    <p class="stmt">${L.stmtVo}</p>${sigs(c,L)}</div>${foot()}</section>`}
 const roomName=(k,lang)=>{const r=ROOMS.find(x=>x.k===k);return r?(lang==="en"?r.en:r.hu):""};
-function pageMr(c){const L=TX[c.lang];LANG=c.lang;const m=c.mr,n=c.lang;let s=3;
-  const cat=CATER.map(it=>{const o=(m.cater||{})[it.k]||{};return {...it,on:!!o.on,qty:o.qty}});const t3=Math.ceil(cat.length/3);
-  const cc=a=>`<div class="checks">${a.map(it=>ck(it.on,n==="en"?it.en:it.hu,(it.price?fmtN(it.price)+" "+L.perPc:L.onReq)+(it.on&&it.qty?" · "+L.qty+": "+fmtN(it.qty):""))).join("")}</div>`;
-  const nl=notesList(c,L);const first=m.rows[0];
+function extrasPrices(){const base=(S.svc&&S.svc.base)||[],gp=(S.lterms&&Number(S.lterms.guestParking))||750;return EXTRAS.map(x=>{const o=base.find(b=>b.n===x.n);return{...x,u:x.n==="_guest"?gp:(o?Number(o.u):x.u)}})}
+function pageMr(c){const L=TX[c.lang];LANG=c.lang;const m=c.mr,n=c.lang,k=calcMr(c);let s=3;const ft=v=>fmtN(v)+(n==="en"?" HUF":" Ft");
+  const nl=notesList(c,L);const first=m.rows[0];const ex=extrasPrices();
   return `<section class="page" lang="${n}">${head(c,L,first?[[L.booked,esc(dFmt(first.date,n))+(m.rows.length>1?" +"+(m.rows.length-1):"")]]:[])}<div class="cb">
    ${parties(c,L,1)}
-   ${m.rows.length?`<div>${bar(s++,L.booking)}<table class="bk"><thead><tr><th>${L.when}</th><th>${L.arr}</th><th>${L.lea}</th><th>${L.ppl}</th><th>${L.room}</th><th>${L.setup}</th><th>${L.equip}</th><th>${L.rate}</th></tr></thead><tbody>
-     ${m.rows.map(r=>`<tr><td style="white-space:nowrap">${esc(dFmt(r.date,n))}</td><td>${esc(r.arrive)}</td><td>${esc(r.leave)}</td><td>${esc(fmtN(r.people))}</td><td><b>${esc(roomName(r.room,n))}</b></td><td>${esc(r.setup||"–")}</td><td>${esc(r.equipment||"–")}</td><td style="white-space:nowrap">${esc(r.rate)}</td></tr>`).join("")}</tbody></table></div>`:""}
-   ${m.pkg&&m.pkg.on?`<div>${bar(s++,L.mrPkg,1)}<div class="pkgbox"><div><b>${L.pkgT(fmtN(m.pkg.hours))}</b><p>${L.pkgX(fmtN(m.pkg.extra))}</p></div><div class="pr2">${fmtN(m.pkg.price)} Ft<small>${n==="en"?"+ VAT / month":"+ Áfa / hó"}</small></div></div></div>`:""}
-   <div>${bar(s++,L.cater)}<div class="box"><div class="cols2" style="grid-template-columns:1fr 1fr 1fr">${cc(cat.slice(0,t3))}${cc(cat.slice(t3,2*t3))}${cc(cat.slice(2*t3))}</div></div></div>
-   <div>${bar(s++,L.payH)}${bankFields(L)}</div>
+   ${m.rows.length?`<div>${bar(s++,L.booking)}<table class="bk"><thead><tr><th>${L.when}</th><th>${L.arr}</th><th>${L.lea}</th><th>${L.ppl}</th><th>${L.room}</th><th style="text-align:right">${L.hrs}</th><th style="text-align:right">${L.hourly}</th><th style="text-align:right">${L.rowTot}</th></tr></thead><tbody>
+     ${m.rows.map((r,i)=>{const x=k.rows[i];return `<tr><td style="white-space:nowrap">${esc(dFmt(r.date,n))}</td><td>${esc(r.arrive)}</td><td>${esc(r.leave)}</td><td>${esc(fmtN(r.people))}</td><td><b>${esc(roomName(r.room,n))}</b></td><td style="text-align:right;white-space:nowrap">${x.h?fmtN(x.h,x.h%1?(Math.round(x.h*10)===x.h*10?1:2):0)+" "+L.hShort:"–"}</td><td style="text-align:right;white-space:nowrap">${ft(x.u)}</td><td style="text-align:right;white-space:nowrap"><b>${ft(x.t)}</b></td></tr>`}).join("")}</tbody></table></div>`:""}
+   ${k.items.length?`<div>${bar(s++,L.cater)}<table class="bk"><thead><tr><th>${L.item}</th><th style="text-align:right">${L.qty}</th><th style="text-align:right">${L.unitP}</th><th style="text-align:right">${L.rowTot}</th></tr></thead><tbody>${k.items.map(it=>`<tr><td>${esc(it.name)}</td><td style="text-align:right">${esc(fmtN(it.qty))}</td><td style="text-align:right;white-space:nowrap">${ft(it.price)}</td><td style="text-align:right;white-space:nowrap"><b>${ft(it.t)}</b></td></tr>`).join("")}</tbody></table></div>`:""}
+   ${k.net?`<div>${bar(s++,L.prepay,1)}<div class="feesg"><div class="mcard"><div><span>${L.prepay}</span><b>${ft(k.gross)}</b><small>${L.prepayGross}</small></div><div class="sep bankm">${L.bankHuf}: <em>${esc(cfg().vista.bankHuf)}</em><br>${L.bankEur}: <em>${esc(cfg().vista.bankEur)}</em><br>${L.swift}: <em>${esc(cfg().vista.swift)}</em></div></div>
+     <table class="ft">${m.rows.length?`<tr><td>${L.roomTot}</td><td>${ft(k.room)}</td></tr>`:""}${k.items.length?`<tr><td>${L.catTot}</td><td>${ft(k.cat)}</td></tr>`:""}<tr><td>${L.netTot}</td><td>${ft(k.net)}</td></tr><tr><td>${L.vat(m.vat||27)}</td><td>${ft(k.vat)}</td></tr><tr class="total"><td>${L.prepay}</td><td>${ft(k.gross)}</td></tr></table></div></div>`:""}
+   ${m.pkg&&m.pkg.on?`<div>${bar(s++,L.mrPkg)}<div class="pkgbox"><div><b>${L.pkgT(fmtN(m.pkg.hours))}</b><p>${L.pkgX(fmtN(m.pkg.extra))}</p></div><div class="pr2">${fmtN(m.pkg.price)} ${n==="en"?"HUF":"Ft"}<small>${n==="en"?"+ VAT / month":"+ Áfa / hó"}</small></div></div></div>`:""}
+   <div>${bar(s++,L.extrasH)}<div class="box"><p style="margin:0 0 6px">${L.extrasTxt}</p><div class="exl">${ex.map(x=>`<div><span>${n==="en"?x.en:x.hu}</span><b>${fmtN(x.u)} ${L.per(x.unit)}</b></div>`).join("")}</div></div></div>
+   ${k.net?"":`<div>${bar(s++,L.payH)}${fields([[L.bankHuf,esc(cfg().vista.bankHuf)],[L.bankEur,esc(cfg().vista.bankEur)],[L.swift,esc(cfg().vista.swift)]],"c3")}</div>`}
    ${nl?`<div>${bar(s++,L.note)}${nl}</div>`:""}
    <p class="stmt">${L.stmtMr}</p>${sigs(c,L)}</div>${foot()}</section>`}
 /* teljesítési igazolás: egy oldal tárgyalási naponként */
@@ -718,11 +744,12 @@ function fromLead(l,oi){const d=l.data||{},kind=d.kind&&KINDS[d.kind]?d.kind:"ir
   if(kind==="vo"){const v=d.vo||{},p=v.packages||{},x=c.vo;["szekhely","telefon","vi"].forEach(k=>x.pkg[k]=!!(p[k]&&p[k].on));
     const fee=["szekhely","telefon","vi"].reduce((a,k)=>a+(p[k]&&p[k].on?Number(p[k].price)||0:0),0);if(fee)x.fee=fee;if(v.install!=null&&v.install!=="")x.install=toNum(v.install);if(isoD(v.start)){x.start=v.start;x.end=endFrom(x.start,x.term)}}
   if(kind==="targyalo"){const m=d.mr||{},rooms=m.rooms||{},firstRoom=["r10","r6","r12"].find(k=>rooms[k]&&rooms[k].on)||"r10";
-    const rt=k=>{const pr=rooms[k]&&rooms[k].price;return pr?numIn(pr)+(c.lang==="en"?" HUF + VAT / hour":" Ft + Áfa / óra"):rateTxt(k,c.lang)};
+    const rt=k=>{const pr=rooms[k]&&rooms[k].price;return pr?Number(numOut(pr))||MRP[k]:MRP[k]};
     const slots=(!m.general&&m.slots||[]).filter(s=>s.date||s.start);
     if(m.pkg)c.mr.pkg={on:!!m.pkg.on,hours:toNum(m.pkg.hours)||MRP.pkgHours,price:toNum(m.pkg.price)||MRP.pkgPrice,extra:toNum(m.pkg.extra)||MRP.pkgExtra};
-    c.mr.rows=slots.map(s=>{const rk=s.room||firstRoom;return{date:isoD(s.date)||c.date,arrive:s.start||"",leave:s.end||"",people:toNum(m.people),room:rk,setup:"",equipment:"",rate:rt(rk)}});
-    if(!c.mr.rows.length&&!c.mr.pkg.on)c.mr.rows=[{date:c.date,arrive:"09:00",leave:"12:00",people:toNum(m.people),room:firstRoom,setup:"",equipment:"",rate:rt(firstRoom)}]}
+    c.mr.rows=slots.map(s=>{const rk=s.room||firstRoom;return{date:isoD(s.date)||c.date,arrive:s.start||"",leave:s.end||"",people:toNum(m.people),room:rk,hourly:rt(rk)}});
+    const ci=(m.cat||[]).filter(x=>x&&(x.name||x.price)).map(x=>({name:x.name||"",qty:toNum(x.qty),price:toNum(x.price)}));if(m.catering&&ci.length)c.mr.catering={on:true,items:ci};
+    if(!c.mr.rows.length&&!c.mr.pkg.on)c.mr.rows=[{date:c.date,arrive:"09:00",leave:"12:00",people:toNum(m.people),room:firstRoom,hourly:rt(firstRoom)}]}
   return c}
 function startFromLead(l,oi){S.cur=fromLead(l,oi);S.curId=null;S.dirty=true;S.lastSaved=null;S.pane="form";S.confirmDel=false;S.view="edit";render();scrollTo(0,0);save();toast("Kitöltve a leadből – minden adat átírható")}
 async function ensureLeads(){if(S.leads)return S.leads;try{S.leads=(await api("leads")).sort((a,b)=>(b.data.updatedAt||b.data.date||"").localeCompare(a.data.updatedAt||a.data.date||""))}catch(e){S.leads=[]}return S.leads}
@@ -765,7 +792,7 @@ async function openActivate(id){const l=S.list.find(x=>x.id===id);if(!l)return;c
     try{const r=await api("contracts/"+id+"/activate",{method:"POST",body:JSON.stringify({client:{n:an.value.trim(),free:numOut($("#af").value)||0,eur:$("#ae").value==="eur",prices}})});
       l.data=r.data;close();renderList();toast((r.created?"Új ügyfél felvéve: ":"Ügyfél frissítve: ")+r.client.n+(prices.length?" · "+prices.length+" egyedi ár":""),4000)}catch(err){btn.disabled=false;toast("Nem sikerült aktiválni: "+err.message,5000)}}}
 
-async function load(){try{const [l,c,lc]=await Promise.all([api("contracts"),api("contractconfig"),api("leadconfig").catch(()=>({}))]);if(lc&&lc.mr)MRP={...MRP,...Object.fromEntries(Object.entries(lc.mr).filter(([k,v])=>v!==""&&v!=null))};S.list=l.sort((a,b)=>(b.data.updatedAt||"").localeCompare(a.data.updatedAt||""));S.cfg=c&&Object.keys(c).length?c:null;S.loaded=true;
+async function load(){try{const [l,c,lc]=await Promise.all([api("contracts"),api("contractconfig"),api("leadconfig").catch(()=>({}))]);S.lterms=lc&&lc.terms||{};api("config").then(v=>{S.svc=v||{};if(S.view==="edit")renderPreview()}).catch(()=>{});if(lc&&lc.mr)MRP={...MRP,...Object.fromEntries(Object.entries(lc.mr).filter(([k,v])=>v!==""&&v!=null))};S.list=l.sort((a,b)=>(b.data.updatedAt||"").localeCompare(a.data.updatedAt||""));S.cfg=c&&Object.keys(c).length?c:null;S.loaded=true;
   const qp=new URLSearchParams(location.search),lid=qp.get("lead");if(lid){history.replaceState(null,"",location.pathname);const ls=await ensureLeads(),l=ls.find(x=>x.id===lid);
     if(l){const os=(l.data.kind||"iroda")==="iroda"?leadOpts(l):[];const oi=qp.get("opt");if(os.length>1&&oi==null){S.leadPick=l.id;S.lq=l.data.company||"";go("choose")}else startFromLead(l,oi!=null?+oi:(os.length?os[0].i:0));return}else toast("A lead nem található.")}
   if(S.view==="list"||S.view==="settings")render()}catch(e){if(e.status!==401)toast(e.message,4000)}}
