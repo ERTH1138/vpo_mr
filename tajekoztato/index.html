@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Marcellus&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* Layout: sticky top bar with tabs; leads = summary chips + list; editor = form column + live A4 preview (side by side on wide screens, toggled on phones). */
@@ -82,12 +83,14 @@ h1.view-title{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,
 .toolbar{display:flex;gap:8px;margin-bottom:12px}
 .search{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-size:16px}
 .table-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
-table.leads{width:100%;border-collapse:collapse;font-size:14px;min-width:1480px}
-.leads td:nth-child(5),.leads td:nth-child(6){min-width:140px}
+table.leads{width:100%;border-collapse:collapse;font-size:13px;table-layout:auto}
+.leads td small{display:block;font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}.leads td.lcli{min-width:130px;max-width:210px}.leads td .srcs{font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.leads td.lctc{max-width:180px}.leads td.lctc div,.leads td.lctc small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leads td.acts .iconbtn{width:30px;height:30px;margin-right:2px}.leads td.acts .iconbtn svg{width:15px;height:15px}
 .leads td.src{font-size:13px;white-space:nowrap}
-.leads td.offer{min-width:150px;max-width:220px;font-size:13px}
+.leads td.offer{min-width:150px;max-width:240px;font-size:12.5px}
 .leads th{background:var(--surface);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-.leads td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.leads td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .leads tr:last-child td{border-bottom:0}
 .leads tbody tr{cursor:pointer}
 .leads .num{font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -651,12 +654,14 @@ function renderLeads(){LANG_FMT="hu";S.pendingRender=false;
   else if(!S.leads.length){body=`<div class="empty"><b>Még nincs egy lead sem</b>Az első kitöltött tájékoztató automatikusan ide kerül.<br><br><button class="btn primary" onclick="go('home')">${ICON.plus} Új tájékoztató</button></div>`}
   else if(!rows.length){body=`<div class="empty"><b>Nincs találat</b>Próbálj másik keresést vagy szűrőt.</div>`}
   else{
-    body=`<div class="table-box"><table class="leads"><thead><tr><th></th><th>Kiküldve</th><th>Típus</th><th>Forrás</th><th>Név</th><th>Cégnév</th><th>Elérhetőség</th><th>Ajánlat</th><th>Díj</th><th>Státusz</th><th>Kiküldte</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
-    rows.map(l=>{const d=l.data,mp=minPrice(d),st=effSt(d);
-      return `<tr class="${rowCls(d)}"><td class="acts">${acts(l)}</td><td class="num">${esc(dShort(sentDateOf(d),"hu"))||"–"}</td><td><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span></td><td class="src">${esc(d.source||"–")}</td><td><b>${esc(d.name||"Névtelen")}</b></td><td>${esc(d.company||"–")}</td>
-      <td><div>${esc(d.phone||"")}</div><small>${esc(d.email||"")}</small></td><td class="offer">${esc(offerSummary(d))}</td><td class="num">${esc(priceInfo(d).t)}</td>
+    body=`<div class="table-box"><table class="leads"><thead><tr><th></th><th>Kiküldve</th><th>Ügyfél</th><th>Elérhetőség</th><th>Ajánlat</th><th>Státusz</th><th>Follow-up</th><th>Megjegyzés</th></tr></thead><tbody>`+
+    rows.map(l=>{const d=l.data,st=effSt(d);
+      return `<tr class="${rowCls(d)}"><td class="acts">${acts(l)}</td><td class="num"><b>${esc(dShort(sentDateOf(d),"hu"))||"–"}</b>${sender(d)?`<small>${esc(sender(d))}</small>`:""}</td>
+      <td class="lcli"><b>${esc(d.company||d.name||"Névtelen")}</b>${d.company&&d.name?`<small>${esc(d.name)}</small>`:""}${d.source?`<small class="srcs">${esc(d.source)}</small>`:""}</td>
+      <td class="lctc"><div title="${esc(d.phone||"")}">${esc(d.phone||"")}</div><small title="${esc(d.email||"")}">${esc(d.email||"")}</small></td>
+      <td class="offer"><span class="kchip k-${kindOf(d)}">${KINDS[kindOf(d)].hu}</span> ${esc(offerSummary(d))}<small><b>${esc(priceInfo(d).t)}</b></small></td>
       <td><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></td>
-      <td>${esc(sender(d))||"–"}</td><td class="num">${fuCell(l,d)}</td><td class="notecell">${noteBox(l)}</td></tr>`}).join("")+
+      <td class="num">${fuCell(l,d)}</td><td class="notecell">${noteBox(l)}</td></tr>`}).join("")+
     `</tbody></table></div><div class="cards">`+
     rows.map(l=>{const d=l.data,mp=minPrice(d),st=effSt(d),due=fuDue(d);
       return `<div class="card ${rowCls(d)}"><div class="row1"><div><b>${esc(d.name||"Névtelen")}</b><br><small>${esc(d.company||"")}</small></div><select class="pill st-${st}" data-st="${l.id}" data-prev="${st}" aria-label="Státusz">${stOpts(st)}</select></div>
@@ -682,7 +687,7 @@ function renderLeads(){LANG_FMT="hu";S.pendingRender=false;
     const id=sel.dataset.st,prev=sel.dataset.prev,v=sel.value,l=S.leads.find(x=>x.id===id);if(!l)return;
     const patch={status:v,updatedAt:new Date().toISOString()};
     if(prev==="followup"&&v==="kikuldve")patch.followups=[...(l.data.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];
-    try{await store.update(id,patch);toast(patch.followups?"Follow-up rögzítve, vissza „Kiküldve”-re":"Státusz: "+STATUSES.find(x=>x.id===v).hu)}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}});
+    try{await store.update(id,patch);toast(patch.followups?"Follow-up rögzítve, vissza „Kiküldve”-re":"Státusz: "+STATUSES.find(x=>x.id===v).hu);if(v==="megnyert"&&window.VPO_SITE)offerContract(l)}catch(e){toast("Nem sikerült menteni: "+(e.message||e.code))}});
   document.querySelectorAll("[data-fu]").forEach(b=>b.onclick=async()=>{const l=S.leads.find(x=>x.id===b.dataset.fu);if(!l)return;b.disabled=true;
     const f=[...(l.data.followups||[]),{at:todayISO(),by:(typeof ME!=="undefined"&&ME)||""}];
     try{await store.update(l.id,{followups:f,status:"kikuldve",updatedAt:new Date().toISOString()});toast("Follow-up rögzítve, a következő "+dShort(addDays(todayISO(),FU_DAYS),"hu")+" esedékes")}catch(err){b.disabled=false;toast("Nem sikerült menteni: "+(err.message||err.code))}});
@@ -782,7 +787,7 @@ function renderEditor(){
    <div class="ed-preview" style="display:${S.pane==="preview"?"block":"none"}"><p class="pv-note">Így kapja meg az érdeklődő (PDF, A4).</p><div class="pages" id="pages"></div></div>
   </div>`;
   $("#actionbar").innerHTML=`<div class="actionbar"><div class="wrap"><div class="grow savestate" id="savestate2"></div>
-    <button class="btn" id="copymail">E-mail</button><button class="btn" id="termsbtn">ÁSZF</button><button class="btn primary" id="pdfbtn">${ICON.pdf} PDF</button></div></div>`;
+    <button class="btn" id="copymail">E-mail</button><button class="btn" id="termsbtn" title="Az ÁSZF a PDF végén is benne van">ÁSZF külön</button><button class="btn primary" id="pdfbtn">${ICON.pdf} PDF + ÁSZF</button></div></div>`;
   bindEditor();updateSaveState();renderPreview();
 }
 function bindEditor(){
@@ -1143,13 +1148,18 @@ async function makePDF(){
       el.querySelectorAll("[data-link]").forEach(a=>{const r=a.getBoundingClientRect();pdf.link((r.left-pr.left)*k,(r.top-pr.top)*k,r.width*k,r.height*k,{url:a.dataset.link})});
     }
     stage.innerHTML="";
-    const fname=docFileName(c),blob=pdf.output("blob");let where="PDF letöltve";
+    let blob=pdf.output("blob");
+    /* az ÁSZF a tájékoztató végére kerül, így nem kell külön csatolni */
+    if(window.PDFLib){try{const key=(kk==="vo"?"vo_":kk==="targyalo"?"mr_":"")+(c.lang==="en"?"en":"hu");const b64=DOCS[key];
+      if(b64&&b64.startsWith("data:")){const out=await PDFLib.PDFDocument.load(await blob.arrayBuffer());const bin=atob(b64.split(",")[1]);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+        const t=await PDFLib.PDFDocument.load(u);(await out.copyPages(t,t.getPageIndices())).forEach(pg=>out.addPage(pg));blob=new Blob([await out.save()],{type:"application/pdf"})}}catch(e){console.warn("ÁSZF csatolása nem sikerült",e)}}
+    const fname=docFileName(c);let where="PDF letöltve";
     if(useDir){try{await saveToDir(fname,blob);where="Mentve: "+DIR.name+" / "+fname}catch(e){await saveFile(fname,blob);where="A mappába nem sikerült menteni, letöltöttem"}}
     else await saveFile(fname,blob);
     if(!c.sentAt){c.sentAt=new Date().toISOString();if(!c.sentBy&&typeof ME!=="undefined"&&ME)c.sentBy=ME;S.dirty=true;await save()}
     toast(where,4000)
   }catch(e){if(e&&e.code==="declined")toast("Letöltés megszakítva");else toast("A PDF nem készült el: "+(e.message||e.code||e))}
-  finally{S.busy=false;btn.disabled=false;btn.innerHTML=ICON.pdf+" PDF"}
+  finally{S.busy=false;btn.disabled=false;btn.innerHTML=ICON.pdf+" PDF + ÁSZF"}
 }
 function mailText(c){const en=c.lang==="en";const n=c.salutation||c.name||"";const k=kindOf(c);
   const M={
@@ -1159,12 +1169,12 @@ function mailText(c){const en=c.lang==="en";const n=c.salutation||c.name||"";con
        en:{s:"Virtual office information – Vista Plus Offices",i:"our virtual office services",d:"the selected service, the meeting room options and the terms of the service",aszf:true,v:"We would also be delighted to welcome you for a personal visit, during which you can see our business centre and get to know our services more closely."}},
    targyalo:{hu:{s:"Tárgyalóbérlési tájékoztató – Vista Plus Offices",i:"tárgyalóink iránt",d:"tárgyalóinkról, az óradíjakról, valamint a kiegészítő szolgáltatásokról",aszf:false,v:"Igény esetén a foglalás előtt személyesen is szívesen megmutatjuk tárgyalóinkat."},
        en:{s:"Meeting room information – Vista Plus Offices",i:"our meeting rooms",d:"our meeting rooms, the hourly rates and our additional services",aszf:false,v:"If you wish, we will be happy to show you our meeting rooms in person before booking."}}}[k][en?"en":"hu"];
-  if(k==="vo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our virtual office services.\n\nPlease find attached our offer, which gives you detailed information about the content of the virtual office service, the additional services available and the contract terms. I am also attaching our General Terms and Conditions.\n\nPlease note that our company operates as a registered office service provider registered with the Hungarian Tax Authority (NAV). In line with the applicable legal requirements, we always carry out a customer due diligence check before the service starts, which is a mandatory part of the contracting process.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nI trust that you will be satisfied with our service, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.`}
-   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését virtuális iroda szolgáltatásunk iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál a virtuális iroda szolgáltatás tartalmáról, az elérhető kiegészítő szolgáltatásokról, valamint a szerződési feltételekről. Csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.\n\nSzeretnénk felhívni figyelmét, hogy társaságunk a NAV-nál nyilvántartásba vett székhelyszolgáltatóként végzi tevékenységét. A vonatkozó jogszabályi előírásoknak megfelelően a szolgáltatás igénybevételét megelőzően minden esetben ügyfél-átvilágítást végzünk, amely a szerződéskötési folyamat kötelező részét képezi.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nBízom benne, hogy szolgáltatásunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését.`};
+  if(k==="vo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our virtual office services.\n\nPlease find attached our offer, which gives you detailed information about the content of the virtual office service, the additional services available and the contract terms. Our General Terms and Conditions are included at the end of the offer.\n\nPlease note that our company operates as a registered office service provider registered with the Hungarian Tax Authority (NAV). In line with the applicable legal requirements, we always carry out a customer due diligence check before the service starts, which is a mandatory part of the contracting process.\n\nShould our offer be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\nI trust that you will be satisfied with our service, and we hope to welcome you among our clients soon.\n\nLooking forward to hearing from you.`}
+   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését virtuális iroda szolgáltatásunk iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál a virtuális iroda szolgáltatás tartalmáról, az elérhető kiegészítő szolgáltatásokról, valamint a szerződési feltételekről. Az ajánlat végén Általános Szerződési Feltételeinket (ÁSZF) is megtalálja.\n\nSzeretnénk felhívni figyelmét, hogy társaságunk a NAV-nál nyilvántartásba vett székhelyszolgáltatóként végzi tevékenységét. A vonatkozó jogszabályi előírásoknak megfelelően a szolgáltatás igénybevételét megelőzően minden esetben ügyfél-átvilágítást végzünk, amely a szerződéskötési folyamat kötelező részét képezi.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nBízom benne, hogy szolgáltatásunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését.`};
   if(k==="targyalo")return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in our meeting room facilities.\n\nPlease find attached our offer, which provides an overview of our meeting rooms, the additional services available, and the applicable rental terms and conditions.\n\nShould you have any questions or require further information, please do not hesitate to contact me using any of the contact details provided below. I will be more than happy to assist you.\n\nWe would also be delighted to arrange a personal viewing at your convenience, giving you the opportunity to explore our meeting rooms and discover the services and facilities we offer.\n\nWe hope our offer meets your expectations and look forward to the opportunity of welcoming you as our client.\n\nI look forward to hearing from you.`}
    :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését tárgyalóink iránt!\n\nMellékelten küldöm ajánlatunkat, amelyben részletes információkat talál tárgyalóinkról, az igénybe vehető kiegészítő szolgáltatásokról, valamint a bérleti feltételekről.\n\nAmennyiben ajánlatunk felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\nIgény esetén személyes megtekintésre is szívesen biztosítunk lehetőséget, hogy megismerhesse tárgyalóinkat és a rendelkezésre álló szolgáltatásokat.\n\nBízom benne, hogy ajánlatunk elnyeri tetszését, és hamarosan Önt is ügyfeleink között köszönthetjük.\n\nVárva mielőbbi visszajelzését.`};
-  return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in ${M.i}.\n\nPlease find attached our information pack, which gives you detailed information about ${M.d}.${M.aszf?" Together with it, I am also sending our General Terms and Conditions.":""}\n\nShould the options presented be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\n${M.v}\n\nLooking forward to hearing from you.`}
-   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését ${M.i}!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál ${M.d}.${M.aszf?" A tájékoztató mellett csatoltan küldöm Általános Szerződési Feltételeinket (ÁSZF) is.":""}\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\n${M.v}\n\nVárva mielőbbi visszajelzését.`}}
+  return en?{subject:M.s,body:`Dear ${n},\n\nThank you for your interest in ${M.i}.\n\nPlease find attached our information pack, which gives you detailed information about ${M.d}.${M.aszf?" Our General Terms and Conditions are included at the end of the document.":""}\n\nShould the options presented be of interest to you, or if you have any further questions, I will be happy to assist you via any of the contact details below.\n\n${M.v}\n\nLooking forward to hearing from you.`}
+   :{subject:M.s,body:`Kedves ${n}!\n\nKöszönjük megtisztelő érdeklődését ${M.i}!\n\nMellékelten küldöm tájékoztatónkat, amelyben részletes információkat talál ${M.d}.${M.aszf?" A tájékoztató végén Általános Szerződési Feltételeinket (ÁSZF) is megtalálja.":""}\n\nAmennyiben a bemutatott lehetőség felkeltette érdeklődését, vagy további kérdése merülne fel, készséggel állok rendelkezésére az alábbi elérhetőségek bármelyikén.\n\n${M.v}\n\nVárva mielőbbi visszajelzését.`}}
 async function copyMail(){
   const c=S.cur;const m=mailText(c);let copied=false;
   try{await navigator.clipboard.writeText(m.body);copied=true}catch(e){}
@@ -1175,6 +1185,13 @@ async function downloadTerms(){const en=S.cur&&S.cur.lang==="en",k=kindOf(S.cur)
   const key=(k==="vo"?"vo_":k==="targyalo"?"mr_":"")+(en?"en":"hu");const b64=DOCS[key];
   const fname={hu:"Vista_Plus_Offices_ÁSZF.pdf",en:"Vista_Plus_Offices_General_Terms_and_Conditions.pdf",vo_hu:"Vista_Plus_Offices_Virtuális_Iroda_ÁSZF.pdf",vo_en:"Vista_Plus_Offices_Virtual_Office_Terms_and_Conditions.pdf",mr_hu:"Vista_Plus_Offices_Tárgyaló_ÁSZF.pdf",mr_en:"Vista_Plus_Offices_Meeting_Room_Terms_and_Conditions.pdf"}[key];const bin=atob(b64.split(",")[1]);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
   try{await saveFile(fname,new Blob([u],{type:"application/pdf"}))}catch(e){if(e.code!=="declined")toast("A letöltés nem sikerült")}}
+
+/* megnyert lead → szerződés felajánlása */
+function offerContract(l){const old=document.getElementById("wonbox");if(old)old.remove();const d=l.data||{};
+  const m=document.createElement("div");m.id="wonbox";m.style.cssText="position:fixed;inset:0;z-index:80;background:rgba(20,22,26,.45);display:flex;align-items:center;justify-content:center;padding:16px";
+  m.innerHTML=`<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:22px;display:grid;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.25)"><h3 style="margin:0;font-size:19px">Megnyert lead</h3><p style="margin:0;color:var(--muted);font-size:14px">Készítsünk szerződést <b style="color:var(--fg)">${esc(d.company||d.name||"")}</b> részére? Az adatok és az árak a tájékoztatóból töltődnek ki, utána minden átírható.</p>
+   <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn" id="wonno">Később</button><a class="btn primary" id="wonyes" style="text-decoration:none" href="/szerzodesek/?lead=${encodeURIComponent(l.id)}">Új szerződés készítése</a></div></div>`;
+  document.body.appendChild(m);const close=()=>m.remove();m.querySelector("#wonno").onclick=close;m.onclick=e=>{if(e.target===m)close()};m.querySelector("#wonyes").focus()}
 
 /* ---------- settings ---------- */
 function renderSettings(){

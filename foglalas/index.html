@@ -320,7 +320,8 @@ footer{margin-top:18px}
       <div><label for="fen">Befejezés</label><select id="fen"></select></div>
       <div class="wide"><label for="fca">Catering</label><textarea id="fca" rows="2" placeholder="pl. 10 fő kávé, víz, pogácsa 9:00-ra – ha nem kér, hagyd üresen"></textarea>
         <div class="crow"><label for="fcd">Megrendelni</label><select id="fcd"><option value="1">az előző munkanapon</option><option value="2">2 munkanappal előtte</option><option value="3">3 munkanappal előtte</option><option value="5">egy héttel előtte (5 munkanap)</option><option value="0">a tárgyalás napján</option></select><span class="mute" id="fcdh"></span></div></div>
-      <div class="wide"><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div>
+      <div class="wide"><label for="fpl">Rendszám(ok)</label><input id="fpl" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase">
+        <label class="chk" style="margin-top:6px;font-size:13.5px;font-weight:600"><input type="checkbox" id="fplsave"> Mentés az ügyfélhez – ezek a rendszámok minden foglalásánál automatikusan bekerülnek</label><div class="hint" id="fplh" style="font-size:12.5px;color:var(--grey)"></div></div>
       <div class="wide" id="repw"><span class="lbl">Ismétlés</span><div class="repeat"><select id="frep" aria-label="Ismétlés"><option value="0">Nem ismétlődik</option><option value="7">Hetente</option><option value="14">Kéthetente</option></select><label for="frend" id="frendl" hidden style="margin:0">utolsó alkalom:</label><input type="date" id="frend" aria-label="Utolsó alkalom dátuma" hidden></div><div class="mute" id="frepi" style="font-size:12.5px;margin-top:4px"></div></div>
       <div class="wide"><label for="fno">Megjegyzés</label><textarea id="fno" rows="2"></textarea></div>
     </div>
@@ -548,7 +549,7 @@ $("cal").addEventListener("keydown",e=>{if(e.key==="Enter"){const bk=e.target.cl
 const timeOpts=(from,to)=>{let o="";for(let m=from;m<=to;m+=STEP)o+=`<option value="${toHM(m)}">${toHM(m)}</option>`;return o};
 $("fst").innerHTML=timeOpts(0,24*60-STEP);$("fen").innerHTML=timeOpts(STEP,24*60);
 function ensureOpt(sel,v){if(v&&![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v))}
-function fill(b){$("ncw").hidden=true;$("fca").value=b.catering||"";$("fcd").value=String(b.cdays??1);setTimeout(cdHint,0);setTimeout(fillPeople,0);$("fpl").value=b.plate||"";$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";$("frend").value="";syncRep();say("fmsg","");clientInfo()}
+function fill(b){$("ncw").hidden=true;$("fca").value=b.catering||"";$("fcd").value=String(b.cdays??1);setTimeout(cdHint,0);setTimeout(fillPeople,0);$("fpl").value=b.plate||"";setTimeout(()=>plateHint(false),0);$("fco").value=b.company||"";$("fti").value=b.title||"";$("fro").value=b.room;$("fda").value=b.date;ensureOpt($("fst"),b.start);ensureOpt($("fen"),b.end);$("fst").value=b.start;$("fen").value=b.end;$("fpe").value=b.person||"";$("fno").value=b.note||"";$("frep").value="0";$("frend").value="";syncRep();say("fmsg","");clientInfo()}
 function openNew(date,roomId,a,b){editing=null;$("dh").textContent="Új foglalás";$("fdel").hidden=true;$("repw").hidden=false;fill({date:date||cur,room:roomId||ROOMS[0].id,start:toHM(a??9*60),end:toHM(b??10*60)});$("dlg").showModal();setTimeout(()=>$("fco").focus(),30)}
 function openEdit(id){tip.hidden=true;const b=BK.find(x=>x.id===id);if(!b)return;editing=b;$("dh").textContent="Foglalás módosítása";$("fdel").hidden=false;$("fdel").dataset.arm="";$("fdel").textContent="Törlés";$("repw").hidden=true;fill(b);$("dlg").showModal()}
 function repDates(){const every=+$("frep").value,start=$("fda").value,end=$("frend").value;if(!every||!start)return[start];const out=[];if(!end||end<start)return[start];for(let d=start;d<=end&&out.length<60;d=addDays(d,every))out.push(d);return out}
@@ -557,7 +558,12 @@ function syncRep(){const on=$("frep").value!=="0";$("frend").hidden=!on;$("frend
  if(!on){$("frepi").textContent="";return}const L=repDates();
  $("frepi").textContent=$("frend").value<$("fda").value?"Az utolsó alkalom nem lehet a kezdő dátum előtt.":L.length+" alkalom · az utolsó: "+parseD(L[L.length-1]).toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric",weekday:"long"})+(L.length>=60?" (legfeljebb 60 alkalom)":"")}
 $("frep").onchange=syncRep;$("frend").onchange=syncRep;$("fda").addEventListener("change",()=>{if(!$("repw").hidden)syncRep()});
-$("fco").addEventListener("input",fillPeople);["fca","fcd","fda"].forEach(id=>$(id).addEventListener(id==="fca"?"input":"change",cdHint));
+$("fco").addEventListener("input",fillPeople);$("fco").addEventListener("input",()=>plateHint(true));
+function clientPlatesOf(n){const c=findClient(String(n||"").trim());return c&&Array.isArray(c.plates)?c.plates:[]}
+function plateHint(autofill){const ps=clientPlatesOf($("fco").value);if(autofill&&!editing&&ps.length&&!$("fpl").value.trim())$("fpl").value=ps.join(", ");
+  $("fplh").textContent=ps.length?"Az ügyfélhez mentett rendszámok: "+ps.join(", "):"";$("fplsave").checked=false}
+async function savePlates(name,str){const v=await api("config");const list=Array.isArray(v.clients)?v.clients:null;if(!list)return;const c=list.find(x=>norm(x.n)===norm(name));if(!c)return;
+  c.plates=[...new Set(String(str||"").toUpperCase().split(",").map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean))].slice(0,20);await api("config",{method:"PUT",body:JSON.stringify(v)});CFG.clients=list}["fca","fcd","fda"].forEach(id=>$(id).addEventListener(id==="fca"?"input":"change",cdHint));
 ["fco","fro","fst","fen"].forEach(id=>$(id).addEventListener(id==="fco"?"input":"change",clientInfo));
 $("fst").addEventListener("change",()=>{if(toMin($("fen").value)<=toMin($("fst").value)){const m=Math.min(toMin($("fst").value)+60,24*60);$("fen").value=toHM(m);clientInfo()}});
 $("fcancel").onclick=()=>$("dlg").close();
@@ -568,6 +574,7 @@ $("bform").onsubmit=async ev=>{ev.preventDefault();
  const fc=findClient($("fco").value.trim());
  const b={catering:$("fca").value.trim(),cdays:+$("fcd").value,plate:$("fpl").value.toUpperCase().replace(/\s+/g," ").trim(),company:fc?fc.n:$("fco").value.trim(),title:$("fti").value.trim(),room:$("fro").value,date:$("fda").value,start:$("fst").value,end:$("fen").value,person:$("fpe").value.trim(),note:$("fno").value.trim()};
  if(!b.company&&!b.title){say("fmsg","Add meg az ügyfelet vagy a megnevezést.",1);return}
+ if($("fplsave").checked&&fc){try{await savePlates(fc.n,b.plate)}catch(e){say("fmsg","A rendszámokat nem sikerült az ügyfélhez menteni: "+e.message,1);return}}
  if(!b.date){say("fmsg","Add meg a dátumot.",1);return}
  if(toMin(b.end)<=toMin(b.start)){say("fmsg","A befejezésnek a kezdés után kell lennie.",1);return}
  $("fsave").disabled=true;

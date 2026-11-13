@@ -295,6 +295,7 @@ async function portalRoutes(req, store, parts, url, who) {
     const b = { room, date, start, end, company: who.company, title: String(r.title || "").slice(0, 200), person: String(r.person || who.name || "").slice(0, 200),
       note: String(r.note || "").slice(0, 1000), catering: String(r.catering || "").trim().slice(0, 1000), cdays: 1, rep: "", repEnd: "", repLast: false,
       plate: String(r.plate || "").toUpperCase().replace(/\s+/g, " ").trim().slice(0, 120), src: "portal", ext: "", ts: now, by: who.email, own: who.email, conf: "", remAt: 0 };
+    if (!b.plate && b.company) b.plate = await clientPlates(store, b.company);
     if (bpMs(date, start) - now < H24) { b.conf = "yes"; b.confAt = now; b.remAt = now; }
     const month = date.slice(0, 7), list = await monthBk(store, month);
     if (list.some((x) => x.room === room && x.date === date && tMin(x.start) < tMin(end) && tMin(start) < tMin(x.end))) return json({ error: "Ez az időpont már foglalt. Válassz másikat." }, 409);
@@ -359,6 +360,14 @@ async function accountRoutes(req, store, parts, user) {
   }
   if (m === "DELETE") { await store.delete(accKey(email)); return json({ ok: true }); }
   return json({ error: "Ismeretlen kérés." }, 404);
+}
+
+// Ügyfélhez mentett rendszámok (config.clients[].plates) – új foglalásnál automatikusan bekerülnek
+async function clientPlates(store, company) {
+  const n = String(company || "").trim().toLowerCase(); if (!n) return "";
+  const cfg = (await store.get("config", { type: "json" })) || {};
+  const c = (Array.isArray(cfg.clients) ? cfg.clients : []).find((x) => String(x.n || "").trim().toLowerCase() === n);
+  return c && Array.isArray(c.plates) ? c.plates.join(", ").slice(0, 120) : "";
 }
 
 export default async (req) => {
@@ -535,6 +544,7 @@ export default async (req) => {
       const x = clash(await loadMonth(month), b, parts[1]);
       if (x) return json({ error: `Ütközik egy másik foglalással: ${x.start}–${x.end} ${x.company || x.title || ""}`.trim(), clash: x }, 409);
       if (m === "POST") b.by = user;
+      if (m === "POST" && !b.plate && b.company) b.plate = await clientPlates(store, b.company);
       id = id || newId(month);
       await store.setJSON(`b/${month}/${id}`, b);
       if (moveFrom) await store.delete(moveFrom);
@@ -629,8 +639,9 @@ export default async (req) => {
       let cl = cfg.clients.find((x) => norm(x.n) === norm(n));
       const created = !cl;
       const prices = Array.isArray(c.prices) ? c.prices.slice(0, 200).map((p) => ({ i: String(p && p.i || "").trim().slice(0, 200), u: Number(p && p.u), cur: p && p.cur === "EUR" ? "EUR" : "HUF" })).filter((p) => p.i && isFinite(p.u) && p.u >= 0) : null;
-      if (cl) { cl.eur = !!c.eur; cl.free = free; if (prices) cl.prices = prices; }
-      else { cl = { n, eur: !!c.eur, free, note: "", prices: prices || [] }; cfg.clients.push(cl); if (Array.isArray(cfg.quick) && !cfg.quick.some((q) => norm(q) === norm(n))) cfg.quick.push(n); }
+      const people = Array.isArray(c.people) ? [...new Set(c.people.map((x) => String(x || "").trim().slice(0, 120)).filter(Boolean))].slice(0, 50) : null;
+      if (cl) { cl.eur = !!c.eur; cl.free = free; if (prices) cl.prices = prices; if (people) cl.people = [...new Set([...(cl.people || []), ...people])]; }
+      else { cl = { n, eur: !!c.eur, free, note: "", prices: prices || [], people: people || [] }; cfg.clients.push(cl); if (Array.isArray(cfg.quick) && !cfg.quick.some((q) => norm(q) === norm(n))) cfg.quick.push(n); }
       await store.setJSON("config", cfg);
       const data = { ...k, status: "aktiv", activatedAt: new Date().toISOString(), activatedBy: user, clientName: cl.n, upd: user };
       await store.setJSON(key, data);
@@ -649,6 +660,14 @@ export default async (req) => {
       const id = m === "PUT" ? parts[1] : `K${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
       const prev = m === "PUT" ? await store.get("k/" + id, { type: "json" }) : null;
       const data = { ...d, by: (prev && prev.by) || user, upd: user };
+      // Szerződésszám: O-ÉÉÉÉ-001 (iroda), VO-ÉÉÉÉ-001 (virtuális iroda), MR-ÉÉÉÉ-001 (tárgyaló) – típusonként és évente folyamatos
+      if (!String(data.no || "").trim() && !(prev && prev.no)) {
+        const pre = { iroda: "O", vo: "VO", targyalo: "MR" }[data.kind] || "O", yr = String(data.date || "").slice(0, 4).match(/^\d{4}$/) ? String(data.date).slice(0, 4) : String(new Date().getFullYear());
+        const { blobs } = await store.list({ prefix: "k/" }); let max = 0;
+        const rx = new RegExp("^" + pre + "-" + yr + "-(\\d+)$");
+        for (const bl of blobs) { const v = await store.get(bl.key, { type: "json" }); const mm = v && String(v.no || "").match(rx); if (mm) max = Math.max(max, +mm[1]); }
+        data.no = `${pre}-${yr}-${String(max + 1).padStart(3, "0")}`;
+      } else if (!String(data.no || "").trim() && prev && prev.no) data.no = prev.no;
       await store.setJSON("k/" + id, data);
       return json({ id, data });
     }

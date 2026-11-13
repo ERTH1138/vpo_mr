@@ -243,6 +243,8 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
         <div><label for="cfree">Ingyenes tárgyalóórák / hó</label><input type="number" id="cfree" min="0" step="any" inputmode="decimal" placeholder="0"></div>
         <div><label class="chk" style="padding-top:26px"><input type="checkbox" id="cquick"> Gyakori ügyfél (gyorsgomb)</label></div>
       </div>
+      <div class="grid" style="margin-top:14px"><div class="wide"><label for="cpeople">Személyek az ügyfélnél <span style="font-weight:400;color:var(--grey)">(vesszővel elválasztva – rögzítéskor a „Ki kérte” listában jelennek meg)</span></label><input id="cpeople" autocomplete="off" placeholder="pl. Nagy Péter, Kiss Anna"></div>
+        <div class="wide"><label for="cplates">Rendszámok <span style="font-weight:400;color:var(--grey)">(vesszővel elválasztva – minden tárgyalófoglalásnál automatikusan bekerülnek)</span></label><input id="cplates" autocomplete="off" placeholder="pl. ABC-123, AA-BB-123" style="text-transform:uppercase"></div></div>
       <div style="margin-top:14px"><label for="cnote">Megjegyzés</label><textarea id="cnote" rows="3" placeholder="pl. kapcsolattartó, számlázási tudnivalók, szerződés részletei…"></textarea></div>
 
       <div style="margin-top:20px">
@@ -437,7 +439,7 @@ function aggregate(M,FR,R){const by={};M.forEach(e=>{const o=by[e.company]||(by[
   const c=curOf(e),f=FR[e.id]||{q:0,a:0},cat=o.h[e.cat]!=null?e.cat:"Egyéb";
   o.h[cat]+=conv(e.total,c,"HUF",R);o.e[cat]+=conv(e.total,c,"EUR",R);o.fq+=f.q;o.fah+=conv(f.a,c,"HUF",R);o.fae+=conv(f.a,c,"EUR",R)});
  Object.values(by).forEach(o=>{o.nh=o.h.Konyhai+o.h.Irodai+o.h["Egyéb"]-o.fah;o.ne=o.e.Konyhai+o.e.Irodai+o.e["Egyéb"]-o.fae});return by}
-function renderPeople(){const c=norm($("co").value);const ps=[...new Set(E.filter(e=>norm(e.company)===c&&e.person).map(e=>e.person))];$("pl").innerHTML=ps.map(p=>`<option value="${esc(p)}">`).join("")}
+function renderPeople(){const c=norm($("co").value);const cl=CLIENTS.find(x=>norm(x.n)===c);const ps=[...new Set([...(cl&&cl.people||[]),...E.filter(e=>norm(e.company)===c&&e.person).map(e=>e.person)])];$("pl").innerHTML=ps.map(p=>`<option value="${esc(p)}">`).join("")}
 // ---------- Rögzített tételek: rendezés és oszlopszűrők ----------
 let LSORT={k:"ts",d:-1},LF={};
 const recTs=e=>e.virtual?Date.parse(e.date+"T23:59:00"):(+e.ts||Date.parse(e.date+"T00:00:00"));
@@ -520,8 +522,8 @@ $("ctab").onclick=e=>{const tr=e.target.closest("tr[data-n]");if(tr)openClient(t
 $("cq").oninput=renderClients;
 $("cnew").onclick=()=>openClient(null,"");
 function openClient(name,prefill){const c=name?findClient(name):null;edOrig=c?c.n:null;
- ED=c?{n:c.n,eur:!!c.eur,free:c.free||0,note:c.note||"",prices:c.prices.map(p=>({...p}))}:{n:prefill||"",eur:false,free:0,note:"",prices:[]};
- $("ced").hidden=false;$("ceh").textContent=c?c.n:"Új ügyfél";$("cname").value=ED.n;setEdCur(ED.eur);$("cfree").value=ED.free||"";$("cquick").checked=c?inQL(c.n):true;$("cnote").value=ED.note;
+ ED=c?{...c,n:c.n,eur:!!c.eur,free:c.free||0,note:c.note||"",prices:c.prices.map(p=>({...p}))}:{n:prefill||"",eur:false,free:0,note:"",prices:[]};
+ $("ced").hidden=false;$("ceh").textContent=c?c.n:"Új ügyfél";$("cname").value=ED.n;setEdCur(ED.eur);$("cfree").value=ED.free||"";$("cquick").checked=c?inQL(c.n):true;$("cnote").value=ED.note;$("cpeople").value=(ED.people||[]).join(", ");$("cplates").value=(ED.plates||[]).join(", ");
  $("cdel").hidden=!c;$("cdel").dataset.arm="";$("cdel").textContent="Ügyfél törlése";say("cm","");renderCP();renderClients();$("pacc").hidden=!c;say("pam","");$("paem").value="";$("pana").value="";renderAcc();
  $("ced").scrollIntoView({behavior:"smooth",block:"start"});if(!c)setTimeout(()=>$("cname").focus(),50)}
 function closeClient(){ED=null;edOrig=null;$("ced").hidden=true;renderClients()}
@@ -542,7 +544,7 @@ $("csave").onclick=async()=>{if(!ED)return;const n=$("cname").value.trim();if(!n
  const fv=$("cfree").value.trim(),fr=fv===""?0:+fv.replace(",",".");if(!(fr>=0)){say("cm","Az ingyenes órák száma nem lehet negatív.",1);return}
  const prices=[];for(const p of ED.prices){if(p.u===""||!(+p.u>0)){say("cm","Adj meg árat minden egyedi tételhez, vagy töröld a sort.",1);return}
   if(prices.some(q=>q.i===p.i)){say("cm","Egy tételhez csak egy egyedi ár tartozhat: "+shortName(p.i),1);return}prices.push({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"})}
- const rec={n:n,eur:!!ED.eur,free:fr,note:$("cnote").value.trim().slice(0,2000),prices:prices},bC=CLIENTS.slice(),bQ=QL.slice();
+ const lst=v=>[...new Set(v.split(",").map(x=>x.trim()).filter(Boolean))],rec={...ED,n:n,eur:!!ED.eur,free:fr,note:$("cnote").value.trim().slice(0,2000),prices:prices,people:lst($("cpeople").value).slice(0,50),plates:lst($("cplates").value.toUpperCase()).slice(0,20)},bC=CLIENTS.slice(),bQ=QL.slice();
  if(edOrig){const ix=CLIENTS.findIndex(c=>c.n===edOrig);CLIENTS[ix]=rec;QL=QL.map(q=>norm(q)===norm(edOrig)?n:q)}else CLIENTS.push(rec);
  const q=inQL(n);if($("cquick").checked&&!q)QL=QL.concat(n);if(!$("cquick").checked&&q)QL=QL.filter(x=>norm(x)!==norm(n));
  try{await saveCfg()}catch(e){CLIENTS=bC;QL=bQ;say("cm","Nem sikerült menteni: "+e.message,1);return}
@@ -596,7 +598,7 @@ function migrate(v){const out=[],add=n=>{n=String(n||"").trim();if(n&&!out.some(
  (v.free||[]).forEach(o=>{const c=f(o.c);if(c)c.free=+o.h||0});(v.eur||[]).forEach(n=>{const c=f(n);if(c)c.eur=true});
  (v.prices||[]).forEach(o=>{const c=f(o.c);if(c)c.prices.push({i:o.i,u:+o.u,cur:o.cur==="EUR"?"EUR":"HUF"})});return out}
 function applyCfg(v){v=v||{};CI=(v.items||[]).map(o=>[o.n,o.c,+o.u||0,o.q?1:0]);BPL=v.base||[];rebuildBP();RATES=v.rates||{};QL=v.quick||QC.slice();QI=v.qitems||null;
- CLIENTS=Array.isArray(v.clients)?v.clients.map(c=>({n:String(c.n),eur:!!c.eur,free:+c.free||0,note:String(c.note||""),prices:(c.prices||[]).map(p=>({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"}))})):migrate(v)}
+ CLIENTS=Array.isArray(v.clients)?v.clients.map(c=>({...c,people:Array.isArray(c.people)?c.people.map(String):[],plates:Array.isArray(c.plates)?c.plates.map(String):[],n:String(c.n),eur:!!c.eur,free:+c.free||0,note:String(c.note||""),prices:(c.prices||[]).map(p=>({i:p.i,u:+p.u,cur:p.cur==="EUR"?"EUR":"HUF"}))})):migrate(v)}
 function refreshAll(first){buildItems();buildIChips();buildCChips();if(first)pick();else{markI();clientInfo()}fillRate();render();renderClients();renderB()}
 let busy=false;
 async function loadE(){const mo=$("mon").value;if(!mo)return;try{const L=await api("entries?month="+mo);if(mo===$("mon").value){E=L;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}}
