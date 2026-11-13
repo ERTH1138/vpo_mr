@@ -559,6 +559,67 @@ export default async (req) => {
     }
   }
 
+  // Jegyzetek (saját Trello-tábla): j/board = {v, lists:[{id,n,pos,done}], cards:{<id>:{id,l,pos,t,d,due,lb,ck,att,ts,by,ut,upd}}, labels:[{id,c,n}]}
+  // GET /api/board?v=N – ha nincs változás: {same:true}; POST /api/board {ops:[...]} – műveletek; POST /api/board/import {board,force}
+  if (parts[0] === "board") {
+    const KEY = "j/board";
+    const load = async () => (await store.get(KEY, { type: "json" })) || { v: 0, lists: [], cards: {}, labels: [] };
+    const str = (x, n) => String(x == null ? "" : x).slice(0, n);
+    const BID = /^[A-Za-z0-9_-]{1,40}$/;
+    if (m === "GET") {
+      const b = await load(), v = url.searchParams.get("v");
+      if (v !== null && +v === b.v) return json({ same: true, v: b.v });
+      return json(b);
+    }
+    if (m === "POST" && parts[1] === "import") {
+      const body = await req.json().catch(() => null), nb = body && body.board;
+      if (!nb || !Array.isArray(nb.lists) || !nb.cards || typeof nb.cards !== "object") return json({ error: "Hibás importfájl." }, 400);
+      if (JSON.stringify(nb).length > 4000000) return json({ error: "Túl nagy tábla." }, 413);
+      const b = await load();
+      if ((b.lists.length || Object.keys(b.cards).length) && !body.force) return json({ error: "A tábla már nem üres – az import felülírná." }, 409);
+      const out = { v: (b.v || 0) + 1, lists: nb.lists, cards: nb.cards, labels: Array.isArray(nb.labels) ? nb.labels : [], importedAt: Date.now(), importedBy: user };
+      await store.setJSON(KEY, out);
+      return json({ ok: true, v: out.v, lists: out.lists.length, cards: Object.keys(out.cards).length });
+    }
+    if (m === "POST") {
+      const body = await req.json().catch(() => null), ops = body && Array.isArray(body.ops) ? body.ops.slice(0, 200) : null;
+      if (!ops || !ops.length) return json({ error: "Nincs művelet." }, 400);
+      const b = await load(), now = Date.now(), errs = [];
+      for (const op of ops) {
+        if (!op || (op.o !== "lb" && !BID.test(String(op.id || "")))) { errs.push("hibás azonosító"); continue; }
+        const s = op.s || {};
+        if (op.o === "c") {
+          let c = b.cards[op.id];
+          if (!c) { if (!s.l || !String(s.t || "").trim()) { errs.push("hiányzó kártyaadat"); continue; } c = { id: op.id, ts: now, by: user }; }
+          if ("l" in s) { if (!b.lists.some((l) => l.id === s.l)) { errs.push("nincs ilyen lista"); continue; } c.l = s.l; }
+          b.cards[op.id] = c;
+          if ("pos" in s && isFinite(+s.pos)) c.pos = +s.pos;
+          if ("t" in s) c.t = str(s.t, 1000);
+          if ("d" in s) c.d = str(s.d, 20000);
+          if ("due" in s) c.due = /^\d{4}-\d{2}-\d{2}$/.test(String(s.due)) ? s.due : "";
+          if ("lb" in s) c.lb = Array.isArray(s.lb) ? s.lb.map((x) => str(x, 40)).slice(0, 20) : [];
+          if ("ck" in s) c.ck = Array.isArray(s.ck) ? s.ck.slice(0, 100).map((x) => ({ id: str(x && x.id, 40), t: str(x && x.t, 500), done: !!(x && x.done) })) : [];
+          if ("att" in s) c.att = Array.isArray(s.att) ? s.att.slice(0, 30).map((x) => ({ n: str(x && x.n, 300), u: str(x && x.u, 2000) })).filter((x) => /^https?:\/\//.test(x.u)) : [];
+          c.ut = now; c.upd = user;
+        } else if (op.o === "cd") delete b.cards[op.id];
+        else if (op.o === "l") {
+          let l = b.lists.find((x) => x.id === op.id);
+          if (!l) { if (!String(s.n || "").trim()) { errs.push("hiányzó listanév"); continue; } l = { id: op.id, n: "", pos: 0 }; b.lists.push(l); }
+          if ("n" in s) l.n = str(s.n, 120);
+          if ("pos" in s && isFinite(+s.pos)) l.pos = +s.pos;
+          if ("done" in s) l.done = !!s.done;
+        } else if (op.o === "ld") {
+          b.lists = b.lists.filter((x) => x.id !== op.id);
+          for (const k of Object.keys(b.cards)) if (b.cards[k].l === op.id) delete b.cards[k];
+        } else if (op.o === "lb") b.labels = Array.isArray(op.labels) ? op.labels.slice(0, 30).map((x) => ({ id: str(x && x.id, 40), c: str(x && x.c, 20), n: str(x && x.n, 60) })) : b.labels;
+        else errs.push("ismeretlen művelet");
+      }
+      b.v = (b.v || 0) + 1;
+      await store.setJSON(KEY, b);
+      return json({ ok: true, v: b.v, errors: errs });
+    }
+  }
+
   // Futárrendelések: f/<YYYY-MM>/<id> = {date,carrier,company,person,addr,awb,orderedBy,note,cost,price,eid,ts,by}
   // Ha a rendelésnek van ára, automatikusan átkerül a Kiegészítő szolgáltatások tételei közé (e/<YYYY-MM>/<eid>, courier: <id>)
   if (parts[0] === "couriers") {
