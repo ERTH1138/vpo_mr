@@ -150,7 +150,7 @@ td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;f
 <div class="wrap">
   <header>
     <img src="logo.png" alt="Vista Plus Offices" width="340" height="170">
-    <nav class="tag"><a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/" aria-current="page">Kiegészítő szolgáltatások</a> · <a href="/foglalas/">Tárgyalófoglalás</a> · <a href="/tajekoztato/">Tájékoztatók</a> · <a href="/szerzodesek/">Szerződések</a></nav>
+    <nav class="tag"><a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/" aria-current="page">Kiegészítő szolgáltatások</a> · <a href="/futar/">Futár</a> · <a href="/foglalas/">Tárgyalófoglalás</a> · <a href="/tajekoztato/">Tájékoztatók</a> · <a href="/szerzodesek/">Szerződések</a></nav>
   </header>
 
   <div class="titlebar">
@@ -474,7 +474,7 @@ function render(){
  document.querySelectorAll("#log .hrow th[data-k]").forEach(th=>{th.classList.toggle("asc",th.dataset.k===LSORT.k&&LSORT.d>0);th.classList.toggle("desc",th.dataset.k===LSORT.k&&LSORT.d<0)});
  requestAnimationFrame(syncSticky);
  $("logb").innerHTML=L.length?
-  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td class=rec>${esc(recTxt(e))}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
+  L.map(e=>`<tr${e.id===editId?' class="ed"':""}><td>${esc(e.date)}</td><td>${esc(e.company)}</td><td class=rec>${esc(recTxt(e))}</td><td>${esc(e.person)}</td><td>${esc(e.item)}${e.virtual?' <span class="badge">foglalásból</span>':""}${e.courier?' <span class="badge">futárrendelésből</span>':""}${FR[e.id]&&FR[e.id].q?` <span class="badge free">${fmtN(FR[e.id].q)} óra ingyenes</span>`:""}</td><td class=num>${fmtN(e.qty)}</td><td class=num>${money(e.total,curOf(e))}</td><td>${esc(e.note)}</td><td class=act>${e.virtual?`<a class=x href="/foglalas/#d=${esc(e.date)}&v=lista" title="A foglalások a tárgyalófoglaló naptárban módosíthatók">Naptár →</a>`:e.courier?`<a class=x href="/futar/#m=${esc(String(e.date).slice(0,7))}" title="A futárrendelések a Futár oldalon módosíthatók">Futár →</a>`:`<button class=x data-ed="${esc(e.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-id="${esc(e.id)}" title="Törlés" aria-label="Törlés">✕</button>`}</td></tr>`).join("")
   :`<tr><td class=empty colspan=9>${M.some(e=>!e.virtual)?"Nincs a szűrésnek megfelelő tétel.":"Ebben a hónapban még nincs rögzített tétel. Válassz ügyfelet és tételt fent, majd kattints a Rögzítés gombra."}</td></tr>`;
 }
 // Dátum és Ügyfél oszlop rögzítése vízszintes görgetéskor

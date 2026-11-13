@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Futárrendelések · Vista Plus Offices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* Ugyanaz a vizuális rendszer, mint a Tárgyaló órák és VPO eredmény oldalakon: fehér alap, Manrope, piros–narancs márkaszín. */
+:root{
+  --red:#EF4130; --red-dark:#D1372A; --orange:#F5975A; --peach:#FDEEE4;
+  --ink:#2B2B2B; --grey:#7D7D7D; --line:#E6E3E0; --bg:#FFFFFF; --soft:#FAF8F6;
+  --ok:#1F7A4D; --okbg:#E8F5EE; --warn:#9B2418; --warnbg:#FFF1EF;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;font-size:15px}
+.wrap{max-width:1040px;margin:0 auto;padding:28px max(20px,env(safe-area-inset-right,0px)) 64px max(20px,env(safe-area-inset-left,0px))}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--orange),var(--red)) 1}
+header img{height:72px;width:auto;display:block}
+header .tag{color:var(--grey);font-size:14px;text-align:right}
+header .tag a{color:var(--grey);text-decoration:none}header .tag a:hover{color:var(--ink)}header .tag a[aria-current]{color:var(--ink);font-weight:700}
+.titlebar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin:26px 0 18px}
+h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15;margin:0 0 4px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.status{color:var(--grey);font-size:13px}
+.status.bad{color:var(--warn)}
+.monthpick{display:flex;flex-direction:column;gap:4px;min-width:170px}
+.tabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin-bottom:22px}
+.tabs button{flex:0 0 auto;font:inherit;font-weight:700;font-size:14px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 14px;color:var(--grey);cursor:pointer;border-radius:0}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--red)}
+.tabs .cnt{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:12px;color:var(--grey);text-align:center}
+section[role=tabpanel]{display:flex;flex-direction:column;gap:22px}
+.panel{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--bg)}
+.panel.soft{background:var(--soft);border-color:transparent}
+h2{margin:0;font-size:19px;font-weight:700}
+.phead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:14px}
+.sub{color:var(--grey);font-size:13.5px;margin:2px 0 0;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.grid .wide{grid-column:span 2}
+@media (max-width:560px){.grid .wide{grid-column:auto}}
+label,.lbl{display:block;font-size:12.5px;font-weight:600;color:var(--grey);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:15px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--peach)}
+input[type=checkbox]{width:auto;accent-color:var(--red)}
+.btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;background:var(--red);color:#fff;white-space:nowrap}
+.btn:hover{background:var(--red-dark)}
+.btn:focus-visible,.chip:focus-visible,.tabs button:focus-visible,.x:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.danger{background:transparent;color:var(--warn);border:1.5px solid #F2C9C2}
+.btn.danger:hover{background:var(--warnbg)}
+.btn.sm{padding:7px 14px;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:36px}
+.chip{font:inherit;font-size:13.5px;font-weight:600;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.chip:hover{border-color:var(--orange)}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff}
+.chip.add{border-style:dashed;color:var(--red);border-color:#F2B8A5;background:transparent}
+.chip.add:hover{background:var(--peach)}
+.chip.ghosted{opacity:.35}
+.chip.dragging{box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.chiprow{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.chiprow .hint{font-size:12px;color:var(--grey);font-weight:400}
+.badges{display:flex;flex-wrap:wrap;gap:6px;min-height:24px;margin:10px 0 2px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.badge.eur{background:#EEF3FF;border-color:#CCD9F7;color:#24448F}
+.badge.free{background:var(--okbg);border-color:#BFE3CF;color:var(--ok)}
+.badge.price{background:var(--peach);border-color:#F6CDB6;color:#8A3A16}
+.qhint{font-size:12.5px;font-weight:700;color:var(--ok);min-height:18px;margin-top:3px}.qhint.bad{color:var(--warn)}
+.badge.portal{background:#F1ECFA;border-color:#D9CCF0;color:#4B2C86;margin-left:6px}
+.linkbox{display:flex;gap:6px;margin-top:6px}.linkbox input{font-size:13px;padding:6px 9px}
+.inline{display:flex;gap:6px}
+.inline select{width:auto;min-width:76px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
+.formfoot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:16px}
+.msg{font-size:13.5px;min-height:20px;font-weight:600;color:var(--ok)}
+.msg.bad{color:var(--warn)}
+.addpanel{margin:0 0 14px;padding:14px;border:1.5px dashed #F2B8A5;border-radius:12px;background:#FFFBF8}
+.tablebox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+th{font-size:12.5px;color:var(--grey);font-weight:700;border-bottom:2px solid var(--ink)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.wrap{white-space:normal;min-width:160px}
+tr.total td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;font-size:15px}
+tr.ed td{background:var(--peach)}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--soft)}
+tr.sel td{background:var(--peach)}
+.big{font-size:20px;color:var(--red)}
+.x{font:inherit;border:0;background:none;color:var(--grey);cursor:pointer;padding:4px 7px;border-radius:8px;font-size:14px}
+.x:hover{background:var(--soft);color:var(--ink)}
+.x.del:hover{color:var(--warn);background:var(--warnbg)}
+td.act{text-align:right}
+.mute{color:var(--grey)}
+.warn{color:var(--warn);font-weight:700}
+.empty{padding:18px;text-align:center;color:var(--grey);font-size:14px;white-space:normal}
+.ratebar{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end;padding:14px;border-radius:12px;background:var(--soft);margin-bottom:12px}
+.notebox{padding:10px 14px;border-left:3px solid var(--orange);background:var(--soft);color:#5a5a5a;font-size:13.5px;border-radius:0 8px 8px 0}
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+.toggle{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.toggle button{font:inherit;font-size:13.5px;font-weight:700;border:0;background:none;padding:6px 16px;border-radius:999px;cursor:pointer;color:var(--grey)}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:600;margin:0;padding-top:8px}
+.prow input,.prow select{padding:7px 9px;font-size:14px}
+.search{width:220px;max-width:100%}
+.phead>div:first-child{flex:1 1 280px;min-width:0}
+footer{margin-top:40px;color:var(--grey);font-size:12.5px}
+textarea{resize:vertical;min-height:84px;line-height:1.45}
+.cnote{margin:6px 0 4px;padding:8px 12px;border-left:3px solid var(--orange);background:var(--soft);border-radius:0 8px 8px 0;font-size:13.5px;color:#4a4a4a;white-space:pre-line;max-width:80ch}
+td.notecell{white-space:pre-line;min-width:180px;max-width:320px;color:#4a4a4a;font-size:13px}
+.login{position:fixed;inset:0;z-index:100;background:var(--soft);display:flex;align-items:center;justify-content:center;padding:20px max(20px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))}
+.login .box{width:100%;max-width:380px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.login img{height:64px;width:auto;display:block;margin:0 auto 14px}
+.login h2{margin:0 0 4px;font-size:20px;text-align:center}
+.login p{margin:0 0 18px;color:var(--grey);font-size:13.5px;text-align:center}
+.login .f{display:flex;flex-direction:column;gap:12px}
+.login .err{color:var(--warn);font-weight:600;font-size:13.5px;min-height:20px}
+.who{font-size:13px;color:var(--grey);display:flex;gap:10px;align-items:center;margin-top:2px}
+.who button{font:inherit;font-size:13px;background:none;border:0;color:var(--red);font-weight:700;cursor:pointer;padding:0}
+.who button:hover{text-decoration:underline}
+[hidden]{display:none!important}
+@media (max-width:560px){header img{height:48px} header .tag{display:none} .panel{padding:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+#log thead th{position:sticky;top:0;background:#fff;z-index:1}
+#log .hrow th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
+#log .hrow th[data-k]:hover{color:var(--ink)}
+#log .hrow th[data-k]::after{content:"";display:inline-block;width:12px;margin-left:3px;color:var(--red)}
+#log .hrow th.asc::after{content:"▲";font-size:9px}
+#log .hrow th.desc::after{content:"▼";font-size:9px}
+#log .frow th{border-bottom:1px solid var(--line);padding:4px 6px 8px;top:34px}
+#log .frow input{padding:5px 8px;font-size:12.5px;border-radius:7px;min-width:70px;font-weight:400}
+#log .frow input:not(:placeholder-shown){border-color:var(--orange);background:#FFFBF8}
+#log tr>:nth-child(1),#log tr>:nth-child(2){position:sticky;background:#fff;z-index:2}
+#log tr>:nth-child(1){left:0;min-width:104px}
+#log tr>:nth-child(2){left:var(--c1,104px);max-width:220px;overflow:hidden;text-overflow:ellipsis;box-shadow:inset -1px 0 0 var(--line)}
+#log.scrolled tr>:nth-child(2){box-shadow:inset -1px 0 0 var(--line),6px 0 8px -6px rgba(0,0,0,.18)}
+#log thead tr>:nth-child(1),#log thead tr>:nth-child(2){z-index:3}
+#log tr.ed>td:nth-child(-n+2){background:var(--peach)}
+#log td.empty{position:static}
+#log td.rec{font-size:12.5px;color:var(--grey);font-variant-numeric:tabular-nums}
+.carinfo{white-space:pre-line}
+td.addr{white-space:normal;min-width:200px;max-width:340px;font-size:13.5px}
+.st-ok{color:var(--ok);font-weight:700;font-size:13px}
+.st-wait{color:var(--warn);font-weight:700;font-size:13px}
+.ptab input{padding:6px 8px;font-size:14px;width:110px;text-align:right}
+.ptab tr.dirty td{background:#FFFBF8}
+tr.grp td{background:var(--soft);font-weight:700;font-size:13px;color:var(--ink);border-bottom:1px solid var(--line)}
+.carlist textarea{min-height:60px;font-size:13.5px}
+.carlist td{vertical-align:top}
+.carlist input{min-width:140px}
+.sumline{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--grey);margin:-4px 0 12px}
+.sumline b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden><form class="box" id="lform"><img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170"><h2>Belépés</h2><p>Futárrendelések</p><div class="f"><div><label for="lem">E-mail-cím</label><input id="lem" type="email" autocomplete="username" required></div><div><label for="lpw">Jelszó</label><input id="lpw" type="password" autocomplete="current-password" required></div><div class="err" id="lerr" role="alert"></div><button class="btn" type="submit" id="lbtn">Belépés</button></div></form></div>
+<div class="wrap">
+  <header>
+    <img src="/szolgaltatasok/logo.png" alt="Vista Plus Offices" width="340" height="170">
+    <nav class="tag"><a href="/eredmeny/">VPO eredmény</a> · <a href="/szolgaltatasok/">Kiegészítő szolgáltatások</a> · <a href="/futar/" aria-current="page">Futár</a> · <a href="/foglalas/">Tárgyalófoglalás</a> · <a href="/tajekoztato/">Tájékoztatók</a> · <a href="/szerzodesek/">Szerződések</a></nav>
+  </header>
+
+  <div class="titlebar">
+    <div><h1>Futárrendelések</h1><div class="status" id="st">Betöltés…</div><div class="who" id="who" hidden><span id="whoe"></span><button type="button" id="logout">Kilépés</button></div></div>
+    <div class="monthpick"><label for="mon">Hónap</label><input type="month" id="mon"></div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Nézetek">
+    <button role="tab" id="t-rendelesek" aria-controls="p-rendelesek" data-tab="rendelesek" aria-selected="true">Rendelések<span class="cnt" id="ocount">0</span></button>
+    <button role="tab" id="t-arazas" aria-controls="p-arazas" data-tab="arazas" aria-selected="false">Havi árazás<span class="cnt" id="wcount">0</span></button>
+    <button role="tab" id="t-futarcegek" aria-controls="p-futarcegek" data-tab="futarcegek" aria-selected="false">Futárcégek</button>
+  </div>
+
+  <!-- ============ RENDELÉSEK ============ -->
+  <section role="tabpanel" id="p-rendelesek" aria-labelledby="t-rendelesek">
+    <div class="panel">
+      <div class="phead"><div><h2 id="fh">Új futárrendelés</h2><p class="sub">Rögzítsd a rendelést, amikor a futárt megrendelted. Az árat ráérsz a hónap végén, a futárszámla alapján beírni a Havi árazás fülön.</p></div></div>
+
+      <div class="chiprow">
+        <span class="lbl">Futárcég</span>
+        <div class="chips" id="carchips"></div>
+      </div>
+      <div class="cnote carinfo" id="carinfo" hidden></div>
+
+      <div class="chiprow" style="margin-top:10px">
+        <span class="lbl">Gyakori ügyfelek</span>
+        <div class="chips" id="cchips"></div>
+      </div>
+
+      <div class="grid">
+        <div><label for="fcar">Futárcég</label><input id="fcar" list="carl" autocomplete="off" placeholder="pl. Hajtás-Pajtás"></div>
+        <div><label for="fdate">Dátum</label><input type="date" id="fdate"></div>
+        <div><label for="fco">Ügyfél</label><input id="fco" list="cl" autocomplete="off" placeholder="pl. Integral"></div>
+        <div><label for="fpe">Ki kérte</label><input id="fpe" list="pl" autocomplete="off" placeholder="név"></div>
+      </div>
+      <div class="badges" id="cinfo"></div>
+      <div class="grid" style="margin-top:6px">
+        <div class="wide"><label for="faddr">Címzett / cím</label><input id="faddr" autocomplete="off" placeholder="pl. Futureal, 1082 Budapest, Futó utca 47–53., Hollósi Zoltán"></div>
+        <div><label for="fawb">Fuvarlevélszám</label><input id="fawb" autocomplete="off"></div>
+        <div><label for="fby">Rendelte (VPO)</label><input id="fby" autocomplete="off" placeholder="pl. Eszter"></div>
+        <div class="wide"><label for="fnote">Megjegyzés</label><input id="fnote" autocomplete="off" placeholder="pl. retour, privát csomag, oda-vissza"></div>
+        <div><label for="fcost">Futár díja (nettó Ft)</label><input type="number" id="fcost" min="0" step="any" inputmode="decimal" placeholder="hó végén"></div>
+        <div><label for="fprice">Számlázandó (nettó Ft)</label><input type="number" id="fprice" min="0" step="any" inputmode="decimal" placeholder="hó végén"></div>
+      </div>
+      <div class="formfoot"><div class="msg" id="msg" role="status"></div><div class="actions"><button class="btn ghost" id="cx" hidden>Mégse</button><button class="btn" id="save">Rögzítés</button></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><div><h2>Rendelések a hónapban</h2><p class="sub" id="lsub"></p></div><div class="actions"><input class="search" id="q" type="search" placeholder="Keresés…" aria-label="Keresés a rendelések között"><button class="btn ghost" id="xl">Excel letöltése</button></div></div>
+      <div class="tablebox"><table id="ltab"></table></div>
+    </div>
+  </section>
+
+  <!-- ============ HAVI ÁRAZÁS ============ -->
+  <section role="tabpanel" id="p-arazas" aria-labelledby="t-arazas" hidden>
+    <div class="panel">
+      <div class="phead"><div><h2>Havi árazás</h2><p class="sub">Írd be a futárszámla szerinti nettó díjakat. A számlázandó összeg a felárral automatikusan kitöltődik (átírható). Mentéskor az árazott rendelések átkerülnek a Kiegészítő szolgáltatások tételei közé, a megfelelő ügyfélhez, „Futárszolgálat” tételként.</p></div>
+        <div class="actions"><label class="chk" style="padding:0"><input type="checkbox" id="onlyw" checked> Csak az ár nélküliek</label><button class="btn" id="psave">Árak mentése és átvezetése</button></div></div>
+      <div class="ratebar" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div><label for="mk">Felár a futár díjára (%)</label><input type="number" id="mk" min="0" step="any" inputmode="decimal" placeholder="0"></div>
+        <div><button class="btn ghost" id="mks" style="width:100%">Felár mentése</button></div>
+        <div class="sub" style="align-self:center;margin:0" id="mkhint"></div>
+      </div>
+      <div class="sumline" id="psum"></div>
+      <div class="msg" id="pm" role="status"></div>
+      <div class="tablebox"><table id="ptab" class="ptab"></table></div>
+    </div>
+  </section>
+
+  <!-- ============ FUTÁRCÉGEK ============ -->
+  <section role="tabpanel" id="p-futarcegek" aria-labelledby="t-futarcegek" hidden>
+    <div class="panel">
+      <div class="phead"><div><h2>Futárcégek</h2><p class="sub">A futárcégek gyorsgombként jelennek meg rögzítéskor; a tudnivalók (telefonszám, ügyfélkód, feladás menete) a cég kiválasztásakor látszanak.</p></div><button class="btn ghost" id="cadd">+ Futárcég</button></div>
+      <div class="tablebox"><table id="ctab" class="carlist"></table></div>
+      <div class="formfoot"><div class="msg" id="cm" role="status"></div><div class="actions"><button class="btn" id="csave">Mentés</button></div></div>
+    </div>
+  </section>
+
+  <footer>Az adatok a Netlify közös tárolójában vannak, mindenki ugyanazt látja. Az oldal 20 másodpercenként frissül.</footer>
+</div>
+<datalist id="cl"></datalist><datalist id="pl"></datalist><datalist id="carl"></datalist>
+<script>
+const DEF_CARRIERS=[
+ {n:"Hajtás-Pajtás",info:"Telefon: +36 1 327 9000"},
+ {n:"GLS",info:""},
+ {n:"FedEx",info:"Online csomagküldés: https://www.fedex.com/hu\nVista Plus Offices ügyfélkód: 343973292\nIntelligenetic ügyfélkód: 492614289\nTelefon: 06 80 980 980"},
+ {n:"TNT",info:""},
+ {n:"DHL",info:"Telefon: +36 1 245 45 45\nNincs MyDHL profilunk: telefonon kell feladni, a partnerkódot bemondva. Le kell diktálni a feladót, a címzettet, a csomag súlyát, méretét és tartalmát, majd megadni az info@vpo.hu címet – az érkező e-mailben kell befejezni a fuvarlevelet.\nTrend Micro partnerkód: 96 99 68 553"},
+ {n:"Redda",info:""},
+ {n:"Főnix Futár",info:""},
+ {n:"DPD",info:""},
+ {n:"Magyar Posta",info:""}];
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("hu-HU");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s||"").trim().toLowerCase();
+const has=v=>v!==null&&v!==undefined&&v!=="";
+function say(id,t,bad){const el=$(id);el.textContent=t||"";el.classList.toggle("bad",!!bad)}
+function arm(bt,label,fn){if(bt.dataset.arm!=="1"){const old=bt.textContent;bt.dataset.arm="1";bt.textContent=label;setTimeout(()=>{if(bt.isConnected){bt.dataset.arm="";bt.textContent=old}},3000);return}fn()}
+const today=new Date().toISOString().slice(0,10);
+$("fdate").value=today;
+{const m=(location.hash.match(/m=(\d{4}-\d{2})/)||[])[1];$("mon").value=m||today.slice(0,7)}
+
+// ---------- állapot ----------
+let F=[],CLIENTS=[],QL=[],CC={carriers:DEF_CARRIERS.slice(),markup:0},editId=null,PD={},CDIRTY=false;
+const findClient=n=>CLIENTS.find(c=>norm(c.n)===norm(n));
+const markup=()=>+CC.markup||0;
+const withMk=c=>has(c)?Math.round(+c*(1+markup()/100)):"";
+const inMon=o=>(o.date||"").slice(0,7)===$("mon").value;
+
+async function api(p,o={}){if(!TOKEN){showLogin();const e=new Error("Jelentkezz be.");e.status=401;throw e}const r=await fetch("/api/"+p,{...o,headers:{"content-type":"application/json","authorization":"Bearer "+TOKEN}});const d=await r.json().catch(()=>({}));if(d&&d.auth){if(r.status===401){TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}showLogin(d.error);setWho()}else showLogin(d.error)}
+ if(!r.ok)throw new Error(d.error||("HTTP "+r.status));return d}
+
+// ---------- fülek ----------
+const TABS=["rendelesek","arazas","futarcegek"];
+function showTab(t,keepHash){if(!TABS.includes(t))t="rendelesek";
+ document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
+ TABS.forEach(x=>$("p-"+x).hidden=x!==t);if(!keepHash)try{history.replaceState(null,"","#"+t+"&m="+$("mon").value)}catch(e){}}
+document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)};
+showTab((location.hash.slice(1).split("&")[0]),true);
+
+// ---------- ügyfelek, futárcégek ----------
+function fillLists(){$("cl").innerHTML=CLIENTS.map(c=>`<option value="${esc(c.n)}">`).join("");
+ $("carl").innerHTML=CC.carriers.map(c=>`<option value="${esc(c.n)}">`).join("");renderPeople()}
+function renderPeople(){const c=findClient($("fco").value);const P=new Set(c&&Array.isArray(c.people)?c.people:[]);
+ F.filter(o=>c&&norm(o.company)===norm(c.n)&&o.person).forEach(o=>P.add(o.person));$("pl").innerHTML=[...P].map(p=>`<option value="${esc(p)}">`).join("")}
+function buildChips(){const cur=norm($("fcar").value);$("carchips").innerHTML=CC.carriers.map(c=>`<button type="button" class="chip${norm(c.n)===cur?" on":""}" data-car="${esc(c.n)}">${esc(c.n)}</button>`).join("");
+ const co=norm($("fco").value);$("cchips").innerHTML=QL.map(n=>`<button type="button" class="chip${norm(n)===co?" on":""}" data-co="${esc(n)}">${esc(n)}</button>`).join("");
+ const ci=CC.carriers.find(c=>norm(c.n)===cur);$("carinfo").hidden=!(ci&&ci.info);$("carinfo").textContent=ci&&ci.info||"";clientInfo()}
+function clientInfo(){const v=$("fco").value.trim(),c=findClient(v),b=[];
+ if(v&&!c)b.push('<span class="badge" style="background:var(--warnbg);border-color:#F2C9C2;color:var(--warn)">Nem szerepel az ügyfelek között – ellenőrizd a nevet, különben új ügyfélként jelenik meg a Kiegészítő szolgáltatásoknál</span>');
+ if(c&&c.eur)b.push('<span class="badge eur">Euróban számlázva – az összesítő az árfolyammal váltja át</span>');
+ $("cinfo").innerHTML=b.join("")}
+$("carchips").onclick=e=>{const b=e.target.closest("[data-car]");if(!b)return;$("fcar").value=b.dataset.car;buildChips();$("fco").focus()};
+$("cchips").onclick=e=>{const b=e.target.closest("[data-co]");if(!b)return;$("fco").value=b.dataset.co;$("fpe").value="";renderPeople();buildChips();$("fpe").focus()};
+$("fcar").oninput=buildChips;$("fco").oninput=()=>{renderPeople();buildChips()};
+$("fcost").oninput=()=>{if($("fprice").dataset.man!=="1")$("fprice").value=withMk($("fcost").value)};
+$("fprice").oninput=()=>{$("fprice").dataset.man=$("fprice").value===""?"":"1"};
+
+// ---------- rögzítés ----------
+let BYDEF="";try{BYDEF=localStorage.getItem("vpo_futar_by")||""}catch(e){}
+$("fby").value=BYDEF;
+function clearForm(){["fcar","fco","fpe","faddr","fawb","fnote","fcost","fprice"].forEach(i=>$(i).value="");$("fprice").dataset.man="";$("fdate").value=today;$("fby").value=BYDEF;buildChips();renderPeople()}
+function startEdit(id){const o=F.find(x=>x.id===id);if(!o)return;editId=id;showTab("rendelesek");
+ $("fcar").value=o.carrier||"";$("fdate").value=o.date;$("fco").value=o.company;$("fpe").value=o.person||"";$("faddr").value=o.addr||"";$("fawb").value=o.awb||"";$("fby").value=o.orderedBy||"";$("fnote").value=o.note||"";
+ $("fcost").value=has(o.cost)?o.cost:"";$("fprice").value=has(o.price)?o.price:"";$("fprice").dataset.man=has(o.price)&&o.price!==withMk(o.cost)?"1":"";
+ $("fh").textContent="Rendelés módosítása";$("save").textContent="Mentés";$("cx").hidden=false;buildChips();renderPeople();render();$("p-rendelesek").scrollIntoView({behavior:"smooth"})}
+function endEdit(){editId=null;$("fh").textContent="Új futárrendelés";$("save").textContent="Rögzítés";$("cx").hidden=true;clearForm();render()}
+$("cx").onclick=endEdit;
+const payload=(o)=>JSON.stringify({date:o.date,carrier:o.carrier,company:o.company,person:o.person,addr:o.addr,awb:o.awb,orderedBy:o.orderedBy,note:o.note,cost:has(o.cost)?+o.cost:null,price:has(o.price)?+o.price:null});
+$("save").onclick=async()=>{const co=$("fco").value.trim();if(!co){say("msg","Add meg az ügyfelet!",1);$("fco").focus();return}
+ if(!$("fdate").value){say("msg","Add meg a dátumot!",1);return}
+ const fc=findClient(co),o={date:$("fdate").value,carrier:$("fcar").value.trim(),company:fc?fc.n:co,person:$("fpe").value.trim(),addr:$("faddr").value.trim(),awb:$("fawb").value.trim(),orderedBy:$("fby").value.trim(),note:$("fnote").value.trim(),cost:$("fcost").value,price:$("fprice").value};
+ if(o.orderedBy){BYDEF=o.orderedBy;try{localStorage.setItem("vpo_futar_by",BYDEF)}catch(e){}}
+ $("save").disabled=true;
+ try{const id=editId,sv=await api("couriers"+(id?"/"+encodeURIComponent(id):""),{method:id?"PUT":"POST",body:payload(o)});
+  F=F.filter(x=>x.id!==id);if(inMon(sv))F.push(sv);delete PD[id];
+  say("msg","✓ "+(id?"Módosítva":"Rögzítve")+": "+sv.company+(sv.carrier?" – "+sv.carrier:"")+(sv.eid?" · átvezetve a kiegészítő szolgáltatásokhoz":"")+(inMon(sv)?"":" – átkerült ide: "+sv.date.slice(0,7)));
+  if(id)endEdit();else clearForm();render()}
+ catch(e){say("msg","Nem sikerült menteni: "+e.message,1)}finally{$("save").disabled=false}};
+
+// ---------- lista ----------
+const status=o=>has(o.price)&&o.price>0?(o.eid?'<span class="st-ok">✓ Átvezetve</span>':'<span class="st-wait">Nincs átvezetve</span>'):'<span class="st-wait">Árra vár</span>';
+const sortF=L=>L.slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.ts||0)-(b.ts||0));
+function render(){const L=sortF(F.filter(inMon)),q=norm($("q").value),wait=L.filter(o=>!(o.price>0));
+ $("ocount").textContent=L.length;$("wcount").textContent=wait.length;
+ $("lsub").textContent=L.length?`${L.length} rendelés · ${wait.length} még ár nélkül`:"";
+ const R=q?L.filter(o=>[o.date,o.carrier,o.company,o.person,o.addr,o.awb,o.orderedBy,o.note].some(v=>norm(v).includes(q))):L;
+ $("ltab").innerHTML=`<thead><tr><th>Dátum</th><th>Futárcég</th><th>Ügyfél</th><th>Ki kérte</th><th>Címzett / cím</th><th>Fuvarlevél</th><th>Rendelte</th><th class=num>Számlázandó</th><th>Állapot</th><th></th></tr></thead><tbody>`+
+  (R.length?R.map(o=>`<tr${o.id===editId?' class="ed"':""}><td>${esc(o.date)}</td><td>${esc(o.carrier)}</td><td>${esc(o.company)}</td><td>${esc(o.person)}</td><td class=addr>${esc(o.addr)}${o.note?`<div class=mute style="font-size:12.5px">${esc(o.note)}</div>`:""}</td><td>${esc(o.awb)}</td><td>${esc(o.orderedBy)}</td><td class=num>${has(o.price)?fmt(o.price)+" Ft":"–"}</td><td>${status(o)}</td><td class=act><button class=x data-ed="${esc(o.id)}" title="Módosítás" aria-label="Módosítás">✎</button><button class="x del" data-del="${esc(o.id)}" title="Törlés" aria-label="Törlés">✕</button></td></tr>`).join("")
+  :`<tr><td class=empty colspan=10>${L.length?"Nincs a keresésnek megfelelő rendelés.":"Ebben a hónapban még nincs futárrendelés."}</td></tr>`)+"</tbody>";
+ if(!$("ptab").contains(document.activeElement))renderP()}
+$("q").oninput=render;
+$("ltab").onclick=ev=>{const bt=ev.target.closest("button");if(!bt)return;if(bt.dataset.ed){startEdit(bt.dataset.ed);return}const id=bt.dataset.del;if(!id)return;
+ arm(bt,"Biztos?",async()=>{try{await api("couriers/"+encodeURIComponent(id),{method:"DELETE"});F=F.filter(o=>o.id!==id);if(editId===id)endEdit();render();say("msg","Törölve (a kiegészítő szolgáltatások közül is).")}catch(e){say("msg","Nem sikerült törölni: "+e.message,1)}})};
+
+// ---------- havi árazás ----------
+function renderP(){const all=sortF(F.filter(inMon)),L=$("onlyw").checked?all.filter(o=>!(o.price>0)||PD[o.id]):all;
+ const tc=all.reduce((s,o)=>s+(+o.cost||0),0),tp=all.reduce((s,o)=>s+(+o.price||0),0),w=all.filter(o=>!(o.price>0)).length;
+ $("psum").innerHTML=all.length?`<span>Rendelések: <b>${all.length}</b></span><span>Ár nélkül: <b>${w}</b></span><span>Futár díja összesen: <b>${fmt(tc)} Ft</b></span><span>Számlázandó összesen: <b>${fmt(tp)} Ft</b></span>`:"";
+ $("mkhint").textContent=markup()?`Számlázandó = futár díja × ${(1+markup()/100).toLocaleString("hu-HU",{maximumFractionDigits:4})}`:"Felár nélkül a számlázandó összeg megegyezik a futár díjával.";
+ const g={};L.forEach(o=>{const k=o.carrier||"(nincs megadva)";(g[k]=g[k]||[]).push(o)});
+ const keys=Object.keys(g).sort((a,b)=>a.localeCompare(b,"hu"));
+ $("ptab").innerHTML=`<thead><tr><th>Dátum</th><th>Ügyfél</th><th>Címzett / cím</th><th>Fuvarlevél</th><th class=num>Futár díja (nettó Ft)</th><th class=num>Számlázandó (nettó Ft)</th><th>Állapot</th></tr></thead><tbody>`+
+  (keys.length?keys.map(k=>`<tr class=grp><td colspan=7>${esc(k)} · ${g[k].length} rendelés</td></tr>`+g[k].map(o=>{const d=PD[o.id],c=d?d.cost:(has(o.cost)?o.cost:""),p=d?d.price:(has(o.price)?o.price:"");
+   return `<tr data-id="${esc(o.id)}"${d?' class="dirty"':""}><td>${esc(o.date)}</td><td>${esc(o.company)}</td><td class=addr>${esc(o.addr)}</td><td>${esc(o.awb)}</td><td class=num><input type=number min=0 step=any inputmode=decimal data-k="cost" value="${esc(c)}" aria-label="Futár díja"></td><td class=num><input type=number min=0 step=any inputmode=decimal data-k="price" value="${esc(p)}" aria-label="Számlázandó"></td><td>${d?'<span class="mute" style="font-size:13px">mentésre vár</span>':status(o)}</td></tr>`}).join("")).join("")
+  :`<tr><td class=empty colspan=7>${all.length?"Minden rendelésnek van ára ebben a hónapban. ✓":"Ebben a hónapban még nincs futárrendelés."}</td></tr>`)+"</tbody>"}
+$("ptab").addEventListener("input",ev=>{const i=ev.target,tr=i.closest("tr[data-id]");if(!tr)return;const id=tr.dataset.id,o=F.find(x=>x.id===id);
+ const d=PD[id]||(PD[id]={cost:has(o.cost)?o.cost:"",price:has(o.price)?o.price:"",man:has(o.price)&&o.price!==withMk(o.cost)});
+ if(i.dataset.k==="cost"){d.cost=i.value;if(!d.man){d.price=withMk(i.value);tr.querySelector('[data-k="price"]').value=d.price}}else{d.price=i.value;d.man=i.value!==""}
+ tr.classList.add("dirty");tr.lastElementChild.innerHTML='<span class="mute" style="font-size:13px">mentésre vár</span>'});
+$("ptab").addEventListener("keydown",ev=>{if(ev.key!=="Enter"||ev.target.tagName!=="INPUT")return;ev.preventDefault();const I=[...$("ptab").querySelectorAll("input")],k=I.indexOf(ev.target);(I[k+(ev.target.dataset.k==="cost"?2:1)]||I[k+1]||$("psave")).focus()});
+$("onlyw").onchange=renderP;
+$("psave").onclick=async()=>{const ids=Object.keys(PD);if(!ids.length){say("pm","Nincs mentendő változás.");return}
+ $("psave").disabled=true;let ok=0,moved=0;const errs=[];
+ for(const id of ids){const o=F.find(x=>x.id===id);if(!o){delete PD[id];continue}const d=PD[id];
+  try{const sv=await api("couriers/"+encodeURIComponent(id),{method:"PUT",body:payload({...o,cost:d.cost,price:d.price})});F=F.filter(x=>x.id!==id);F.push(sv);delete PD[id];ok++;if(sv.eid)moved++}
+  catch(e){errs.push((o.company||"")+": "+e.message)}}
+ $("psave").disabled=false;render();renderP();
+ say("pm",errs.length?`${ok} mentve, ${errs.length} hiba – ${errs.join("; ")}`:`✓ ${ok} rendelés mentve, ${moved} tétel átvezetve a Kiegészítő szolgáltatásokhoz.`,!!errs.length)};
+$("mk").oninput=()=>{};
+$("mks").onclick=async()=>{const v=+$("mk").value||0;if(v<0){say("pm","A felár nem lehet negatív.",1);return}CC.markup=v;try{await api("courierconfig",{method:"PUT",body:JSON.stringify(CC)});say("pm","✓ Felár mentve: "+v+"%. A már beírt árak nem változnak.");renderP()}catch(e){say("pm","Nem sikerült menteni: "+e.message,1)}};
+
+// ---------- futárcégek ----------
+function renderC(){$("ctab").innerHTML=`<thead><tr><th>Név</th><th>Tudnivalók (telefon, ügyfélkód, feladás menete)</th><th></th></tr></thead><tbody>`+
+ CC.carriers.map((c,i)=>`<tr data-i="${i}"><td><input data-k="n" value="${esc(c.n)}" aria-label="Futárcég neve"></td><td style="width:100%"><textarea data-k="info" rows="2" aria-label="Tudnivalók">${esc(c.info)}</textarea></td><td class=act><button class="x" data-up="${i}" title="Feljebb" aria-label="Feljebb">↑</button><button class="x del" data-rm="${i}" title="Törlés" aria-label="Törlés">✕</button></td></tr>`).join("")+"</tbody>"}
+$("ctab").addEventListener("input",ev=>{const i=ev.target,tr=i.closest("tr[data-i]");if(!tr)return;CC.carriers[+tr.dataset.i][i.dataset.k]=i.value;CDIRTY=true});
+$("ctab").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;if(b.dataset.up){const i=+b.dataset.up;if(i>0){const A=CC.carriers;[A[i-1],A[i]]=[A[i],A[i-1]];CDIRTY=true;renderC()}return}
+ if(b.dataset.rm)arm(b,"Biztos?",()=>{CC.carriers.splice(+b.dataset.rm,1);CDIRTY=true;renderC()})};
+$("cadd").onclick=()=>{CC.carriers.push({n:"",info:""});CDIRTY=true;renderC();const I=$("ctab").querySelectorAll('input[data-k="n"]');I[I.length-1].focus()};
+$("csave").onclick=async()=>{CC.carriers=CC.carriers.map(c=>({n:String(c.n||"").trim(),info:String(c.info||"").trim()})).filter(c=>c.n);
+ try{await api("courierconfig",{method:"PUT",body:JSON.stringify(CC)});CDIRTY=false;renderC();fillLists();buildChips();say("cm","✓ Futárcégek mentve.")}catch(e){say("cm","Nem sikerült menteni: "+e.message,1)}};
+
+// ---------- Excel ----------
+$("xl").onclick=()=>{const L=sortF(F.filter(inMon));if(!L.length){say("msg","Ebben a hónapban nincs letölthető rendelés.",1);return}
+ const rows=[["Futárcég","Dátum","Ügyfél","Ki kérte","Címzett / cím","Fuvarlevélszám","Rendelte","Megjegyzés","Futár díja (nettó Ft)","Számlázandó (nettó Ft)","Átvezetve"]]
+  .concat(L.map(o=>[o.carrier,o.date,o.company,o.person,o.addr,o.awb,o.orderedBy,o.note,has(o.cost)?+o.cost:"",has(o.price)?+o.price:"",o.eid?"igen":"nem"]));
+ const ws=XLSX.utils.aoa_to_sheet(rows);ws["!cols"]=[14,11,22,16,48,18,12,24,14,14,10].map(w=>({wch:w}));
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Futár "+$("mon").value);XLSX.writeFile(wb,"Futarrendelesek_"+$("mon").value+".xlsx")};
+
+// ---------- betöltés ----------
+async function loadF(){const mo=$("mon").value;if(!mo)return;try{const L=await api("couriers?month="+mo);if(mo===$("mon").value){F=L;$("st").textContent="Közös tároló · mindenki ugyanazt látja";$("st").classList.remove("bad");render()}}
+ catch(e){$("st").textContent="A tároló nem érhető el: "+e.message;$("st").classList.add("bad")}}
+async function loadCfg(){try{const v=await api("config");CLIENTS=Array.isArray(v.clients)?v.clients.map(c=>({...c,n:String(c.n)})):[];QL=Array.isArray(v.quick)?v.quick:[];fillLists();buildChips()}catch(e){}
+ try{const c=await api("courierconfig");if(!CDIRTY&&!$("p-futarcegek").contains(document.activeElement)){CC={carriers:Array.isArray(c.carriers)&&c.carriers.length?c.carriers:DEF_CARRIERS.slice(),markup:+c.markup||0};if(document.activeElement!==$("mk"))$("mk").value=CC.markup||"";renderC();fillLists();buildChips();renderP()}}catch(e){}}
+$("mon").onchange=()=>{F=[];PD={};render();loadF();try{history.replaceState(null,"","#"+(document.querySelector('.tabs [aria-selected="true"]').dataset.tab)+"&m="+$("mon").value)}catch(e){}};
+let busy=false;
+async function start(){await loadCfg();await loadF();
+ if(!busy){busy=true;setInterval(()=>{if(!document.hidden&&!Object.keys(PD).length)loadF()},20000);setInterval(()=>{if(!document.hidden)loadCfg()},60000)}}
+// ---------- belépés ----------
+let TOKEN="",ME="",booted=false;try{TOKEN=localStorage.getItem("vpo_token")||"";ME=localStorage.getItem("vpo_user")||""}catch(e){}
+function showLogin(msg){$("login").hidden=false;$("lerr").textContent=msg||"";if(ME&&!$("lem").value)$("lem").value=ME;setTimeout(()=>($("lem").value?$("lpw"):$("lem")).focus(),30)}
+function setWho(){$("who").hidden=!ME||!TOKEN;$("whoe").textContent=ME?"Belépve: "+ME:""}
+$("lform").onsubmit=async ev=>{ev.preventDefault();$("lbtn").disabled=true;$("lerr").textContent="";
+ try{const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("lem").value,password:$("lpw").value})});const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Nem sikerült belépni.");if(d.role==="client")throw new Error("Ez ügyfélfiók – az ügyfélportálon tudsz foglalni: "+location.origin+"/ugyfel/");TOKEN=d.token;ME=d.email;try{localStorage.setItem("vpo_token",TOKEN);localStorage.setItem("vpo_user",ME)}catch(e){}
+  $("lpw").value="";$("login").hidden=true;setWho();boot()}catch(e){$("lerr").textContent=e.message}finally{$("lbtn").disabled=false}};
+$("logout").onclick=()=>{TOKEN="";try{localStorage.removeItem("vpo_token")}catch(e){}location.reload()};
+function boot(){if(!booted){booted=true;start()}else{loadCfg();loadF()}}
+renderC();fillLists();buildChips();render();
+setWho();if(TOKEN){booted=true;start()}else showLogin();
+</script>
+</body>
+</html>

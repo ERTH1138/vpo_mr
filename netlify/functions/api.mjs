@@ -559,6 +559,74 @@ export default async (req) => {
     }
   }
 
+  // Futárrendelések: f/<YYYY-MM>/<id> = {date,carrier,company,person,addr,awb,orderedBy,note,cost,price,eid,ts,by}
+  // Ha a rendelésnek van ára, automatikusan átkerül a Kiegészítő szolgáltatások tételei közé (e/<YYYY-MM>/<eid>, courier: <id>)
+  if (parts[0] === "couriers") {
+    const syncEntry = async (id, o, prevEid) => {
+      const month = o.date.slice(0, 7);
+      let eid = prevEid || null;
+      if (eid && eid.slice(0, 7) !== month) { await store.delete(`e/${eid.slice(0, 7)}/${eid}`); eid = null; }
+      if (!(o.price > 0) || !o.company) { if (eid) await store.delete(`e/${month}/${eid}`); return null; }
+      eid = eid || `${month}_f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+      const prevE = await store.get(`e/${month}/${eid}`, { type: "json" });
+      const entry = {
+        date: o.date, company: o.company, person: o.person, cat: "Irodai", item: "Futárszolgálat" + (o.carrier ? " – " + o.carrier : ""),
+        qty: 1, unit: o.price, total: o.price, cur: "HUF",
+        note: [o.addr, o.awb ? "Fuvarlevél: " + o.awb : ""].filter(Boolean).join(" · ").slice(0, 500),
+        ts: (prevE && prevE.ts) || Date.now(), by: o.by, courier: id,
+      };
+      await store.setJSON(`e/${month}/${eid}`, entry);
+      return eid;
+    };
+    if (m === "GET") {
+      const month = url.searchParams.get("month") || "";
+      if (!MONTH.test(month)) return json({ error: "Hibás hónap." }, 400);
+      const { blobs } = await store.list({ prefix: `f/${month}/` });
+      const items = await Promise.all(blobs.map(async (b) => { const v = await store.get(b.key, { type: "json" }); return v ? { ...v, id: b.key.split("/").pop() } : null; }));
+      return json(items.filter(Boolean));
+    }
+    if (m === "POST" || (m === "PUT" && parts[1] && ID.test(parts[1]))) {
+      const r = await req.json().catch(() => ({}));
+      const date = String(r.date || "").slice(0, 10), month = date.slice(0, 7);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !String(r.company || "").trim()) return json({ error: "Add meg a dátumot és az ügyfelet." }, 400);
+      let id = null, prev = null, oldKey = null;
+      if (m === "PUT") {
+        oldKey = `f/${parts[1].slice(0, 7)}/${parts[1]}`;
+        prev = await store.get(oldKey, { type: "json" });
+        if (!prev) return json({ error: "A rendelés már nem létezik (lehet, hogy valaki törölte)." }, 404);
+        if (parts[1].slice(0, 7) === month) { id = parts[1]; oldKey = null; }
+      }
+      id = id || `${month}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+      const num = (v) => { const n = Number(v); return v === "" || v == null || !isFinite(n) || n < 0 ? null : Math.round(n * 100) / 100; };
+      const o = {
+        date, carrier: String(r.carrier || "").trim().slice(0, 80), company: String(r.company).trim().slice(0, 200), person: String(r.person || "").trim().slice(0, 200),
+        addr: String(r.addr || "").trim().slice(0, 400), awb: String(r.awb || "").trim().slice(0, 80), orderedBy: String(r.orderedBy || "").trim().slice(0, 80),
+        note: String(r.note || "").trim().slice(0, 500), cost: num(r.cost), price: num(r.price),
+        ts: (prev && prev.ts) || Date.now(), by: (prev && prev.by) || user, upd: user,
+      };
+      o.eid = await syncEntry(id, o, prev && prev.eid);
+      await store.setJSON(`f/${month}/${id}`, o);
+      if (oldKey) await store.delete(oldKey);
+      return json({ ...o, id });
+    }
+    if (m === "DELETE" && parts[1] && ID.test(parts[1])) {
+      const key = `f/${parts[1].slice(0, 7)}/${parts[1]}`, prev = await store.get(key, { type: "json" });
+      if (prev && prev.eid) await store.delete(`e/${prev.eid.slice(0, 7)}/${prev.eid}`);
+      await store.delete(key);
+      return json({ ok: true });
+    }
+  }
+  if (parts[0] === "courierconfig") {
+    if (m === "GET") return json((await store.get("courierconfig", { type: "json" })) || {});
+    if (m === "PUT") {
+      const body = await req.json().catch(() => null);
+      if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "Hibás adat." }, 400);
+      if (JSON.stringify(body).length > 50000) return json({ error: "Túl sok adat." }, 413);
+      await store.setJSON("courierconfig", body);
+      return json({ ok: true });
+    }
+  }
+
   // Tételek havonta: e/<YYYY-MM>/<id>
   if (parts[0] === "entries") {
     if (m === "GET") {
@@ -580,6 +648,7 @@ export default async (req) => {
         const oldKey = `e/${parts[1].slice(0, 7)}/${parts[1]}`;
         const prev = await store.get(oldKey, { type: "json" });
         if (!prev) return json({ error: "A tétel már nem létezik (lehet, hogy valaki törölte)." }, 404);
+        if (prev.courier) return json({ error: "Ez futárrendelésből jött tétel – a Futár oldalon módosítható." }, 409);
         id = parts[1].slice(0, 7) === month ? parts[1] : null;
         if (!id) moveFrom = oldKey;
         r.ts = prev.ts;
@@ -596,6 +665,8 @@ export default async (req) => {
     }
     if (m === "DELETE" && parts[1] && ID.test(parts[1])) {
       const month = parts[1].slice(0, 7);
+      const prev = await store.get(`e/${month}/${parts[1]}`, { type: "json" });
+      if (prev && prev.courier) return json({ error: "Ez futárrendelésből jött tétel – a Futár oldalon törölhető." }, 409);
       await store.delete(`e/${month}/${parts[1]}`);
       return json({ ok: true });
     }
